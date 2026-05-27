@@ -134,9 +134,13 @@ const ANSWER_WORDS = [
     'ZESTY', 'ZONAL',
 ];
 
-// ── Pick a random answer ───────────────────────────────────────────────────────
-function getRandomWord() {
-    return ANSWER_WORDS[Math.floor(Math.random() * ANSWER_WORDS.length)];
+// ── Pick the daily answer (same word for every player on the same calendar day) ─
+function getDailyWord() {
+    const start = new Date('2025-01-01');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dayIndex = Math.floor((today - start) / (1000 * 60 * 60 * 24));
+    return ANSWER_WORDS[dayIndex % ANSWER_WORDS.length];
 }
 
 // ── Validate any guess via Free Dictionary API ─────────────────────────────────
