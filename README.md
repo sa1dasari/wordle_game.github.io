@@ -1,6 +1,6 @@
-# Wordle Clone
+# 🟩 Wordle Clone
 
-A browser-based Wordle clone, real-time dictionary validation, and a first-visit how-to-play guide. No backend, no dependencies — pure vanilla JS hosted on GitHub Pages.
+A browser-based Wordle clone with daily shared words, real-time dictionary validation, and a first-visit how-to-play guide. No backend, no dependencies — pure vanilla JS hosted on GitHub Pages.
 
 🎮 **[Play it live →](https://sa1dasari.github.io/wordle_game.github.io/)**
 
@@ -8,26 +8,12 @@ A browser-based Wordle clone, real-time dictionary validation, and a first-visit
 
 ## Features
 
+- **Daily word mode** — everyone gets the same word each calendar day, derived deterministically from the date so no server or API is needed
 - **Real-time validation** — guesses are checked against the [Free Dictionary API](https://api.dictionaryapi.dev)
 - **How to Play modal** — shown automatically on first visit, accessible anytime via the `?` button
 - **6 attempts**, colour-coded feedback (green / yellow / grey) matching standard Wordle rules
 - **Responsive** — works on desktop and mobile
 - **Offline-safe** — if the dictionary API is unreachable, guesses are accepted so the game never breaks
-
----
-
-## How It Works
-
-### Guess validation
-Rather than shipping a 170 KB word list, each guess hits the Free Dictionary API:
-
-```js
-async function isValidWord(word) {
-    if (ANSWER_WORDS.includes(word.toUpperCase())) return true;
-    const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`);
-    return res.ok;
-}
-```
 
 ---
 
@@ -42,7 +28,6 @@ wordle_game.github.io/
 ```
 
 ---
-
 
 ## Tile Colour Rules
 
