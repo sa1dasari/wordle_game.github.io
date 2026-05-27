@@ -12,6 +12,29 @@ window.addEventListener('DOMContentLoaded', () => {
     initializeGame();
     document.addEventListener('keydown', handleKeyPress);
     document.getElementById('resetBtn').addEventListener('click', resetGame);
+
+    // How to Play modal
+    const overlay  = document.getElementById('modalOverlay');
+    const helpBtn  = document.getElementById('helpBtn');
+    const closeBtn = document.getElementById('modalClose');
+
+    const openModal  = () => overlay.classList.add('open');
+    const closeModal = () => overlay.classList.remove('open');
+
+    helpBtn.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeModal(); // click backdrop to dismiss
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModal();
+    });
+
+    // Show modal automatically on first visit
+    if (!localStorage.getItem('wordleRulesSeen')) {
+        openModal();
+        localStorage.setItem('wordleRulesSeen', '1');
+    }
 });
 
 function initializeGame() {
