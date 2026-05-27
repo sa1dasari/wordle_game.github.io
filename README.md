@@ -2,7 +2,7 @@
 
 A browser-based Wordle clone, real-time dictionary validation, and a first-visit how-to-play guide. No backend, no dependencies — pure vanilla JS hosted on GitHub Pages.
 
-🎮 **[Play it live →](https://sa1dasari.github.io/wordle_game.github.io)**
+🎮 **[Play it live →](https://sa1dasari.github.io/wordle_game.github.io/)**
 
 ---
 
