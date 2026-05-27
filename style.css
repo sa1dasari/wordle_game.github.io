@@ -1,0 +1,130 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f5f5f5;
+}
+
+.container {
+    text-align: center;
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    margin-bottom: 30px;
+    color: #333;
+    letter-spacing: 2px;
+}
+
+.game-board {
+    display: grid;
+    grid-template-columns: repeat(5, 60px);
+    gap: 8px;
+    margin-bottom: 30px;
+    justify-content: center;
+}
+
+.tile {
+    width: 60px;
+    height: 60px;
+    border: 2px solid #d3d6da;
+    border-radius: 4px;
+    font-size: 28px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #ffffff;
+    cursor: text;
+    text-transform: uppercase;
+}
+
+.tile.active {
+    border-color: #333;
+}
+
+.tile.correct {
+    background-color: #6aaa64;
+    color: white;
+    border-color: #6aaa64;
+}
+
+.tile.present {
+    background-color: #b59f3b;
+    color: white;
+    border-color: #b59f3b;
+}
+
+.tile.absent {
+    background-color: #d3d6da;
+    color: #999;
+    border-color: #d3d6da;
+}
+
+.tile.filled {
+    border-color: #999;
+}
+
+.message {
+    font-size: 18px;
+    margin: 20px 0;
+    height: 30px;
+    color: #333;
+    font-weight: bold;
+}
+
+.message.success {
+    color: #6aaa64;
+}
+
+.message.failure {
+    color: #d32f2f;
+}
+
+.reset-btn {
+    padding: 12px 30px;
+    font-size: 16px;
+    background-color: #6aaa64;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.reset-btn:hover {
+    background-color: #5a9a54;
+}
+
+.reset-btn:active {
+    transform: scale(0.98);
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 20px;
+    }
+
+    .game-board {
+        gap: 6px;
+    }
+
+    .tile {
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
+    }
+}
+
