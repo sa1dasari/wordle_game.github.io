@@ -39,7 +39,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function initializeGame() {
     createGameBoard();
-    secretWord = getRandomWord();
+    secretWord = getDailyWord();
     console.log('Secret word:', secretWord); // Remove before production
     gameOver = false;
     currentRow = 0;
