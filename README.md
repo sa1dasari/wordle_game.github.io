@@ -1,4 +1,4 @@
-# 🟩 Wordle Clone
+# Wordle Clone
 
 A browser-based Wordle clone, real-time dictionary validation, and a first-visit how-to-play guide. No backend, no dependencies — pure vanilla JS hosted on GitHub Pages.
 
