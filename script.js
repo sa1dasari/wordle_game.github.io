@@ -3,7 +3,7 @@ let currentRow = 0;
 let currentCol = 0;
 let gameOver = false;
 let secretWord = '';
-const MAX_ROWS = 5;
+const MAX_ROWS = 6;   // standard Wordle allows 6 guesses
 const MAX_COLS = 5;
 let tiles = [];
 
@@ -17,7 +17,7 @@ window.addEventListener('DOMContentLoaded', () => {
 function initializeGame() {
     createGameBoard();
     secretWord = getRandomWord();
-    console.log('Secret word:', secretWord); // For debugging - remove in production
+    console.log('Secret word:', secretWord); // Remove before production
     gameOver = false;
     currentRow = 0;
     currentCol = 0;
@@ -44,26 +44,34 @@ function handleKeyPress(e) {
 
     if (key === 'BACKSPACE') {
         e.preventDefault();
-        if (currentCol > 0) {
-            currentCol--;
-            const tileIndex = currentRow * MAX_COLS + currentCol;
-            tiles[tileIndex].textContent = '';
-            tiles[tileIndex].classList.remove('filled');
-        }
+        deleteLetter();
     } else if (key === 'ENTER') {
         e.preventDefault();
         if (currentCol === MAX_COLS) {
-            submitWord();
+            submitWord();  // async — no need to await at event handler level
         }
     } else if (/^[A-Z]$/.test(key) && currentCol < MAX_COLS) {
-        const tileIndex = currentRow * MAX_COLS + currentCol;
-        tiles[tileIndex].textContent = key;
-        tiles[tileIndex].classList.add('filled');
-        currentCol++;
+        addLetter(key);
     }
 }
 
-function submitWord() {
+function addLetter(key) {
+    const tileIndex = currentRow * MAX_COLS + currentCol;
+    tiles[tileIndex].textContent = key;
+    tiles[tileIndex].classList.add('filled');
+    currentCol++;
+}
+
+function deleteLetter() {
+    if (currentCol > 0) {
+        currentCol--;
+        const tileIndex = currentRow * MAX_COLS + currentCol;
+        tiles[tileIndex].textContent = '';
+        tiles[tileIndex].classList.remove('filled');
+    }
+}
+
+async function submitWord() {
     const word = getEnteredWord();
 
     if (word.length !== MAX_COLS) {
@@ -71,21 +79,30 @@ function submitWord() {
         return;
     }
 
-    if (!VALID_WORDS.includes(word) && !WORD_LIST.includes(word)) {
-        showMessage('Word not in list', 'failure');
+    // Show a subtle loading state while the API checks the word
+    showMessage('Checking...', '');
+
+    const valid = await isValidWord(word);
+    if (!valid) {
+        showMessage('Not a valid word!', 'failure');
         return;
     }
 
+    // Clear the checking message before showing result
+    showMessage('', '');
+
     evaluateWord(word);
+    const attemptIndex = currentRow; // capture BEFORE incrementing
     currentRow++;
     currentCol = 0;
 
     if (word === secretWord) {
         gameOver = true;
-        showMessage('🎉 Good job!', 'success');
+        const messages = ['Genius!', 'Magnificent!', 'Impressive!', 'Splendid!', 'Great!', 'Phew!'];
+        showMessage(messages[attemptIndex] || '🎉 You got it!', 'success');
     } else if (currentRow === MAX_ROWS) {
         gameOver = true;
-        showMessage(`Better luck next time! The word was: ${secretWord}`, 'failure');
+        showMessage(`The word was: ${secretWord}`, 'failure');
     }
 }
 
@@ -107,7 +124,7 @@ function evaluateWord(word) {
     for (let i = 0; i < MAX_COLS; i++) {
         if (enteredLetters[i] === secretLetters[i]) {
             result[i] = 'correct';
-            secretLetters[i] = null; // Mark as used
+            secretLetters[i] = null; // Mark as used so it won't match again
         }
     }
 
@@ -115,19 +132,15 @@ function evaluateWord(word) {
     for (let i = 0; i < MAX_COLS; i++) {
         if (result[i] === 'correct') continue;
 
-        const tileIndex = currentRow * MAX_COLS + i;
-
         if (secretLetters.includes(enteredLetters[i])) {
             result[i] = 'present';
-            // Remove one instance of this letter from secretLetters
-            const idx = secretLetters.indexOf(enteredLetters[i]);
-            secretLetters[idx] = null;
+            secretLetters[secretLetters.indexOf(enteredLetters[i])] = null;
         } else {
             result[i] = 'absent';
         }
     }
 
-    // Apply styles to tiles
+    // Apply colour classes to tiles
     for (let i = 0; i < MAX_COLS; i++) {
         const tileIndex = currentRow * MAX_COLS + i;
         tiles[tileIndex].classList.add(result[i]);
@@ -139,8 +152,8 @@ function showMessage(text, className = '') {
     messageEl.textContent = text;
     messageEl.className = `message ${className}`;
 
-    // Clear message after 3 seconds if it's not a game-over message
-    if (!gameOver) {
+    // Auto-clear transient messages (not game-over ones)
+    if (!gameOver && text !== '' && className !== '') {
         setTimeout(() => {
             messageEl.textContent = '';
             messageEl.className = 'message';
@@ -153,4 +166,3 @@ function resetGame() {
     document.getElementById('message').className = 'message';
     initializeGame();
 }
-
