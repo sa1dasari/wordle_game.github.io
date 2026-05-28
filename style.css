@@ -292,3 +292,82 @@ h1 {
         font-size: 24px;
     }
 }
+
+/* ── On-screen keyboard ──────────────────────────────────────────────────────── */
+#keyboard {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0 auto 24px;
+    width: 100%;
+    max-width: 500px;
+    user-select: none;
+}
+
+.kb-row {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+}
+
+.kb-key {
+    height: 58px;
+    min-width: 43px;
+    flex: 1;
+    max-width: 43px;
+    border: none;
+    border-radius: 4px;
+    background-color: #d3d6da;
+    color: #333;
+    font-family: 'League Spartan', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s, transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;  /* removes 300ms tap delay on mobile */
+}
+
+.kb-key:active {
+    transform: scale(0.95);
+}
+
+.kb-wide {
+    min-width: 65px;
+    max-width: 65px;
+    font-size: 12px;
+}
+
+/* Colour states — match tile colours */
+.kb-key.correct {
+    background-color: #6aaa64;
+    color: white;
+}
+
+.kb-key.present {
+    background-color: #b59f3b;
+    color: white;
+}
+
+.kb-key.absent {
+    background-color: #787c7e;
+    color: white;
+}
+
+@media (max-width: 480px) {
+    .kb-key {
+        height: 50px;
+        min-width: 32px;
+        max-width: 32px;
+        font-size: 12px;
+    }
+
+    .kb-wide {
+        min-width: 50px;
+        max-width: 50px;
+        font-size: 11px;
+    }
+}
