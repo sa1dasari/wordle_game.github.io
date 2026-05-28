@@ -47,7 +47,7 @@ window.addEventListener('DOMContentLoaded', () => {
 function initializeGame() {
     createGameBoard();
     resetKeyboard();
-    secretWord = getDailyWord();
+    secretWord = getRandomWord();
     console.log('Secret word:', secretWord); // Remove before production
     gameOver = false;
     currentRow = 0;
