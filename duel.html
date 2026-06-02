@@ -5,22 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Wordle Duel</title>
     <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;700;900&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
-    <!-- Socket.io client -->
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
-            --bg:      #121213;
-            --bg2:     #1a1a1b;
-            --bg3:     #242426;
-            --border:  #3a3a3c;
-            --text:    #e8e6e0;
-            --muted:   #818384;
-            --green:   #538d4e;
-            --yellow:  #b59f3b;
-            --grey:    #3a3a3c;
-            --accent:  #c8b97a;
+            --bg:     #121213;
+            --bg2:    #1a1a1b;
+            --bg3:    #242426;
+            --border: #3a3a3c;
+            --text:   #e8e6e0;
+            --muted:  #818384;
+            --green:  #538d4e;
+            --yellow: #b59f3b;
+            --grey:   #3a3a3c;
+            --accent: #c8b97a;
+            --red:    #c0392b;
         }
 
         body {
@@ -43,26 +43,32 @@
             justify-content: space-between;
             border-bottom: 1px solid var(--border);
             margin-bottom: 24px;
+            flex-shrink: 0;
         }
 
-        h1 {
-            font-family: 'League Spartan', sans-serif;
-            font-weight: 900;
-            font-size: 1.6rem;
-            letter-spacing: 3px;
-        }
+        .header-left { display: flex; flex-direction: column; gap: 2px; }
+        h1 { font-family: 'League Spartan', sans-serif; font-weight: 900; font-size: 1.6rem; letter-spacing: 3px; }
+        .header-sub { font-size: 12px; color: var(--muted); font-family: monospace; }
 
-        .header-sub {
+        /* Solo mode link in header */
+        .solo-link {
+            font-family: monospace;
             font-size: 12px;
             color: var(--muted);
-            font-family: monospace;
+            text-decoration: none;
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            white-space: nowrap;
         }
+        .solo-link:hover { color: var(--accent); border-color: var(--accent); }
 
         /* ── Screens ── */
         .screen { display: none; width: 100%; max-width: 480px; padding: 0 20px; }
         .screen.active { display: flex; flex-direction: column; align-items: center; gap: 16px; }
 
-        /* ── Lobby ── */
+        /* ── Lobby card ── */
         .lobby-card {
             background: var(--bg2);
             border: 1px solid var(--border);
@@ -95,7 +101,7 @@
             transition: border-color 0.2s;
         }
 
-        input[type="text"]:focus { border-color: var(--accent); }
+        input[type="text"]:focus  { border-color: var(--accent); }
         input[type="text"]::placeholder { color: var(--muted); }
 
         .btn {
@@ -109,347 +115,215 @@
             letter-spacing: 1px;
             transition: opacity 0.2s, transform 0.1s;
             width: 100%;
+            text-align: center;
+            text-decoration: none;
+            display: block;
         }
 
-        .btn:active { transform: scale(0.98); }
+        .btn:active   { transform: scale(0.98); }
         .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-        .btn-green  { background: var(--green);  color: white; }
-        .btn-yellow { background: var(--yellow); color: white; }
-        .btn-ghost  {
-            background: transparent;
-            color: var(--muted);
-            border: 1px solid var(--border);
-        }
-
+        .btn-green    { background: var(--green);  color: white; }
+        .btn-yellow   { background: var(--yellow); color: white; }
+        .btn-red      { background: var(--red);    color: white; }
+        .btn-ghost    { background: transparent; color: var(--muted); border: 1px solid var(--border); }
         .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
 
         .divider {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--muted);
-            font-size: 12px;
+            display: flex; align-items: center; gap: 10px;
+            color: var(--muted); font-size: 12px;
         }
-
         .divider::before, .divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--border);
+            content: ''; flex: 1; height: 1px; background: var(--border);
         }
 
-        /* ── Waiting ── */
+        /* ── Waiting screen ── */
         .room-code-display {
             font-family: 'League Spartan', sans-serif;
-            font-size: 3rem;
-            font-weight: 900;
-            letter-spacing: 12px;
-            color: var(--accent);
-            text-align: center;
-            padding: 12px 0;
+            font-size: 3rem; font-weight: 900;
+            letter-spacing: 12px; color: var(--accent);
+            text-align: center; padding: 12px 0;
         }
 
-        .waiting-label {
-            font-size: 13px;
-            color: var(--muted);
-            text-align: center;
-            font-family: monospace;
-        }
-
-        .copy-btn {
-            font-size: 12px;
-            padding: 6px 14px;
-            width: auto;
-        }
+        .waiting-label { font-size: 13px; color: var(--muted); text-align: center; font-family: monospace; }
+        .copy-btn { font-size: 12px; padding: 6px 14px; width: auto; }
 
         /* ── Game screen ── */
-        #screen-game {
+        #screen-game { max-width: 900px; padding: 0 16px; }
+
+        /* In-game action bar */
+        .game-actions {
+            width: 100%;
             max-width: 900px;
-            padding: 0 16px;
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
         }
+
+        .game-action-btn {
+            font-family: 'League Spartan', sans-serif;
+            font-size: 11px; font-weight: 700;
+            letter-spacing: 1px;
+            padding: 6px 14px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .game-action-btn:hover        { color: var(--text); border-color: var(--muted); }
+        .game-action-btn.danger:hover { color: var(--red);  border-color: var(--red); }
+        .game-action-btn.solo:hover   { color: var(--accent); border-color: var(--accent); }
 
         /* Status bar */
         .status-bar {
-            width: 100%;
-            max-width: 900px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            width: 100%; max-width: 900px;
+            display: flex; align-items: center; justify-content: space-between;
             padding: 10px 16px;
-            background: var(--bg2);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
+            background: var(--bg2); border: 1px solid var(--border);
+            border-radius: 8px; margin-bottom: 20px;
         }
 
-        .status-player {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .player-name {
-            font-family: 'League Spartan', sans-serif;
-            font-size: 15px;
-            font-weight: 700;
-        }
-
-        .player-guesses {
-            font-size: 11px;
-            color: var(--muted);
-            font-family: monospace;
-        }
+        .status-player { display: flex; flex-direction: column; gap: 2px; }
+        .player-name   { font-family: 'League Spartan', sans-serif; font-size: 15px; font-weight: 700; }
+        .player-guesses { font-size: 11px; color: var(--muted); font-family: monospace; }
 
         .turn-indicator {
             font-family: 'League Spartan', sans-serif;
-            font-size: 12px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            padding: 6px 14px;
-            border-radius: 20px;
-            border: 1px solid var(--border);
-            color: var(--muted);
+            font-size: 12px; letter-spacing: 1px; text-transform: uppercase;
+            padding: 6px 14px; border-radius: 20px;
+            border: 1px solid var(--border); color: var(--muted);
             transition: all 0.3s;
         }
+        .turn-indicator.your-turn { background: var(--green); border-color: var(--green); color: white; }
 
-        .turn-indicator.your-turn {
-            background: var(--green);
-            border-color: var(--green);
-            color: white;
-        }
-
-        .turn-indicator.their-turn {
-            color: var(--muted);
-        }
-
-        /* Shared guess board */
+        /* Board */
         .board-wrapper {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            margin-bottom: 20px;
-            max-height: 60vh;
-            overflow-y: auto;
-            padding: 4px 0;
+            width: 100%; display: flex; flex-direction: column; gap: 6px;
+            margin-bottom: 20px; max-height: 50vh;
+            overflow-y: auto; padding: 4px 0;
         }
 
-        .guess-row {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-        }
+        .guess-row { display: flex; gap: 6px; align-items: center; }
 
         .guess-owner {
-            font-size: 10px;
-            font-family: monospace;
-            color: var(--muted);
-            width: 70px;
-            text-align: right;
-            flex-shrink: 0;
-            letter-spacing: 0.5px;
+            font-size: 10px; font-family: monospace; color: var(--muted);
+            width: 70px; text-align: right; flex-shrink: 0; letter-spacing: 0.5px;
         }
-
         .guess-owner.me { color: var(--accent); }
 
-        .guess-tiles {
-            display: flex;
-            gap: 5px;
-        }
+        .guess-tiles { display: flex; gap: 5px; }
 
         .tile {
-            width: 52px;
-            height: 52px;
-            border: 2px solid var(--border);
-            border-radius: 4px;
-            font-size: 22px;
-            font-weight: 900;
+            width: 52px; height: 52px;
+            border: 2px solid var(--border); border-radius: 4px;
+            font-size: 22px; font-weight: 900;
             font-family: 'League Spartan', sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-transform: uppercase;
-            transition: background 0.15s;
+            display: flex; align-items: center; justify-content: center;
+            text-transform: uppercase; transition: background 0.15s;
         }
 
         .tile.correct { background: var(--green);  border-color: var(--green);  color: white; }
         .tile.present { background: var(--yellow); border-color: var(--yellow); color: white; }
         .tile.absent  { background: var(--grey);   border-color: var(--grey);   color: white; }
-        .tile.active  { border-color: #565758; }
         .tile.filled  { border-color: #565758; }
 
-        /* Current input row */
-        .input-row {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
+        /* Input row */
+        .input-row { display: flex; gap: 6px; align-items: center; margin-bottom: 16px; }
         .input-row .guess-owner { color: var(--accent); }
 
         /* Keyboard */
-        .keyboard {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            width: 100%;
-            max-width: 500px;
-            margin: 0 auto;
-            user-select: none;
-        }
-
-        .kb-row {
-            display: flex;
-            justify-content: center;
-            gap: 6px;
-        }
+        .keyboard { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 500px; margin: 0 auto; user-select: none; }
+        .kb-row   { display: flex; justify-content: center; gap: 6px; }
 
         .kb-key {
-            height: 56px;
-            min-width: 40px;
-            flex: 1;
-            max-width: 42px;
-            border: none;
-            border-radius: 4px;
-            background: #818384;
-            color: white;
-            font-family: 'League Spartan', sans-serif;
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            height: 56px; min-width: 40px; flex: 1; max-width: 42px;
+            border: none; border-radius: 4px; background: #818384; color: white;
+            font-family: 'League Spartan', sans-serif; font-size: 13px; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
             transition: background 0.2s, transform 0.1s;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation; -webkit-tap-highlight-color: transparent;
         }
-
         .kb-key:active { transform: scale(0.93); }
         .kb-wide { min-width: 62px; max-width: 62px; font-size: 11px; }
-        .kb-key.correct { background: var(--green); }
-        .kb-key.present { background: var(--yellow); }
-        .kb-key.absent  { background: #3a3a3c; }
+        .kb-key.correct  { background: var(--green); }
+        .kb-key.present  { background: var(--yellow); }
+        .kb-key.absent   { background: #3a3a3c; }
+        .kb-key:disabled { opacity: 0.35; cursor: not-allowed; }
 
-        /* Disabled state when not your turn */
-        .kb-key:disabled, .kb-key.disabled {
-            opacity: 0.35;
-            cursor: not-allowed;
-        }
-
-        /* ── Message toast ── */
+        /* Toast */
         .toast {
-            position: fixed;
-            top: 80px;
-            left: 50%;
+            position: fixed; top: 80px; left: 50%;
             transform: translateX(-50%) translateY(-10px);
-            background: var(--text);
-            color: var(--bg);
-            padding: 10px 20px;
-            border-radius: 6px;
+            background: var(--text); color: var(--bg);
+            padding: 10px 20px; border-radius: 6px;
             font-family: 'League Spartan', sans-serif;
-            font-size: 14px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            opacity: 0;
-            transition: opacity 0.2s, transform 0.2s;
-            z-index: 999;
-            pointer-events: none;
+            font-size: 14px; font-weight: 700; letter-spacing: 1px;
+            opacity: 0; transition: opacity 0.2s, transform 0.2s;
+            z-index: 999; pointer-events: none; text-align: center;
+            max-width: 320px;
         }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.error { background: var(--red); color: white; }
 
-        .toast.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
-
-        /* ── Game over overlay ── */
-        .overlay {
+        /* Pending banner */
+        .pending-banner {
             display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.7);
-            z-index: 200;
-            align-items: center;
-            justify-content: center;
+            width: 100%; max-width: 900px;
+            background: var(--bg2); border: 1px solid var(--accent);
+            border-radius: 8px; padding: 14px 18px;
+            margin-bottom: 12px;
+            align-items: center; justify-content: space-between; gap: 12px;
         }
+        .pending-banner.show { display: flex; }
+        .pending-banner p { font-size: 13px; color: var(--text); font-family: monospace; }
+        .pending-banner p span { color: var(--accent); font-weight: 700; }
+        .pending-banner .btn { width: auto; padding: 7px 16px; font-size: 12px; white-space: nowrap; }
 
+        /* Game over overlay */
+        .overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.75); z-index: 200;
+            align-items: center; justify-content: center;
+        }
         .overlay.show { display: flex; }
 
         .result-card {
-            background: var(--bg2);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 36px 32px;
-            text-align: center;
-            max-width: 360px;
-            width: 90%;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
+            background: var(--bg2); border: 1px solid var(--border);
+            border-radius: 12px; padding: 36px 32px; text-align: center;
+            max-width: 360px; width: 90%;
+            display: flex; flex-direction: column; gap: 14px;
         }
 
         .result-emoji { font-size: 3rem; }
-
-        .result-title {
-            font-family: 'League Spartan', sans-serif;
-            font-size: 1.6rem;
-            font-weight: 900;
-            letter-spacing: 2px;
-        }
-
-        .result-word {
-            font-family: monospace;
-            font-size: 13px;
-            color: var(--muted);
-        }
-
+        .result-title { font-family: 'League Spartan', sans-serif; font-size: 1.6rem; font-weight: 900; letter-spacing: 2px; }
+        .result-word  { font-family: monospace; font-size: 13px; color: var(--muted); }
         .result-word span {
             font-family: 'League Spartan', sans-serif;
-            font-size: 18px;
-            font-weight: 900;
-            color: var(--accent);
-            letter-spacing: 4px;
-            display: block;
-            margin-top: 4px;
+            font-size: 18px; font-weight: 900; color: var(--accent);
+            letter-spacing: 4px; display: block; margin-top: 4px;
         }
 
         .result-stats {
-            display: flex;
-            justify-content: center;
-            gap: 24px;
+            display: flex; justify-content: center; gap: 24px;
             padding: 12px 0;
             border-top: 1px solid var(--border);
             border-bottom: 1px solid var(--border);
         }
-
         .stat { text-align: center; }
+        .stat-num   { font-family: 'League Spartan', sans-serif; font-size: 1.8rem; font-weight: 900; color: var(--accent); }
+        .stat-label { font-size: 11px; color: var(--muted); font-family: monospace; }
 
-        .stat-num {
-            font-family: 'League Spartan', sans-serif;
-            font-size: 1.8rem;
-            font-weight: 900;
-            color: var(--accent);
-        }
-
-        .stat-label {
-            font-size: 11px;
-            color: var(--muted);
-            font-family: monospace;
-        }
+        .rematch-waiting { display: none; font-size: 13px; color: var(--muted); font-family: monospace; text-align: center; }
+        .rematch-waiting.show { display: block; }
 
         .result-btns { display: flex; flex-direction: column; gap: 8px; }
 
-        /* ── Error ── */
-        .error-msg {
-            color: #e74c3c;
-            font-size: 13px;
-            font-family: monospace;
-            text-align: center;
-            min-height: 18px;
-        }
+        .error-msg { color: #e74c3c; font-size: 13px; font-family: monospace; text-align: center; min-height: 18px; }
 
         @media (max-width: 520px) {
             .tile { width: 44px; height: 44px; font-size: 18px; }
@@ -462,14 +336,17 @@
 <body>
 
 <header>
-    <h1>WORDLE DUEL</h1>
-    <span class="header-sub">turn-based · unlimited guesses</span>
+    <div class="header-left">
+        <h1>WORDLE DUEL</h1>
+        <span class="header-sub">turn-based · unlimited guesses</span>
+    </div>
+    <!-- Always-visible Solo Mode link -->
+    <a href="index.html" class="solo-link">← Solo Mode</a>
 </header>
 
-<!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<!-- ── LOBBY SCREEN ── -->
+<!-- ── LOBBY ── -->
 <div class="screen active" id="screen-lobby">
     <div class="lobby-card">
         <h2>Create a game</h2>
@@ -483,42 +360,62 @@
         <h2>Join a game</h2>
         <input type="text" id="nameJoin" placeholder="Your name" maxlength="16" />
         <input type="text" id="codeInput" placeholder="Room code (e.g. XK92)" maxlength="4"
-               style="text-transform:uppercase; letter-spacing: 4px; font-family: monospace; font-size: 18px;" />
+               style="text-transform:uppercase;letter-spacing:4px;font-family:monospace;font-size:18px;" />
         <button class="btn btn-yellow" onclick="joinRoom()">Join Room</button>
         <p class="error-msg" id="joinError"></p>
     </div>
+
+    <!-- Solo mode shortcut from lobby -->
+    <a href="index.html" class="btn btn-ghost" style="max-width:200px; text-align:center;">🎮 Play Solo Instead</a>
 </div>
 
-<!-- ── WAITING SCREEN ── -->
+<!-- ── WAITING ── -->
 <div class="screen" id="screen-waiting">
-    <p style="color:var(--muted); font-size:13px; font-family:monospace;">Share this code with your opponent</p>
+    <p style="color:var(--muted);font-size:13px;font-family:monospace;">Share this code with your opponent</p>
     <div class="room-code-display" id="displayCode">----</div>
     <button class="btn btn-ghost copy-btn" onclick="copyCode()">Copy code</button>
     <p class="waiting-label">⏳ Waiting for opponent to join...</p>
+    <div style="display:flex;gap:10px;margin-top:8px;width:100%;">
+        <button class="btn btn-ghost" style="flex:1;" onclick="backToLobby()">Cancel</button>
+        <a href="index.html" class="btn btn-ghost" style="flex:1;text-align:center;">Solo Mode</a>
+    </div>
 </div>
 
-<!-- ── GAME SCREEN ── -->
+<!-- ── GAME ── -->
 <div class="screen" id="screen-game">
+
+    <!-- In-game action buttons -->
+    <div class="game-actions">
+        <a href="index.html" class="game-action-btn solo">🎮 Solo Mode</a>
+        <button class="game-action-btn" onclick="requestNewWord()">New Word</button>
+        <button class="game-action-btn danger" onclick="exitRoom()">Exit Room</button>
+    </div>
+
+    <!-- Pending banner -->
+    <div class="pending-banner" id="pendingBanner">
+        <p id="pendingMsg">Opponent wants a rematch</p>
+        <button class="btn btn-green" id="pendingAcceptBtn" style="width:auto;padding:7px 16px;font-size:12px;" onclick="acceptPending()">Accept</button>
+    </div>
 
     <!-- Status bar -->
     <div class="status-bar">
-        <div class="status-player" id="p1Info">
-            <span class="player-name" id="p1Name">—</span>
+        <div class="status-player">
+            <span class="player-name"   id="p1Name">—</span>
             <span class="player-guesses" id="p1Guesses">0 guesses</span>
         </div>
         <div class="turn-indicator" id="turnIndicator">—</div>
-        <div class="status-player" style="text-align:right;" id="p2Info">
-            <span class="player-name" id="p2Name">—</span>
+        <div class="status-player" style="text-align:right;">
+            <span class="player-name"   id="p2Name">—</span>
             <span class="player-guesses" id="p2Guesses">0 guesses</span>
         </div>
     </div>
 
-    <!-- Shared guess board -->
+    <!-- Shared board -->
     <div class="board-wrapper" id="boardWrapper"></div>
 
-    <!-- Current input row (shown only on your turn) -->
+    <!-- Input row -->
     <div class="input-row" id="inputRow">
-        <span class="guess-owner me" id="inputOwnerLabel">you</span>
+        <span class="guess-owner me">you</span>
         <div class="guess-tiles" id="inputTiles">
             <div class="tile" id="t0"></div>
             <div class="tile" id="t1"></div>
@@ -530,14 +427,13 @@
 
     <!-- Keyboard -->
     <div class="keyboard" id="keyboard"></div>
-
 </div>
 
 <!-- ── GAME OVER OVERLAY ── -->
 <div class="overlay" id="overlay">
     <div class="result-card">
         <div class="result-emoji" id="resultEmoji">🎉</div>
-        <div class="result-title" id="resultTitle">YOU WIN!</div>
+        <div class="result-title"  id="resultTitle">YOU WIN!</div>
         <div class="result-word">
             The word was
             <span id="resultWord">—</span>
@@ -552,298 +448,370 @@
                 <div class="stat-label">their guesses</div>
             </div>
         </div>
-        <div class="result-btns">
-            <button class="btn btn-green" onclick="rematch()">Rematch</button>
-            <button class="btn btn-ghost" onclick="backToLobby()">New Room</button>
+
+        <p class="rematch-waiting" id="rematchWaiting">⏳ Waiting for opponent...</p>
+
+        <div class="result-btns" id="resultBtns">
+            <button class="btn btn-green"  onclick="voteRematch()">Rematch</button>
+            <button class="btn btn-yellow" onclick="voteNewWord()">New Word</button>
+            <button class="btn btn-ghost"  onclick="exitRoom()">Exit Room</button>
+            <a href="index.html" class="btn btn-ghost">🎮 Solo Mode</a>
         </div>
     </div>
 </div>
 
 <script>
-// ── Config ────────────────────────────────────────────────────────────────────
-// Change this to your deployed server URL when you host it
-const SERVER_URL = 'https://web-production-a12a9.up.railway.app';
+    const SERVER_URL = 'https://web-production-a12a9.up.railway.app';
+    const socket = io(SERVER_URL, { autoConnect: false });
 
-const socket = io(SERVER_URL, { autoConnect: false });
+    // ── State ─────────────────────────────────────────────────────────────────────
+    let myId        = null;
+    let myName      = '';
+    let roomCode    = '';
+    let isMyTurn    = false;
+    let currentCol  = 0;
+    let players     = [];
+    let guessCounts = {};
+    let pendingType = null;
 
-// ── State ─────────────────────────────────────────────────────────────────────
-let myId        = null;
-let myName      = '';
-let roomCode    = '';
-let isMyTurn    = false;
-let currentCol  = 0;
-let players     = [];  // [{ id, name }]
-let guessCounts = {};  // { id: count }
+    const KB_ROWS = [
+        ['Q','W','E','R','T','Y','U','I','O','P'],
+        ['A','S','D','F','G','H','J','K','L'],
+        ['ENTER','Z','X','C','V','B','N','M','⌫']
+    ];
 
-const KB_ROWS = [
-    ['Q','W','E','R','T','Y','U','I','O','P'],
-    ['A','S','D','F','G','H','J','K','L'],
-    ['ENTER','Z','X','C','V','B','N','M','⌫']
-];
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-function showScreen(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-}
-
-let toastTimer;
-function showToast(msg, duration = 2000) {
-    const el = document.getElementById('toast');
-    el.textContent = msg;
-    el.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => el.classList.remove('show'), duration);
-}
-
-function copyCode() {
-    navigator.clipboard.writeText(roomCode)
-        .then(() => showToast('Code copied!'))
-        .catch(() => showToast(roomCode));
-}
-
-// ── Lobby actions ─────────────────────────────────────────────────────────────
-function createRoom() {
-    myName = document.getElementById('nameCreate').value.trim();
-    if (!myName) { showToast('Enter your name first'); return; }
-    socket.connect();
-    socket.emit('create_room', { playerName: myName });
-}
-
-function joinRoom() {
-    myName   = document.getElementById('nameJoin').value.trim();
-    const code = document.getElementById('codeInput').value.trim().toUpperCase();
-    document.getElementById('joinError').textContent = '';
-    if (!myName) { showToast('Enter your name first'); return; }
-    if (code.length !== 4) { showToast('Enter a 4-letter room code'); return; }
-    socket.connect();
-    socket.emit('join_room', { roomCode: code, playerName: myName });
-}
-
-// ── Game board ────────────────────────────────────────────────────────────────
-function appendGuessRow(entry) {
-    const wrapper = document.getElementById('boardWrapper');
-    const row     = document.createElement('div');
-    row.className = 'guess-row';
-
-    const isMe = entry.playerId === myId;
-    const ownerEl = document.createElement('span');
-    ownerEl.className = 'guess-owner' + (isMe ? ' me' : '');
-    ownerEl.textContent = isMe ? 'you' : entry.playerName;
-    row.appendChild(ownerEl);
-
-    const tilesEl = document.createElement('div');
-    tilesEl.className = 'guess-tiles';
-    entry.guess.split('').forEach((letter, i) => {
-        const tile = document.createElement('div');
-        tile.className = `tile ${entry.result[i]}`;
-        tile.textContent = letter;
-        tilesEl.appendChild(tile);
-    });
-    row.appendChild(tilesEl);
-    wrapper.appendChild(row);
-
-    // Auto-scroll to latest guess
-    wrapper.scrollTop = wrapper.scrollHeight;
-}
-
-// ── Input tiles ───────────────────────────────────────────────────────────────
-function clearInputTiles() {
-    currentCol = 0;
-    for (let i = 0; i < 5; i++) {
-        const t = document.getElementById('t' + i);
-        t.textContent = '';
-        t.className = 'tile';
+    // ── Helpers ───────────────────────────────────────────────────────────────────
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
     }
-}
 
-function addLetter(key) {
-    if (currentCol >= 5 || !isMyTurn) return;
-    const t = document.getElementById('t' + currentCol);
-    t.textContent = key;
-    t.className = 'tile filled';
-    currentCol++;
-}
+    let toastTimer;
+    function showToast(msg, duration = 2500, isError = false) {
+        const el = document.getElementById('toast');
+        el.textContent = msg;
+        el.classList.toggle('error', isError);
+        el.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+            el.classList.remove('show');
+            el.classList.remove('error');
+        }, duration);
+    }
 
-function deleteLetter() {
-    if (currentCol <= 0 || !isMyTurn) return;
-    currentCol--;
-    const t = document.getElementById('t' + currentCol);
-    t.textContent = '';
-    t.className = 'tile';
-}
+    function copyCode() {
+        navigator.clipboard.writeText(roomCode)
+            .then(() => showToast('Code copied!'))
+            .catch(() => showToast(roomCode));
+    }
 
-function submitGuess() {
-    if (!isMyTurn) return;
-    let word = '';
-    for (let i = 0; i < 5; i++) word += document.getElementById('t' + i).textContent;
-    if (word.length !== 5) { showToast('Not enough letters'); return; }
-    socket.emit('submit_guess', { guess: word });
-}
+    // ── Lobby ─────────────────────────────────────────────────────────────────────
+    function createRoom() {
+        myName = document.getElementById('nameCreate').value.trim();
+        if (!myName) { showToast('Enter your name first', 2000, true); return; }
+        socket.connect();
+        socket.emit('create_room', { playerName: myName });
+    }
 
-// ── Keyboard ──────────────────────────────────────────────────────────────────
-function buildKeyboard() {
-    const kb = document.getElementById('keyboard');
-    kb.innerHTML = '';
-    KB_ROWS.forEach(row => {
-        const rowEl = document.createElement('div');
-        rowEl.className = 'kb-row';
-        row.forEach(key => {
-            const btn = document.createElement('button');
-            btn.className = 'kb-key' + (key === 'ENTER' || key === '⌫' ? ' kb-wide' : '');
-            btn.textContent = key;
-            btn.setAttribute('data-key', key);
-            btn.addEventListener('click', () => {
-                if (!isMyTurn) return;
-                if (key === '⌫') deleteLetter();
-                else if (key === 'ENTER') submitGuess();
-                else addLetter(key);
-            });
-            rowEl.appendChild(btn);
+    function joinRoom() {
+        myName = document.getElementById('nameJoin').value.trim();
+        const code = document.getElementById('codeInput').value.trim().toUpperCase();
+        document.getElementById('joinError').textContent = '';
+        if (!myName) { showToast('Enter your name first', 2000, true); return; }
+        if (code.length !== 4) { showToast('Enter a 4-letter room code', 2000, true); return; }
+        socket.connect();
+        socket.emit('join_room', { roomCode: code, playerName: myName });
+    }
+
+    function backToLobby() {
+        socket.disconnect();
+        showScreen('screen-lobby');
+    }
+
+    // ── In-game actions ───────────────────────────────────────────────────────────
+    function requestNewWord() {
+        showToast('Requested a new word — waiting for opponent...');
+        socket.emit('new_word');
+    }
+
+    function exitRoom() {
+        socket.emit('exit_room');
+        socket.disconnect();
+        hidePendingBanner();
+        document.getElementById('overlay').classList.remove('show');
+        document.getElementById('boardWrapper').innerHTML = '';
+        guessCounts = {};
+        showScreen('screen-lobby');
+    }
+
+    // ── Rematch / new word voting ─────────────────────────────────────────────────
+    function voteRematch() {
+        document.getElementById('resultBtns').style.display    = 'none';
+        document.getElementById('rematchWaiting').classList.add('show');
+        socket.emit('rematch');
+    }
+
+    function voteNewWord() {
+        document.getElementById('resultBtns').style.display    = 'none';
+        document.getElementById('rematchWaiting').classList.add('show');
+        socket.emit('new_word');
+    }
+
+    function showPendingBanner(type, voterName) {
+        pendingType = type;
+        const label = type === 'rematch' ? 'rematch' : 'a new word';
+        document.getElementById('pendingMsg').innerHTML =
+            `<span>${voterName}</span> wants ${label}!`;
+        document.getElementById('pendingBanner').classList.add('show');
+    }
+
+    function hidePendingBanner() {
+        document.getElementById('pendingBanner').classList.remove('show');
+        pendingType = null;
+    }
+
+    function acceptPending() {
+        hidePendingBanner();
+        if (pendingType === 'rematch')   socket.emit('rematch');
+        else if (pendingType === 'new_word') socket.emit('new_word');
+    }
+
+    // ── Board ─────────────────────────────────────────────────────────────────────
+    function appendGuessRow(entry) {
+        const wrapper = document.getElementById('boardWrapper');
+        const row     = document.createElement('div');
+        row.className = 'guess-row';
+
+        const isMe    = entry.playerId === myId;
+        const ownerEl = document.createElement('span');
+        ownerEl.className   = 'guess-owner' + (isMe ? ' me' : '');
+        ownerEl.textContent = isMe ? 'you' : entry.playerName;
+        row.appendChild(ownerEl);
+
+        const tilesEl = document.createElement('div');
+        tilesEl.className = 'guess-tiles';
+        entry.guess.split('').forEach((letter, i) => {
+            const tile = document.createElement('div');
+            tile.className   = `tile ${entry.result[i]}`;
+            tile.textContent = letter;
+            tilesEl.appendChild(tile);
         });
-        kb.appendChild(rowEl);
-    });
-}
-
-function updateKeyboard(guess, result) {
-    guess.split('').forEach((letter, i) => {
-        const btn = document.querySelector(`.kb-key[data-key="${letter}"]`);
-        if (!btn) return;
-        const priority = { correct: 3, present: 2, absent: 1 };
-        const cur = ['correct','present','absent'].find(c => btn.classList.contains(c));
-        if (cur && priority[cur] >= priority[result[i]]) return;
-        btn.classList.remove('correct','present','absent');
-        btn.classList.add(result[i]);
-    });
-}
-
-function setKeyboardEnabled(enabled) {
-    document.querySelectorAll('.kb-key').forEach(btn => {
-        btn.disabled = !enabled;
-        btn.classList.toggle('disabled', !enabled);
-    });
-}
-
-// ── Turn UI ───────────────────────────────────────────────────────────────────
-function setTurnUI(currentTurnId) {
-    isMyTurn = currentTurnId === myId;
-    const indicator = document.getElementById('turnIndicator');
-
-    if (isMyTurn) {
-        indicator.textContent  = 'Your Turn';
-        indicator.className    = 'turn-indicator your-turn';
-        document.getElementById('inputRow').style.opacity = '1';
-    } else {
-        const opp = players.find(p => p.id !== myId);
-        indicator.textContent  = opp ? `${opp.name}'s Turn` : "Opponent's Turn";
-        indicator.className    = 'turn-indicator their-turn';
-        document.getElementById('inputRow').style.opacity = '0.3';
-        clearInputTiles();
+        row.appendChild(tilesEl);
+        wrapper.appendChild(row);
+        wrapper.scrollTop = wrapper.scrollHeight;
     }
 
-    setKeyboardEnabled(isMyTurn);
-}
+    // ── Input ─────────────────────────────────────────────────────────────────────
+    function clearInputTiles() {
+        currentCol = 0;
+        for (let i = 0; i < 5; i++) {
+            const t = document.getElementById('t' + i);
+            t.textContent = '';
+            t.className   = 'tile';
+        }
+    }
 
-function updateGuessCount(playerId, count) {
-    guessCounts[playerId] = count;
-    players.forEach((p, idx) => {
-        const n = idx === 0 ? 'p1' : 'p2';
-        const c = guessCounts[p.id] || 0;
-        document.getElementById(n + 'Guesses').textContent = `${c} guess${c !== 1 ? 'es' : ''}`;
+    function addLetter(key) {
+        if (currentCol >= 5 || !isMyTurn) return;
+        const t = document.getElementById('t' + currentCol);
+        t.textContent = key;
+        t.className   = 'tile filled';
+        currentCol++;
+    }
+
+    function deleteLetter() {
+        if (currentCol <= 0 || !isMyTurn) return;
+        currentCol--;
+        const t = document.getElementById('t' + currentCol);
+        t.textContent = '';
+        t.className   = 'tile';
+    }
+
+    function submitGuess() {
+        if (!isMyTurn) return;
+        let word = '';
+        for (let i = 0; i < 5; i++) word += document.getElementById('t' + i).textContent;
+        if (word.length !== 5) { showToast('Not enough letters', 2000, true); return; }
+        // Disable keyboard while server validates to prevent double-submit
+        setKeyboardEnabled(false);
+        socket.emit('submit_guess', { guess: word });
+    }
+
+    // ── Keyboard ──────────────────────────────────────────────────────────────────
+    function buildKeyboard() {
+        const kb = document.getElementById('keyboard');
+        kb.innerHTML = '';
+        KB_ROWS.forEach(row => {
+            const rowEl = document.createElement('div');
+            rowEl.className = 'kb-row';
+            row.forEach(key => {
+                const btn = document.createElement('button');
+                btn.className   = 'kb-key' + (key === 'ENTER' || key === '⌫' ? ' kb-wide' : '');
+                btn.textContent = key;
+                btn.setAttribute('data-key', key);
+                btn.addEventListener('click', () => {
+                    if (!isMyTurn) return;
+                    if (key === '⌫')          deleteLetter();
+                    else if (key === 'ENTER') submitGuess();
+                    else                      addLetter(key);
+                });
+                rowEl.appendChild(btn);
+            });
+            kb.appendChild(rowEl);
+        });
+    }
+
+    function resetKeyboard() {
+        document.querySelectorAll('.kb-key').forEach(btn => {
+            btn.classList.remove('correct','present','absent');
+        });
+    }
+
+    function updateKeyboard(guess, result) {
+        guess.split('').forEach((letter, i) => {
+            const btn = document.querySelector(`.kb-key[data-key="${letter}"]`);
+            if (!btn) return;
+            const priority = { correct: 3, present: 2, absent: 1 };
+            const cur = ['correct','present','absent'].find(c => btn.classList.contains(c));
+            if (cur && priority[cur] >= priority[result[i]]) return;
+            btn.classList.remove('correct','present','absent');
+            btn.classList.add(result[i]);
+        });
+    }
+
+    function setKeyboardEnabled(enabled) {
+        document.querySelectorAll('.kb-key').forEach(btn => { btn.disabled = !enabled; });
+    }
+
+    // ── Turn UI ───────────────────────────────────────────────────────────────────
+    function setTurnUI(currentTurnId) {
+        isMyTurn = currentTurnId === myId;
+        const indicator = document.getElementById('turnIndicator');
+
+        if (isMyTurn) {
+            indicator.textContent = 'Your Turn';
+            indicator.className   = 'turn-indicator your-turn';
+            document.getElementById('inputRow').style.opacity = '1';
+            setKeyboardEnabled(true);
+        } else {
+            const opp = players.find(p => p.id !== myId);
+            indicator.textContent = opp ? `${opp.name}'s Turn` : "Opponent's Turn";
+            indicator.className   = 'turn-indicator';
+            document.getElementById('inputRow').style.opacity = '0.3';
+            clearInputTiles();
+            setKeyboardEnabled(false);
+        }
+    }
+
+    function updateGuessCount(playerId, count) {
+        guessCounts[playerId] = count;
+        players.forEach((p, idx) => {
+            const n = idx === 0 ? 'p1' : 'p2';
+            const c = guessCounts[p.id] || 0;
+            document.getElementById(n + 'Guesses').textContent = `${c} guess${c !== 1 ? 'es' : ''}`;
+        });
+    }
+
+    function resetGameUI() {
+        document.getElementById('boardWrapper').innerHTML     = '';
+        document.getElementById('overlay').classList.remove('show');
+        document.getElementById('rematchWaiting').classList.remove('show');
+        document.getElementById('resultBtns').style.display  = 'flex';
+        hidePendingBanner();
+        resetKeyboard();
+        clearInputTiles();
+        guessCounts = {};
+        players.forEach((p, idx) => {
+            document.getElementById((idx === 0 ? 'p1' : 'p2') + 'Guesses').textContent = '0 guesses';
+        });
+    }
+
+    // ── Physical keyboard ─────────────────────────────────────────────────────────
+    document.addEventListener('keydown', e => {
+        if (!isMyTurn) return;
+        const key = e.key.toUpperCase();
+        if (key === 'BACKSPACE')       { e.preventDefault(); deleteLetter(); }
+        else if (key === 'ENTER')      { e.preventDefault(); submitGuess(); }
+        else if (/^[A-Z]$/.test(key)) addLetter(key);
     });
-}
 
-// ── Rematch / back ────────────────────────────────────────────────────────────
-function rematch() {
-    document.getElementById('overlay').classList.remove('show');
-    document.getElementById('boardWrapper').innerHTML = '';
-    document.querySelectorAll('.kb-key').forEach(btn => {
-        btn.classList.remove('correct','present','absent');
-    });
-    guessCounts = {};
-    players.forEach((p, idx) => {
-        document.getElementById((idx === 0 ? 'p1' : 'p2') + 'Guesses').textContent = '0 guesses';
-    });
-    socket.emit('rematch');
-}
+    // ── Socket events ─────────────────────────────────────────────────────────────
+    socket.on('connect', () => { myId = socket.id; });
 
-function backToLobby() {
-    socket.disconnect();
-    document.getElementById('overlay').classList.remove('show');
-    document.getElementById('boardWrapper').innerHTML = '';
-    guessCounts = {};
-    showScreen('screen-lobby');
-}
-
-// ── Physical keyboard ─────────────────────────────────────────────────────────
-document.addEventListener('keydown', e => {
-    if (!isMyTurn) return;
-    const key = e.key.toUpperCase();
-    if (key === 'BACKSPACE') { e.preventDefault(); deleteLetter(); }
-    else if (key === 'ENTER') { e.preventDefault(); submitGuess(); }
-    else if (/^[A-Z]$/.test(key)) addLetter(key);
-});
-
-// ── Socket events ─────────────────────────────────────────────────────────────
-socket.on('connect', () => { myId = socket.id; });
-
-socket.on('room_created', ({ code }) => {
-    roomCode = code;
-    document.getElementById('displayCode').textContent = code;
-    showScreen('screen-waiting');
-});
-
-socket.on('game_start', ({ players: p, currentTurn }) => {
-    players     = p;
-    guessCounts = {};
-    p.forEach((pl, idx) => {
-        guessCounts[pl.id] = 0;
-        const n = idx === 0 ? 'p1' : 'p2';
-        document.getElementById(n + 'Name').textContent = pl.name;
-        document.getElementById(n + 'Guesses').textContent = '0 guesses';
+    socket.on('room_created', ({ code }) => {
+        roomCode = code;
+        document.getElementById('displayCode').textContent = code;
+        showScreen('screen-waiting');
     });
 
-    buildKeyboard();
-    clearInputTiles();
-    setTurnUI(currentTurn);
-    showScreen('screen-game');
-});
+    socket.on('game_start', ({ players: p, currentTurn }) => {
+        players = p;
+        resetGameUI();
+        p.forEach((pl, idx) => {
+            document.getElementById((idx === 0 ? 'p1' : 'p2') + 'Name').textContent = pl.name;
+        });
+        buildKeyboard();
+        setTurnUI(currentTurn);
+        showScreen('screen-game');
+    });
 
-socket.on('guess_result', (entry) => {
-    appendGuessRow(entry);
-    updateKeyboard(entry.guess, entry.result);
-    updateGuessCount(entry.playerId, entry.guessNum);
-    if (entry.playerId === myId) clearInputTiles();
-});
+    socket.on('guess_result', (entry) => {
+        appendGuessRow(entry);
+        updateKeyboard(entry.guess, entry.result);
+        updateGuessCount(entry.playerId, entry.guessNum);
+        if (entry.playerId === myId) clearInputTiles();
+        // Re-enable keyboard after server confirms guess was accepted
+        if (isMyTurn) setKeyboardEnabled(true);
+    });
 
-socket.on('turn_change', ({ currentTurn }) => {
-    setTurnUI(currentTurn);
-});
+    socket.on('turn_change', ({ currentTurn }) => {
+        setTurnUI(currentTurn);
+    });
 
-socket.on('game_over', ({ winnerId, winnerName, word, guesses }) => {
-    const won = winnerId === myId;
-    const myGuesses  = guessCounts[myId] || 0;
-    const oppId      = players.find(p => p.id !== myId)?.id;
-    const oppGuesses = guessCounts[oppId] || 0;
+    // Server rejected the word — re-enable keyboard so player can try again
+    socket.on('invalid_word', ({ message }) => {
+        showToast(message, 2500, true);
+        setKeyboardEnabled(true); // restore — don't consume the turn
+    });
 
-    document.getElementById('resultEmoji').textContent  = won ? '🎉' : '😔';
-    document.getElementById('resultTitle').textContent  = won ? 'YOU WIN!' : `${winnerName} WINS`;
-    document.getElementById('resultWord').textContent   = word;
-    document.getElementById('myGuessCount').textContent  = myGuesses;
-    document.getElementById('oppGuessCount').textContent = oppGuesses;
-    document.getElementById('overlay').classList.add('show');
-});
+    socket.on('game_over', ({ winnerId, winnerName, word }) => {
+        const won        = winnerId === myId;
+        const myGuesses  = guessCounts[myId] || 0;
+        const oppId      = players.find(p => p.id !== myId)?.id;
+        const oppGuesses = guessCounts[oppId] || 0;
 
-socket.on('opponent_left', ({ message }) => {
-    showToast(message, 4000);
-    setTimeout(backToLobby, 4000);
-});
+        document.getElementById('resultEmoji').textContent   = won ? '🎉' : '😔';
+        document.getElementById('resultTitle').textContent   = won ? 'YOU WIN!' : `${winnerName} WINS`;
+        document.getElementById('resultWord').textContent    = word;
+        document.getElementById('myGuessCount').textContent  = myGuesses;
+        document.getElementById('oppGuessCount').textContent = oppGuesses;
+        document.getElementById('overlay').classList.add('show');
+        setKeyboardEnabled(false);
+    });
 
-socket.on('error', ({ message }) => {
-    showToast(message);
-    document.getElementById('joinError').textContent = message;
-    socket.disconnect();
-});
+    socket.on('rematch_pending', ({ voterName }) => {
+        showPendingBanner('rematch', voterName);
+    });
+
+    socket.on('new_word_pending', ({ voterName }) => {
+        showPendingBanner('new_word', voterName);
+    });
+
+    socket.on('opponent_left', ({ message }) => {
+        showToast(message, 4000, true);
+        setKeyboardEnabled(false);
+        setTimeout(() => {
+            document.getElementById('overlay').classList.remove('show');
+            showScreen('screen-lobby');
+            socket.disconnect();
+        }, 4000);
+    });
+
+    socket.on('error', ({ message }) => {
+        showToast(message, 3000, true);
+        document.getElementById('joinError').textContent = message;
+        socket.disconnect();
+    });
 </script>
 </body>
 </html>
