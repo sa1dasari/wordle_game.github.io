@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Wordle Duel</title>
     <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;700;900&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -177,7 +177,6 @@
 
         .game-action-btn:hover        { color: var(--text); border-color: var(--muted); }
         .game-action-btn.danger:hover { color: var(--red);  border-color: var(--red); }
-        .game-action-btn.solo:hover   { color: var(--accent); border-color: var(--accent); }
 
         /* Status bar */
         .status-bar {
@@ -413,8 +412,6 @@
 
     <!-- In-game action buttons -->
     <div class="game-actions">
-        <a href="index.html" class="game-action-btn solo">🎮 Solo Mode</a>
-        <button class="game-action-btn" onclick="requestNewWord()">New Word</button>
         <button class="game-action-btn danger" onclick="exitRoom()">Exit Room</button>
     </div>
 
@@ -492,6 +489,20 @@
 
 <script>
     const SERVER_URL = 'https://web-production-a12a9.up.railway.app';
+
+    // Guard: if Socket.io failed to load, show a clear error rather than crashing
+    if (typeof io === 'undefined') {
+        document.body.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+                    height:100vh;gap:16px;font-family:monospace;color:#e8e6e0;text-align:center;padding:20px;">
+            <div style="font-size:2rem;">⚠️</div>
+            <div style="font-size:16px;">Failed to load Socket.io</div>
+            <div style="font-size:12px;color:#818384;">Check your internet connection or disable any ad blockers, then refresh.</div>
+            <a href="index.html" style="color:#c8b97a;font-size:13px;margin-top:8px;">← Back to Solo Mode</a>
+        </div>`;
+        throw new Error('Socket.io failed to load');
+    }
+
     const socket = io(SERVER_URL, { autoConnect: false });
 
     // ── State ─────────────────────────────────────────────────────────────────────
