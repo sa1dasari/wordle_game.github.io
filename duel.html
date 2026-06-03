@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Wordle Duel</title>
     <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;700;900&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
-    <!-- Socket.io client served locally — no CDN dependency -->
-    <script src="socket.io.min.js"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -463,20 +462,6 @@
 
 <script>
     const SERVER_URL = 'https://web-production-a12a9.up.railway.app';
-
-    // Guard: if Socket.io failed to load, show a clear error rather than crashing
-    if (typeof io === 'undefined') {
-        document.body.innerHTML = `
-        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
-                    height:100vh;gap:16px;font-family:monospace;color:#e8e6e0;text-align:center;padding:20px;">
-            <div style="font-size:2rem;">⚠️</div>
-            <div style="font-size:16px;">Failed to load Socket.io</div>
-            <div style="font-size:12px;color:#818384;">Check your internet connection or disable any ad blockers, then refresh.</div>
-            <a href="index.html" style="color:#c8b97a;font-size:13px;margin-top:8px;">← Back to Solo Mode</a>
-        </div>`;
-        throw new Error('Socket.io failed to load');
-    }
-
     const socket = io(SERVER_URL, { autoConnect: false });
 
     // ── State ─────────────────────────────────────────────────────────────────────
@@ -488,7 +473,6 @@
     let players     = [];
     let guessCounts = {};
     let pendingType = null;
-    let gameStarted = false; // false on very first start, true on rematch/new word
 
     const KB_ROWS = [
         ['Q','W','E','R','T','Y','U','I','O','P'],
@@ -541,16 +525,12 @@
 
     function backToLobby() {
         socket.disconnect();
-        gameStarted = false;
         showScreen('screen-lobby');
     }
 
     // ── In-game actions ───────────────────────────────────────────────────────────
     function requestNewWord() {
-        // Just emit — don't touch the board at all.
-        // Board only clears when server confirms BOTH players agreed (game_start fires).
-        // Show a subtle toast so the requester knows their vote was sent.
-        showToast('New word requested — waiting for opponent to accept...');
+        showToast('Requested a new word — waiting for opponent...');
         socket.emit('new_word');
     }
 
@@ -558,7 +538,6 @@
         socket.emit('exit_room');
         socket.disconnect();
         hidePendingBanner();
-        gameStarted = false;
         document.getElementById('overlay').classList.remove('show');
         document.getElementById('boardWrapper').innerHTML = '';
         guessCounts = {};
@@ -567,15 +546,13 @@
 
     // ── Rematch / new word voting ─────────────────────────────────────────────────
     function voteRematch() {
-        // Hide buttons, show waiting — but don't clear board yet.
-        // Board clears only when server confirms both agreed via game_start.
-        document.getElementById('resultBtns').style.display = 'none';
+        document.getElementById('resultBtns').style.display    = 'none';
         document.getElementById('rematchWaiting').classList.add('show');
         socket.emit('rematch');
     }
 
     function voteNewWord() {
-        document.getElementById('resultBtns').style.display = 'none';
+        document.getElementById('resultBtns').style.display    = 'none';
         document.getElementById('rematchWaiting').classList.add('show');
         socket.emit('new_word');
     }
@@ -769,20 +746,7 @@
 
     socket.on('game_start', ({ players: p, currentTurn }) => {
         players = p;
-
-        if (gameStarted) {
-            // This is a rematch or new word — both players confirmed.
-            // NOW it's safe to wipe the board and reset everything.
-            resetGameUI();
-        } else {
-            // Very first game start — just initialise UI state without wiping
-            // (there's nothing to wipe yet anyway)
-            hidePendingBanner();
-            clearInputTiles();
-            guessCounts = {};
-            gameStarted = true;
-        }
-
+        resetGameUI();
         p.forEach((pl, idx) => {
             document.getElementById((idx === 0 ? 'p1' : 'p2') + 'Name').textContent = pl.name;
         });
@@ -837,7 +801,6 @@
         showToast(message, 4000, true);
         setKeyboardEnabled(false);
         setTimeout(() => {
-            gameStarted = false;
             document.getElementById('overlay').classList.remove('show');
             showScreen('screen-lobby');
             socket.disconnect();
