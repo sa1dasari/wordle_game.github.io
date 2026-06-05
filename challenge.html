@@ -373,6 +373,9 @@
         <p class="error-msg" id="createError"></p>
         <button class="btn btn-accent" onclick="createChallenge()">Generate Challenge Link</button>
     </div>
+
+    <!-- On-screen keyboard for creator -->
+    <div class="keyboard" id="createKeyboard"></div>
 </div>
 
 <!-- ── SHARE SCREEN ── -->
@@ -778,6 +781,51 @@
         else if (/^[A-Z]$/.test(key)) addLetter(key);
     }
 
+    // ── CREATE: on-screen keyboard ───────────────────────────────────────────
+    function buildCreateKeyboard() {
+        const kb = document.getElementById('createKeyboard');
+        if (!kb) return;
+        kb.innerHTML = '';
+        KB_ROWS.forEach(row => {
+            const rowEl = document.createElement('div');
+            rowEl.className = 'kb-row';
+            row.forEach(key => {
+                const btn = document.createElement('button');
+                btn.className   = 'kb-key' + (key === 'ENTER' || key === '⌫' ? ' kb-wide' : '');
+                btn.textContent = key;
+                btn.setAttribute('data-create-key', key);
+                btn.addEventListener('click', () => handleCreateKey(key));
+                rowEl.appendChild(btn);
+            });
+            kb.appendChild(rowEl);
+        });
+    }
+
+    function handleCreateKey(key) {
+        // Find the first empty tile, or the last filled tile for backspace
+        const filled = createInputs.filter(i => i.value).length;
+
+        if (key === '⌫') {
+            if (filled > 0) {
+                const target = createInputs[filled - 1];
+                target.value = '';
+                target.classList.remove('filled');
+                target.focus();
+            }
+        } else if (key === 'ENTER') {
+            createChallenge();
+        } else if (/^[A-Z]$/.test(key)) {
+            if (filled < 5) {
+                const target = createInputs[filled];
+                target.value = key;
+                target.classList.add('filled');
+                document.getElementById('createError').textContent = '';
+                // Advance focus to next tile
+                if (filled < 4) createInputs[filled + 1].focus();
+            }
+        }
+    }
+
     // Physical keyboard
     document.addEventListener('keydown', e => {
         if (gameOver) return;
@@ -811,6 +859,7 @@
         } else {
             // No code — show the create screen
             showScreen('screen-create');
+            buildCreateKeyboard();
         }
     })();
 </script>
