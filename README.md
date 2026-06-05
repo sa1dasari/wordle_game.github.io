@@ -8,11 +8,18 @@ A browser-based Wordle clone with daily shared words, real-time dictionary valid
 
 ## Features
 
-### Single Player Mode
+### Solo Mode
 - **Daily word mode** — everyone gets the same word each calendar day, derived deterministically from the date so no server needed
 - **Real-time validation** — guesses are checked against the [Free Dictionary API](https://api.dictionaryapi.dev)
 - **How to Play modal** — shown automatically on first visit, accessible anytime via the `?` button
 - **6 attempts**, colour-coded feedback (green / yellow / grey) matching standard Wordle rules
+
+### Challenge Mode
+- **Custom words** — create a challenge by setting any 5-letter word
+- **Easy sharing** — share via short 5-digit code (same device) or encoded link (cross-device)
+- **Share options** — send challenges via WhatsApp, Text, Gmail, or native share
+- **6 guesses** — friends get 6 attempts to solve your custom word
+- **Persistent codes** — codes stored locally; links work anywhere
 
 ### Duel Mode
 - **Real-time multiplayer** — play turn-based matches against other players
@@ -24,7 +31,7 @@ A browser-based Wordle clone with daily shared words, real-time dictionary valid
 ### General
 - **Dark theme** — modern dark mode for comfortable gameplay
 - **Responsive** — works on desktop and mobile
-- **Offline-safe** — single player mode never breaks even if API is unreachable
+- **Offline-safe** — Solo and Challenge modes never break even if API is unreachable
 
 ---
 
@@ -32,10 +39,11 @@ A browser-based Wordle clone with daily shared words, real-time dictionary valid
 
 ```
 wordle_game.github.io/
-├── index.html       # Single player game layout + How to Play modal
-├── duel.html        # Multiplayer Duel Mode with Socket.io
+├── index.html       # Solo mode: daily shared word with How to Play modal
+├── challenge.html   # Challenge mode: create custom word challenges & share
+├── duel.html        # Duel mode: multiplayer real-time matches with Socket.io
 ├── style.css        # Shared styles: dark theme, tiles, keyboard, responsive
-├── script.js        # Single player game logic and UI handlers
+├── script.js        # Solo mode game logic and UI handlers
 ├── words.js         # Curated answer list + isValidWord() API helper
 ├── server.js        # Express backend for Duel Mode (optional)
 ├── package.json     # Node.js dependencies and config
