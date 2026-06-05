@@ -143,16 +143,77 @@ h1 {
 .message.success { color: var(--green); }
 .message.failure  { color: #e74c3c; }
 
-/* ── Reset button ────────────────────────────────────────────────────────── */
+/* ── Buttons ──────────────────────────────────────────────────────────────────── */
 .buttons-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 12px;
     justify-content: center;
     align-items: center;
     margin-top: 24px;
 }
 
+.btn {
+    padding: 14px 32px;
+    font-size: 15px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    min-width: 120px;
+}
+
+.btn:active { 
+    transform: scale(0.96);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+/* Colors synced with page palette */
+.btn-duel {
+    background-color: var(--green);
+}
+
+.btn-duel:hover {
+    background-color: #4a7a3f;
+}
+
+.btn-challenge {
+    background-color: var(--yellow);
+}
+
+.btn-challenge:hover {
+    background-color: #a88e30;
+}
+
+.btn-party {
+    background-color: #d97706;
+}
+
+.btn-party:hover {
+    background-color: #b45309;
+}
+
+.btn-new-game {
+    background-color: #5b9bd5;
+}
+
+.btn-new-game:hover {
+    background-color: #4a7fb8;
+}
+
+/* Keep old reset-btn for backward compatibility */
 .reset-btn {
     padding: 12px 30px;
     font-size: 15px;
