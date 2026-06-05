@@ -48,90 +48,97 @@
         .header-sub { font-size: 12px; color: var(--muted); font-family: monospace; }
 
         .nav-links { display: flex; gap: 8px; }
-
         .nav-link {
-            font-family: monospace;
-            font-size: 12px;
-            color: var(--muted);
-            text-decoration: none;
-            border: 1px solid var(--border);
-            padding: 6px 12px;
-            border-radius: 4px;
-            transition: all 0.2s;
-            white-space: nowrap;
+            font-family: monospace; font-size: 12px; color: var(--muted);
+            text-decoration: none; border: 1px solid var(--border);
+            padding: 6px 12px; border-radius: 4px; transition: all 0.2s; white-space: nowrap;
         }
         .nav-link:hover { color: var(--accent); border-color: var(--accent); }
 
         /* ── Screens ── */
-        .screen { display: none; width: 100%; max-width: 480px; padding: 0 20px; }
-        .screen.active { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        .screen { display: none; width: 100%; max-width: 480px; padding: 0 20px 40px; }
+        .screen.active { display: flex; flex-direction: column; align-items: center; gap: 16px; }
 
         /* ── Cards ── */
         .card {
-            background: var(--bg2);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 28px;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
+            background: var(--bg2); border: 1px solid var(--border);
+            border-radius: 8px; padding: 28px; width: 100%;
+            display: flex; flex-direction: column; gap: 16px;
         }
 
         .card h2 {
             font-family: 'League Spartan', sans-serif;
-            font-size: 1rem;
-            letter-spacing: 2px;
-            color: var(--accent);
-            text-transform: uppercase;
+            font-size: 1rem; letter-spacing: 2px; color: var(--accent); text-transform: uppercase;
         }
 
-        .card p {
-            font-size: 13px;
-            color: var(--muted);
-            line-height: 1.7;
+        .card p { font-size: 13px; color: var(--muted); line-height: 1.7; }
+
+        /* ── Home screen mode buttons ── */
+        .mode-btn {
+            width: 100%; padding: 20px;
+            background: var(--bg2); border: 1px solid var(--border);
+            border-radius: 8px; cursor: pointer; text-align: left;
+            transition: background 0.2s, border-color 0.2s;
+            display: flex; align-items: center; gap: 16px;
+        }
+        .mode-btn:hover { background: var(--bg3); border-color: var(--muted); }
+
+        .mode-btn-icon {
+            font-size: 2rem;
+            width: 52px; height: 52px;
+            background: var(--bg3); border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
         }
 
-        /* ── Word input tiles (creator) ── */
-        .word-input-row {
-            display: flex;
-            gap: 8px;
-            justify-content: center;
+        .mode-btn-text { display: flex; flex-direction: column; gap: 4px; }
+
+        .mode-btn-title {
+            font-family: 'League Spartan', sans-serif;
+            font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: 1px;
         }
+
+        .mode-btn-desc { font-size: 12px; color: var(--muted); font-family: monospace; }
+
+        .divider {
+            display: flex; align-items: center; gap: 10px;
+            color: var(--muted); font-size: 12px; width: 100%;
+        }
+        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+        /* ── Word input tiles ── */
+        .word-input-row { display: flex; gap: 8px; justify-content: center; }
 
         .word-input-tile {
             width: 52px; height: 52px;
-            background: var(--bg3);
-            border: 2px solid var(--border);
-            border-radius: 4px;
-            font-size: 22px; font-weight: 900;
-            font-family: 'League Spartan', sans-serif;
-            color: var(--text);
-            text-align: center;
-            text-transform: uppercase;
-            outline: none;
-            transition: border-color 0.2s;
-            caret-color: transparent;
+            background: var(--bg3); border: 2px solid var(--border);
+            border-radius: 4px; font-size: 22px; font-weight: 900;
+            font-family: 'League Spartan', sans-serif; color: var(--text);
+            text-align: center; text-transform: uppercase;
+            outline: none; transition: border-color 0.2s; caret-color: transparent;
         }
-
         .word-input-tile:focus { border-color: var(--accent); }
         .word-input-tile.filled { border-color: #565758; }
 
+        /* ── Code input ── */
+        .code-input {
+            background: var(--bg3); border: 1px solid var(--border);
+            border-radius: 4px; color: var(--text);
+            font-size: 28px; font-weight: 900;
+            font-family: 'League Spartan', sans-serif;
+            padding: 12px; width: 100%; outline: none;
+            text-align: center; letter-spacing: 8px;
+            transition: border-color 0.2s;
+        }
+        .code-input:focus { border-color: var(--accent); }
+        .code-input::placeholder { color: var(--muted); font-size: 16px; letter-spacing: 2px; font-weight: 400; }
+
         /* ── Buttons ── */
         .btn {
-            padding: 11px 20px;
-            border-radius: 4px;
-            border: none;
-            cursor: pointer;
-            font-family: 'League Spartan', sans-serif;
-            font-size: 14px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            transition: opacity 0.2s, transform 0.1s;
-            width: 100%;
-            text-align: center;
-            text-decoration: none;
-            display: block;
+            padding: 11px 20px; border-radius: 4px; border: none; cursor: pointer;
+            font-family: 'League Spartan', sans-serif; font-size: 14px; font-weight: 700;
+            letter-spacing: 1px; transition: opacity 0.2s, transform 0.1s;
+            width: 100%; text-align: center; text-decoration: none; display: block;
         }
         .btn:active   { transform: scale(0.98); }
         .btn:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -140,141 +147,116 @@
         .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
         .btn-accent { background: var(--accent); color: #121213; }
 
-        /* ── Share box ── */
-        .share-box {
-            background: var(--bg3);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            width: 100%;
-        }
+        /* ── Share section ── */
+        .share-section { display: flex; flex-direction: column; gap: 12px; width: 100%; }
 
         .share-label {
-            font-family: monospace;
-            font-size: 11px;
-            color: var(--muted);
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
+            font-family: monospace; font-size: 11px; color: var(--muted);
+            letter-spacing: 0.08em; text-transform: uppercase;
         }
 
-        .share-url {
-            font-family: monospace;
-            font-size: 12px;
-            color: var(--text);
-            word-break: break-all;
-            line-height: 1.6;
+        /* Short code display */
+        .code-display {
+            background: var(--bg3); border: 1px solid var(--border);
+            border-radius: 6px; padding: 16px;
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
         }
 
-        .share-btns { display: flex; gap: 8px; }
+        .code-number {
+            font-family: 'League Spartan', sans-serif;
+            font-size: 2.2rem; font-weight: 900;
+            color: var(--accent); letter-spacing: 8px;
+        }
 
-        .share-btn {
+        .code-copy-btn {
+            font-family: 'League Spartan', sans-serif;
+            font-size: 11px; font-weight: 700; letter-spacing: 1px;
+            padding: 6px 14px; border-radius: 4px;
+            border: 1px solid var(--border); background: transparent;
+            color: var(--muted); cursor: pointer; transition: all 0.2s; white-space: nowrap;
+        }
+        .code-copy-btn:hover { color: var(--text); border-color: var(--muted); }
+        .code-copy-btn.done  { color: var(--green); border-color: var(--green); }
+
+        /* Share options grid */
+        .share-options {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .share-option {
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+            padding: 12px 6px; border-radius: 8px;
+            border: 1px solid var(--border); background: var(--bg3);
+            cursor: pointer; transition: all 0.2s; text-decoration: none;
+        }
+        .share-option:hover { border-color: var(--muted); background: var(--bg2); }
+
+        .share-option-icon {
+            width: 36px; height: 36px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+        }
+
+        .share-option-label {
+            font-family: monospace; font-size: 10px; color: var(--muted);
+            letter-spacing: 0.03em; text-align: center;
+        }
+
+        /* Link row */
+        .link-row {
+            background: var(--bg3); border: 1px solid var(--border);
+            border-radius: 6px; padding: 12px 14px;
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+        }
+
+        .link-text {
+            font-family: monospace; font-size: 11px; color: var(--muted);
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
             flex: 1;
-            padding: 8px 12px;
-            border-radius: 4px;
-            border: 1px solid var(--border);
-            background: transparent;
-            color: var(--muted);
-            font-family: 'League Spartan', sans-serif;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .share-btn:hover       { color: var(--text); border-color: var(--muted); }
-        .share-btn.copy-done   { color: var(--green); border-color: var(--green); }
-
-        /* ── Game board (guesser) ── */
-        .game-header {
-            width: 100%;
-            text-align: center;
         }
 
-        .game-header p {
-            font-size: 13px;
-            color: var(--muted);
-            font-family: monospace;
-            margin-top: 4px;
-        }
+        /* ── Game board ── */
+        .game-header { width: 100%; text-align: center; }
+        .game-header p { font-size: 13px; color: var(--muted); font-family: monospace; margin-top: 4px; }
+        .game-title { font-family: 'League Spartan', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--text); letter-spacing: 1px; }
 
-        .game-title {
-            font-family: 'League Spartan', sans-serif;
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--text);
-            letter-spacing: 1px;
-        }
-
-        .board-wrapper {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            width: 100%;
-            align-items: center;
-        }
-
-        .board-row {
-            display: flex;
-            gap: 6px;
-        }
+        .board-wrapper { display: flex; flex-direction: column; gap: 6px; width: 100%; align-items: center; }
+        .board-row { display: flex; gap: 6px; }
 
         .tile {
-            width: 56px; height: 56px;
-            border: 2px solid var(--border);
-            border-radius: 4px;
-            font-size: 24px; font-weight: 900;
-            font-family: 'League Spartan', sans-serif;
-            display: flex; align-items: center; justify-content: center;
-            text-transform: uppercase;
+            width: 56px; height: 56px; border: 2px solid var(--border); border-radius: 4px;
+            font-size: 24px; font-weight: 900; font-family: 'League Spartan', sans-serif;
+            display: flex; align-items: center; justify-content: center; text-transform: uppercase;
             transition: background 0.2s, border-color 0.2s;
         }
-
         .tile.filled  { border-color: #565758; }
         .tile.correct { background: var(--green);  border-color: var(--green);  color: white; }
         .tile.present { background: var(--yellow); border-color: var(--yellow); color: white; }
         .tile.absent  { background: var(--grey);   border-color: var(--grey);   color: white; }
         .tile.active  { border-color: var(--accent); }
 
-        /* ── Guess counter ── */
-        .guess-counter {
-            font-family: monospace;
-            font-size: 12px;
-            color: var(--muted);
-            text-align: center;
-        }
-
+        .guess-counter { font-family: monospace; font-size: 12px; color: var(--muted); text-align: center; }
         .guess-counter span { color: var(--accent); font-weight: 700; }
 
         /* ── Keyboard ── */
-        .keyboard {
-            display: flex; flex-direction: column; gap: 8px;
-            width: 100%; max-width: 500px;
-            margin: 0 auto; user-select: none;
-        }
-
-        .kb-row { display: flex; justify-content: center; gap: 6px; }
+        .keyboard { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 500px; margin: 0 auto; user-select: none; }
+        .kb-row   { display: flex; justify-content: center; gap: 6px; }
 
         .kb-key {
             height: 56px; min-width: 40px; flex: 1; max-width: 42px;
-            border: none; border-radius: 4px;
-            background: #818384; color: white;
-            font-family: 'League Spartan', sans-serif;
-            font-size: 13px; font-weight: 700;
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
+            border: none; border-radius: 4px; background: #818384; color: white;
+            font-family: 'League Spartan', sans-serif; font-size: 13px; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
             transition: background 0.2s, transform 0.1s;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation; -webkit-tap-highlight-color: transparent;
         }
-
-        .kb-key:active  { transform: scale(0.93); }
-        .kb-wide        { min-width: 62px; max-width: 62px; font-size: 11px; }
-        .kb-key.correct { background: var(--green); }
-        .kb-key.present { background: var(--yellow); }
-        .kb-key.absent  { background: #3a3a3c; }
+        .kb-key:active   { transform: scale(0.93); }
+        .kb-wide         { min-width: 62px; max-width: 62px; font-size: 11px; }
+        .kb-key.correct  { background: var(--green); }
+        .kb-key.present  { background: var(--yellow); }
+        .kb-key.absent   { background: #3a3a3c; }
         .kb-key:disabled { opacity: 0.35; cursor: not-allowed; }
 
         /* ── Toast ── */
@@ -283,54 +265,39 @@
             transform: translateX(-50%) translateY(-10px);
             background: var(--text); color: var(--bg);
             padding: 10px 20px; border-radius: 6px;
-            font-family: 'League Spartan', sans-serif;
-            font-size: 14px; font-weight: 700; letter-spacing: 1px;
+            font-family: 'League Spartan', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 1px;
             opacity: 0; transition: opacity 0.2s, transform 0.2s;
-            z-index: 999; pointer-events: none; text-align: center;
-            max-width: 320px;
+            z-index: 999; pointer-events: none; text-align: center; max-width: 320px;
         }
         .toast.show  { opacity: 1; transform: translateX(-50%) translateY(0); }
         .toast.error { background: var(--red); color: white; }
 
         /* ── Result banner ── */
         .result-banner {
-            display: none;
-            width: 100%;
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            flex-direction: column;
-            gap: 10px;
+            display: none; width: 100%; border-radius: 8px; padding: 20px;
+            text-align: center; flex-direction: column; gap: 10px;
         }
-
         .result-banner.show { display: flex; }
         .result-banner.win  { background: rgba(83,141,78,0.15); border: 1px solid var(--green); }
         .result-banner.lose { background: rgba(192,57,43,0.12); border: 1px solid var(--red); }
 
         .result-emoji { font-size: 2.5rem; }
-
-        .result-title {
-            font-family: 'League Spartan', sans-serif;
-            font-size: 1.4rem; font-weight: 900; letter-spacing: 2px;
-        }
-
-        .result-word-reveal {
-            font-family: monospace;
-            font-size: 12px; color: var(--muted);
-        }
-
+        .result-title { font-family: 'League Spartan', sans-serif; font-size: 1.4rem; font-weight: 900; letter-spacing: 2px; }
+        .result-word-reveal { font-family: monospace; font-size: 12px; color: var(--muted); }
         .result-word-reveal span {
-            font-family: 'League Spartan', sans-serif;
-            font-size: 20px; font-weight: 900;
-            color: var(--accent); letter-spacing: 6px;
-            display: block; margin-top: 4px;
+            font-family: 'League Spartan', sans-serif; font-size: 20px; font-weight: 900;
+            color: var(--accent); letter-spacing: 6px; display: block; margin-top: 4px;
         }
-
         .result-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
 
-        .error-msg {
-            color: #e74c3c; font-size: 13px;
-            font-family: monospace; text-align: center; min-height: 18px;
+        .error-msg { color: #e74c3c; font-size: 13px; font-family: monospace; text-align: center; min-height: 18px; }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%       { transform: translateX(-6px); }
+            40%       { transform: translateX(6px); }
+            60%       { transform: translateX(-4px); }
+            80%       { transform: translateX(4px); }
         }
 
         @media (max-width: 520px) {
@@ -338,6 +305,7 @@
             .kb-key { height: 48px; min-width: 32px; max-width: 34px; font-size: 11px; }
             .kb-wide { min-width: 52px; max-width: 52px; }
             .word-input-tile { width: 46px; height: 46px; font-size: 18px; }
+            .share-options { grid-template-columns: repeat(4, 1fr); gap: 6px; }
         }
     </style>
 </head>
@@ -356,12 +324,46 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- ── HOME SCREEN ── -->
+<div class="screen active" id="screen-home">
+    <button class="mode-btn" onclick="showScreen('screen-create')">
+        <div class="mode-btn-icon">🎯</div>
+        <div class="mode-btn-text">
+            <div class="mode-btn-title">Create a Challenge</div>
+            <div class="mode-btn-desc">Set a word · share a code or link</div>
+        </div>
+    </button>
+
+    <div class="divider">or</div>
+
+    <button class="mode-btn" onclick="showScreen('screen-enter-code')">
+        <div class="mode-btn-icon">🔑</div>
+        <div class="mode-btn-text">
+            <div class="mode-btn-title">Enter a Code</div>
+            <div class="mode-btn-desc">Got a code from a friend? Play here</div>
+        </div>
+    </button>
+</div>
+
+<!-- ── ENTER CODE SCREEN ── -->
+<div class="screen" id="screen-enter-code">
+    <div class="card">
+        <h2>Enter Challenge Code</h2>
+        <p>Type the 5-digit code your friend shared with you.</p>
+        <input class="code-input" id="codeEntryInput" placeholder="e.g. 48291"
+               maxlength="5" inputmode="numeric" pattern="[0-9]*"
+               oninput="this.value=this.value.replace(/[^0-9]/g,'')" />
+        <p class="error-msg" id="codeEntryError"></p>
+        <button class="btn btn-green" onclick="playFromCode()">Play Challenge</button>
+        <button class="btn btn-ghost" onclick="showScreen('screen-home')">← Back</button>
+    </div>
+</div>
+
 <!-- ── CREATE SCREEN ── -->
-<div class="screen active" id="screen-create">
+<div class="screen" id="screen-create">
     <div class="card">
         <h2>Set your word</h2>
         <p>Type any 5-letter word. Your opponent won't see it — they get 6 guesses to figure it out.</p>
-
         <div class="word-input-row" id="wordInputRow">
             <input class="word-input-tile" id="ci0" maxlength="1" />
             <input class="word-input-tile" id="ci1" maxlength="1" />
@@ -369,12 +371,10 @@
             <input class="word-input-tile" id="ci3" maxlength="1" />
             <input class="word-input-tile" id="ci4" maxlength="1" />
         </div>
-
         <p class="error-msg" id="createError"></p>
-        <button class="btn btn-accent" onclick="createChallenge()">Generate Challenge Link</button>
+        <button class="btn btn-accent" onclick="createChallenge()">Generate Challenge</button>
+        <button class="btn btn-ghost" onclick="showScreen('screen-home')">← Back</button>
     </div>
-
-    <!-- On-screen keyboard for creator -->
     <div class="keyboard" id="createKeyboard"></div>
 </div>
 
@@ -382,14 +382,42 @@
 <div class="screen" id="screen-share">
     <div class="card">
         <h2>Challenge ready!</h2>
-        <p>Share this link with your opponent. They get <strong style="color:var(--text)">6 guesses</strong> to crack your word.</p>
+        <p>Share the <strong style="color:var(--text)">link</strong> so anyone can play — multiple friends can use the same link. The short code only works on this device.</p>
 
-        <div class="share-box">
-            <span class="share-label">Challenge link</span>
-            <span class="share-url" id="shareUrl">—</span>
-            <div class="share-btns">
-                <button class="share-btn" id="copyBtn" onclick="copyLink()">Copy Link</button>
-                <button class="share-btn" onclick="shareLink()">Share</button>
+        <div class="share-section">
+            <!-- Short code -->
+            <span class="share-label">Short code</span>
+            <div class="code-display">
+                <span class="code-number" id="shortCode">—</span>
+                <button class="code-copy-btn" id="codeCopyBtn" onclick="copyShortCode()">Copy code</button>
+            </div>
+
+            <!-- Share options -->
+            <span class="share-label">Share via</span>
+            <div class="share-options">
+                <a class="share-option" id="shareWhatsapp" href="#" onclick="shareVia('whatsapp'); return false;">
+                    <div class="share-option-icon" style="background:#1fbe45;">💬</div>
+                    <span class="share-option-label">WhatsApp</span>
+                </a>
+                <a class="share-option" id="shareText" href="#" onclick="shareVia('text'); return false;">
+                    <div class="share-option-icon" style="background:#3b82f6;">✉️</div>
+                    <span class="share-option-label">Text</span>
+                </a>
+                <a class="share-option" id="shareGmail" href="#" onclick="shareVia('gmail'); return false;">
+                    <div class="share-option-icon" style="background:#ea4335;">📧</div>
+                    <span class="share-option-label">Gmail</span>
+                </a>
+                <a class="share-option" id="shareMore" href="#" onclick="shareVia('native'); return false;">
+                    <div class="share-option-icon" style="background:#555;">⋯</div>
+                    <span class="share-option-label">More</span>
+                </a>
+            </div>
+
+            <!-- Full link -->
+            <span class="share-label">Or copy full link</span>
+            <div class="link-row">
+                <span class="link-text" id="shareUrl">—</span>
+                <button class="code-copy-btn" id="linkCopyBtn" onclick="copyLink()">Copy</button>
             </div>
         </div>
 
@@ -399,17 +427,15 @@
 
 <!-- ── PLAY SCREEN ── -->
 <div class="screen" id="screen-play">
-
     <div class="game-header">
-        <div class="game-title" id="challengerLabel">Someone challenged you!</div>
+        <div class="game-title">You got a challenge!</div>
         <p>6 guesses to crack the word</p>
     </div>
 
-    <!-- Result banner (shown on win/lose) -->
     <div class="result-banner" id="resultBanner">
-        <div class="result-emoji"        id="resultEmoji">🎉</div>
-        <div class="result-title"        id="resultTitle">YOU GOT IT!</div>
-        <div class="result-word-reveal"  id="resultWordReveal">
+        <div class="result-emoji"       id="resultEmoji">🎉</div>
+        <div class="result-title"       id="resultTitle">YOU GOT IT!</div>
+        <div class="result-word-reveal" id="resultWordReveal">
             The word was <span id="resultWord">—</span>
         </div>
         <div class="result-actions">
@@ -419,49 +445,54 @@
         </div>
     </div>
 
-    <!-- Board -->
     <div class="board-wrapper" id="boardWrapper"></div>
-
-    <!-- Guess counter -->
-    <div class="guess-counter">
-        Guess <span id="guessNum">1</span> of <span>6</span>
-    </div>
-
-    <!-- Keyboard -->
+    <div class="guess-counter">Guess <span id="guessNum">1</span> of <span>6</span></div>
     <div class="keyboard" id="keyboard"></div>
 </div>
 
 <script>
     const MAX_GUESSES = 6;
     const MAX_COLS    = 5;
-
     const KB_ROWS = [
         ['Q','W','E','R','T','Y','U','I','O','P'],
         ['A','S','D','F','G','H','J','K','L'],
         ['ENTER','Z','X','C','V','B','N','M','⌫']
     ];
 
-    // ── Simple encode/decode — not encryption, just obfuscation so word
-    //    isn't readable in plain text in the URL
+    // ── Encode / decode ───────────────────────────────────────────────────────
+    // URL encoding: XOR + base64 (obfuscation, not encryption)
     function encodeWord(word) {
-        // XOR each char code with a fixed key, then base64
         const key = [7, 13, 3, 19, 11];
-        const bytes = word.toUpperCase().split('').map((c, i) =>
-            c.charCodeAt(0) ^ key[i % key.length]
-        );
-        return btoa(String.fromCharCode(...bytes))
-            .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+        const bytes = word.toUpperCase().split('').map((c, i) => c.charCodeAt(0) ^ key[i % key.length]);
+        return btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
     }
 
     function decodeWord(encoded) {
         try {
-            const b64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
+            const b64   = encoded.replace(/-/g, '+').replace(/_/g, '/');
             const bytes = atob(b64).split('').map(c => c.charCodeAt(0));
-            const key = [7, 13, 3, 19, 11];
+            const key   = [7, 13, 3, 19, 11];
             return bytes.map((b, i) => String.fromCharCode(b ^ key[i % key.length])).join('');
-        } catch {
-            return null;
-        }
+        } catch { return null; }
+    }
+
+    // Short code: map word to a 5-digit number using a lookup table
+    // Each letter maps to its index in the alphabet, combine into a number
+    // We store a session map so codes work within the same browser session,
+    // and for cross-device sharing we use the URL link approach.
+    // Short code is stored in sessionStorage keyed by code → encoded word.
+    function generateShortCode(encodedWord) {
+        // 5-digit code stored in localStorage — only works on SAME device/browser.
+        // For cross-device sharing, use the full link instead.
+        let code;
+        do { code = String(Math.floor(10000 + Math.random() * 90000)); }
+        while (localStorage.getItem('wc_' + code));
+        localStorage.setItem('wc_' + code, encodedWord);
+        return code;
+    }
+
+    function getWordFromCode(code) {
+        return localStorage.getItem('wc_' + code);
     }
 
     // ── Toast ─────────────────────────────────────────────────────────────────
@@ -472,16 +503,41 @@
         el.classList.toggle('error', isError);
         el.classList.add('show');
         clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => {
-            el.classList.remove('show');
-            el.classList.remove('error');
-        }, duration);
+        toastTimer = setTimeout(() => { el.classList.remove('show', 'error'); }, duration);
     }
 
     // ── Screen switcher ───────────────────────────────────────────────────────
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
+        if (id === 'screen-create') setTimeout(() => createInputs[0].focus(), 50);
+        if (id === 'screen-enter-code') setTimeout(() => document.getElementById('codeEntryInput').focus(), 50);
+    }
+
+    // ── Enter code: play from short code ─────────────────────────────────────
+    function playFromCode() {
+        const code    = document.getElementById('codeEntryInput').value.trim();
+        const errorEl = document.getElementById('codeEntryError');
+        errorEl.textContent = '';
+
+        if (code.length !== 5 || !/^\d{5}$/.test(code)) {
+            errorEl.textContent = 'Please enter a valid 5-digit code.';
+            return;
+        }
+
+        const encoded = getWordFromCode(code);
+        if (!encoded) {
+            errorEl.textContent = 'Code not found. Make sure you\'re on the same device, or ask for the full link.';
+            return;
+        }
+
+        const word = decodeWord(encoded);
+        if (!word || word.length !== 5) {
+            errorEl.textContent = 'Invalid code. Please try again.';
+            return;
+        }
+
+        startPlay(word);
     }
 
     // ── CREATE: tile keyboard navigation ─────────────────────────────────────
@@ -495,7 +551,6 @@
             if (input.value && idx < 4) createInputs[idx + 1].focus();
             document.getElementById('createError').textContent = '';
         });
-
         input.addEventListener('keydown', (e) => {
             if (e.key === 'Backspace' && !input.value && idx > 0) {
                 createInputs[idx - 1].focus();
@@ -504,93 +559,158 @@
             }
             if (e.key === 'Enter') createChallenge();
         });
-
-        // Select all on focus so typing replaces
         input.addEventListener('focus', () => input.select());
     });
 
-    // Auto-focus first tile on load
-    createInputs[0].focus();
+    // ── CREATE: on-screen keyboard ────────────────────────────────────────────
+    function buildCreateKeyboard() {
+        const kb = document.getElementById('createKeyboard');
+        if (!kb) return;
+        kb.innerHTML = '';
+        KB_ROWS.forEach(row => {
+            const rowEl = document.createElement('div');
+            rowEl.className = 'kb-row';
+            row.forEach(key => {
+                const btn = document.createElement('button');
+                btn.className   = 'kb-key' + (key === 'ENTER' || key === '⌫' ? ' kb-wide' : '');
+                btn.textContent = key;
+                btn.addEventListener('click', () => handleCreateKey(key));
+                rowEl.appendChild(btn);
+            });
+            kb.appendChild(rowEl);
+        });
+    }
 
-    // ── CREATE: generate link ─────────────────────────────────────────────────
+    function handleCreateKey(key) {
+        const filled = createInputs.filter(i => i.value).length;
+        if (key === '⌫') {
+            if (filled > 0) {
+                const t = createInputs[filled - 1];
+                t.value = ''; t.classList.remove('filled'); t.focus();
+            }
+        } else if (key === 'ENTER') {
+            createChallenge();
+        } else if (/^[A-Z]$/.test(key) && filled < 5) {
+            const t = createInputs[filled];
+            t.value = key; t.classList.add('filled');
+            document.getElementById('createError').textContent = '';
+            if (filled < 4) createInputs[filled + 1].focus();
+        }
+    }
+
+    // ── CREATE: generate ──────────────────────────────────────────────────────
+    let currentEncodedWord = '';
+    let currentShortCode   = '';
+
     async function createChallenge() {
-        const word = createInputs.map(i => i.value.toUpperCase()).join('');
+        const word    = createInputs.map(i => i.value.toUpperCase()).join('');
         const errorEl = document.getElementById('createError');
 
-        if (word.length !== 5) {
-            errorEl.textContent = 'Enter a full 5-letter word.';
-            return;
-        }
+        if (word.length !== 5) { errorEl.textContent = 'Enter a full 5-letter word.'; return; }
 
-        // Validate the word
         errorEl.textContent = 'Checking word...';
         const valid = await isValidWord(word);
-        if (!valid) {
-            errorEl.textContent = 'That\'s not a valid English word. Try another.';
-            return;
-        }
-
+        if (!valid) { errorEl.textContent = "That's not a valid English word. Try another."; return; }
         errorEl.textContent = '';
 
-        const encoded  = encodeWord(word);
-        const baseUrl  = window.location.href.split('?')[0];
-        const fullUrl  = `${baseUrl}?c=${encoded}`;
+        currentEncodedWord = encodeWord(word);
+        currentShortCode   = generateShortCode(currentEncodedWord);
 
-        document.getElementById('shareUrl').textContent = fullUrl;
+        const baseUrl  = window.location.href.split('?')[0];
+        const fullUrl  = `${baseUrl}?c=${currentEncodedWord}`;
+
+        document.getElementById('shortCode').textContent = currentShortCode;
+        document.getElementById('shareUrl').textContent  = fullUrl;
+
         showScreen('screen-share');
     }
 
-    // ── SHARE: copy / native share ────────────────────────────────────────────
+    // ── SHARE actions ─────────────────────────────────────────────────────────
+    function getShareText() {
+        const code = document.getElementById('shortCode').textContent;
+        const url  = document.getElementById('shareUrl').textContent;
+        return {
+            code,
+            url,
+            // Lead with the link since code is device-specific
+            msg: `Can you guess my Wordle? 🟩🟨⬜ You get 6 tries — open this link: ${url}`,
+        };
+    }
+
+    function shareVia(platform) {
+        const { msg, url, code } = getShareText();
+        const encoded = encodeURIComponent(msg);
+
+        if (platform === 'whatsapp') {
+            window.open(`https://wa.me/?text=${encoded}`, '_blank');
+        } else if (platform === 'text') {
+            // SMS — works on mobile
+            window.location.href = `sms:?body=${encoded}`;
+        } else if (platform === 'gmail') {
+            const subject = encodeURIComponent('Wordle Challenge — can you guess my word?');
+            window.open(`https://mail.google.com/mail/?view=cm&su=${subject}&body=${encoded}`, '_blank');
+        } else if (platform === 'native') {
+            if (navigator.share) {
+                navigator.share({ title: 'Wordle Challenge', text: msg, url }).catch(() => {});
+            } else {
+                copyLink();
+                showToast('Link copied — paste it anywhere!');
+            }
+        }
+    }
+
+    function copyShortCode() {
+        const code = document.getElementById('shortCode').textContent;
+        navigator.clipboard.writeText(code).then(() => {
+            const btn = document.getElementById('codeCopyBtn');
+            btn.textContent = 'Copied!'; btn.classList.add('done');
+            setTimeout(() => { btn.textContent = 'Copy code'; btn.classList.remove('done'); }, 2000);
+        }).catch(() => showToast(code));
+    }
+
     function copyLink() {
         const url = document.getElementById('shareUrl').textContent;
         navigator.clipboard.writeText(url).then(() => {
-            const btn = document.getElementById('copyBtn');
-            btn.textContent = 'Copied!';
-            btn.classList.add('copy-done');
-            setTimeout(() => {
-                btn.textContent = 'Copy Link';
-                btn.classList.remove('copy-done');
-            }, 2000);
+            const btn = document.getElementById('linkCopyBtn');
+            btn.textContent = 'Copied!'; btn.classList.add('done');
+            setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('done'); }, 2000);
         }).catch(() => showToast(url));
-    }
-
-    function shareLink() {
-        const url = document.getElementById('shareUrl').textContent;
-        if (navigator.share) {
-            navigator.share({
-                title: 'Wordle Challenge',
-                text: 'Can you guess my word in 6 tries?',
-                url
-            }).catch(() => {});
-        } else {
-            copyLink();
-        }
     }
 
     function resetCreate() {
         createInputs.forEach(i => { i.value = ''; i.classList.remove('filled'); });
+        document.getElementById('createError').textContent = '';
         showScreen('screen-create');
-        setTimeout(() => createInputs[0].focus(), 100);
     }
 
     // ── DICTIONARY VALIDATION ─────────────────────────────────────────────────
     async function isValidWord(word) {
         try {
-            const res = await fetch(
-                `https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`
-            );
+            const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`);
             return res.ok;
-        } catch {
-            return true; // fail open if API unreachable
-        }
+        } catch { return true; }
     }
 
     // ── PLAY: state ───────────────────────────────────────────────────────────
-    let secretWord  = '';
-    let currentRow  = 0;
-    let currentCol  = 0;
-    let gameOver    = false;
-    let tiles       = []; // 2D array [row][col]
+    let secretWord   = '';
+    let currentRow   = 0;
+    let currentCol   = 0;
+    let gameOver     = false;
+    let isSubmitting = false; // prevents double-submit on rapid Enter
+    let tiles        = [];
+
+    function startPlay(word) {
+        secretWord   = word;
+        currentRow   = 0;
+        currentCol   = 0;
+        gameOver     = false;
+        isSubmitting = false;
+        document.getElementById('resultBanner').className = 'result-banner';
+        document.getElementById('headerSub').textContent  = 'guess the word · 6 tries';
+        buildBoard();
+        buildGuesserKeyboard();
+        showScreen('screen-play');
+    }
 
     function buildBoard() {
         const wrapper = document.getElementById('boardWrapper');
@@ -609,11 +729,10 @@
             wrapper.appendChild(row);
             tiles.push(rowTiles);
         }
-        // Highlight first row as active
         tiles[0].forEach(t => t.classList.add('active'));
     }
 
-    function buildKeyboard() {
+    function buildGuesserKeyboard() {
         const kb = document.getElementById('keyboard');
         kb.innerHTML = '';
         KB_ROWS.forEach(row => {
@@ -646,24 +765,23 @@
     }
 
     async function submitGuess() {
-        if (gameOver) return;
+        if (gameOver || isSubmitting) return;
 
         const guess = tiles[currentRow].map(t => t.textContent).join('');
-        if (guess.length !== MAX_COLS) {
-            showToast('Not enough letters', true);
-            shakRow(currentRow);
-            return;
-        }
+        if (guess.length !== MAX_COLS) { showToast('Not enough letters', true); shakeRow(currentRow); return; }
 
-        // Validate
+        isSubmitting = true;
+        setKeyboardEnabled(false);
+
         const valid = await isValidWord(guess);
         if (!valid) {
             showToast('Not a valid word!', true);
-            shakRow(currentRow);
+            shakeRow(currentRow);
+            isSubmitting = false;
+            setKeyboardEnabled(true);
             return;
         }
 
-        // Evaluate
         const result = evaluate(guess, secretWord);
         applyResult(currentRow, guess, result);
         updateKeyboard(guess, result);
@@ -671,43 +789,36 @@
         const isCorrect = result.every(r => r === 'correct');
         currentRow++;
         currentCol = 0;
-        updateGuessCounter();
+        document.getElementById('guessNum').textContent = Math.min(currentRow + 1, MAX_GUESSES);
 
         if (isCorrect) {
             gameOver = true;
+            isSubmitting = false;
             setKeyboardEnabled(false);
             setTimeout(() => showResult(true), 400);
         } else if (currentRow === MAX_GUESSES) {
             gameOver = true;
+            isSubmitting = false;
             setKeyboardEnabled(false);
             setTimeout(() => showResult(false), 400);
         } else {
-            // Highlight next row
+            isSubmitting = false;
+            setKeyboardEnabled(true);
             tiles[currentRow].forEach(t => t.classList.add('active'));
         }
     }
 
     function evaluate(guess, secret) {
-        const result     = Array(5).fill('absent');
-        const secretArr  = secret.split('');
-        const guessArr   = guess.split('');
-        const usedSecret = Array(5).fill(false);
-        const usedGuess  = Array(5).fill(false);
-
+        const result = Array(5).fill('absent');
+        const sArr = secret.split(''), gArr = guess.split('');
+        const uS = Array(5).fill(false), uG = Array(5).fill(false);
         for (let i = 0; i < 5; i++) {
-            if (guessArr[i] === secretArr[i]) {
-                result[i] = 'correct';
-                usedSecret[i] = usedGuess[i] = true;
-            }
+            if (gArr[i] === sArr[i]) { result[i] = 'correct'; uS[i] = uG[i] = true; }
         }
         for (let i = 0; i < 5; i++) {
-            if (usedGuess[i]) continue;
+            if (uG[i]) continue;
             for (let j = 0; j < 5; j++) {
-                if (!usedSecret[j] && guessArr[i] === secretArr[j]) {
-                    result[i] = 'present';
-                    usedSecret[j] = true;
-                    break;
-                }
+                if (!uS[j] && gArr[i] === sArr[j]) { result[i] = 'present'; uS[j] = true; break; }
             }
         }
         return result;
@@ -733,18 +844,13 @@
     }
 
     function setKeyboardEnabled(enabled) {
-        document.querySelectorAll('.kb-key').forEach(btn => { btn.disabled = !enabled; });
+        document.querySelectorAll('#keyboard .kb-key').forEach(btn => { btn.disabled = !enabled; });
     }
 
-    function updateGuessCounter() {
-        document.getElementById('guessNum').textContent =
-            Math.min(currentRow + 1, MAX_GUESSES);
-    }
-
-    function shakRow(row) {
+    function shakeRow(row) {
         tiles[row].forEach(tile => {
             tile.style.animation = 'none';
-            tile.offsetHeight; // reflow
+            tile.offsetHeight;
             tile.style.animation = 'shake 0.4s ease';
         });
     }
@@ -752,127 +858,56 @@
     function showResult(won) {
         const banner = document.getElementById('resultBanner');
         banner.className = 'result-banner show ' + (won ? 'win' : 'lose');
-
         document.getElementById('resultEmoji').textContent =
             won ? ['🎉','🥳','🔥','✨','👏'][Math.min(currentRow - 1, 4)] : '😔';
         document.getElementById('resultTitle').textContent =
             won ? ['GENIUS!','MAGNIFICENT!','IMPRESSIVE!','SPLENDID!','GREAT!','PHEW!'][currentRow - 1]
                 : 'BETTER LUCK NEXT TIME';
-
-        // Only reveal the word on loss
         const revealEl = document.getElementById('resultWordReveal');
-        if (won) {
-            revealEl.style.display = 'none';
-        } else {
-            revealEl.style.display = 'block';
-            document.getElementById('resultWord').textContent = secretWord;
-        }
+        if (won) { revealEl.style.display = 'none'; }
+        else { revealEl.style.display = 'block'; document.getElementById('resultWord').textContent = secretWord; }
     }
 
-    function playAgain() {
-        // Reload without query param — goes back to create screen
-        window.location.href = window.location.pathname;
-    }
+    function playAgain() { window.location.href = window.location.pathname; }
 
     function handleKey(key) {
         if (gameOver) return;
-        if (key === '⌫')          deleteLetter();
-        else if (key === 'ENTER') submitGuess();
-        else if (/^[A-Z]$/.test(key)) addLetter(key);
+        if (key === '⌫')               deleteLetter();
+        else if (key === 'ENTER')       submitGuess();
+        else if (/^[A-Z]$/.test(key))  addLetter(key);
     }
 
-    // ── CREATE: on-screen keyboard ───────────────────────────────────────────
-    function buildCreateKeyboard() {
-        const kb = document.getElementById('createKeyboard');
-        if (!kb) return;
-        kb.innerHTML = '';
-        KB_ROWS.forEach(row => {
-            const rowEl = document.createElement('div');
-            rowEl.className = 'kb-row';
-            row.forEach(key => {
-                const btn = document.createElement('button');
-                btn.className   = 'kb-key' + (key === 'ENTER' || key === '⌫' ? ' kb-wide' : '');
-                btn.textContent = key;
-                btn.setAttribute('data-create-key', key);
-                btn.addEventListener('click', () => handleCreateKey(key));
-                rowEl.appendChild(btn);
-            });
-            kb.appendChild(rowEl);
-        });
-    }
-
-    function handleCreateKey(key) {
-        // Find the first empty tile, or the last filled tile for backspace
-        const filled = createInputs.filter(i => i.value).length;
-
-        if (key === '⌫') {
-            if (filled > 0) {
-                const target = createInputs[filled - 1];
-                target.value = '';
-                target.classList.remove('filled');
-                target.focus();
-            }
-        } else if (key === 'ENTER') {
-            createChallenge();
-        } else if (/^[A-Z]$/.test(key)) {
-            if (filled < 5) {
-                const target = createInputs[filled];
-                target.value = key;
-                target.classList.add('filled');
-                document.getElementById('createError').textContent = '';
-                // Advance focus to next tile
-                if (filled < 4) createInputs[filled + 1].focus();
-            }
-        }
-    }
-
-    // Physical keyboard
     document.addEventListener('keydown', e => {
-        if (gameOver) return;
-        const key = e.key.toUpperCase();
-        if (key === 'BACKSPACE')       { e.preventDefault(); deleteLetter(); }
-        else if (key === 'ENTER')      { e.preventDefault(); submitGuess(); }
-        else if (/^[A-Z]$/.test(key)) addLetter(key);
+        // Only handle physical keyboard when on play or create screen
+        const activeScreen = document.querySelector('.screen.active')?.id;
+        if (activeScreen === 'screen-play') {
+            if (gameOver) return;
+            const key = e.key.toUpperCase();
+            if (key === 'BACKSPACE')       { e.preventDefault(); deleteLetter(); }
+            else if (key === 'ENTER')      { e.preventDefault(); submitGuess(); }
+            else if (/^[A-Z]$/.test(key)) addLetter(key);
+        }
     });
 
-    // ── INIT: check URL for challenge param ───────────────────────────────────
+    // ── INIT ─────────────────────────────────────────────────────────────────
     (function init() {
+        buildCreateKeyboard();
+
         const params = new URLSearchParams(window.location.search);
         const code   = params.get('c');
 
         if (code) {
-            // Someone is playing a challenge
             const word = decodeWord(code);
-
             if (!word || word.length !== 5 || !/^[A-Z]+$/.test(word)) {
                 showToast('Invalid challenge link.', true, 5000);
-                showScreen('screen-create');
+                showScreen('screen-home');
                 return;
             }
-
-            secretWord = word;
-            document.getElementById('headerSub').textContent = 'guess the word · 6 tries';
-            document.getElementById('challengerLabel').textContent = 'You got a challenge!';
-            buildBoard();
-            buildKeyboard();
-            showScreen('screen-play');
+            startPlay(word);
         } else {
-            // No code — show the create screen
-            showScreen('screen-create');
-            buildCreateKeyboard();
+            showScreen('screen-home');
         }
     })();
 </script>
-
-<style>
-    @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        20%       { transform: translateX(-6px); }
-        40%       { transform: translateX(6px); }
-        60%       { transform: translateX(-4px); }
-        80%       { transform: translateX(4px); }
-    }
-</style>
-
 </body>
 </html>
