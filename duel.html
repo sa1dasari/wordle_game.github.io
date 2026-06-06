@@ -367,8 +367,9 @@
         <span class="header-sub">turn-based · unlimited guesses</span>
     </div>
     <div style="display:flex;gap:8px;">
+        <a href="party.html" class="solo-link">🎉 Party</a>
         <a href="challenge.html" class="solo-link">🎯 Challenge</a>
-        <a href="index.html" class="solo-link">← Solo Mode</a>
+        <a href="index.html" class="solo-link">← Solo</a>
     </div>
 </header>
 
@@ -504,7 +505,14 @@
         throw new Error('Socket.io failed to load');
     }
 
-    const socket = io(SERVER_URL, { autoConnect: false });
+    const socket = io(SERVER_URL, {
+        autoConnect: false,
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        timeout: 20000,
+    });
 
     // ── State ─────────────────────────────────────────────────────────────────────
     let myId        = null;
