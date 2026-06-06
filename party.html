@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Wordle Party</title>
+    <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;700;900&family=DM+Sans:wght@400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
+    <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+        --bg:     #121213; --bg2: #1a1a1b; --bg3: #242426;
+        --border: #3a3a3c; --text: #e8e6e0; --muted: #818384;
+        --green:  #538d4e; --yellow: #b59f3b; --grey: #3a3a3c;
+        --accent: #c8b97a; --red: #c0392b; --blue: #3b82f6;
+    }
+    body {
+        background: var(--bg); color: var(--text);
+        font-family: 'DM Sans', sans-serif;
+        min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+    }
+
+    /* ── Header ── */
+    header {
+        width: 100%; max-width: 1100px; padding: 14px 20px;
+        display: flex; align-items: center; justify-content: space-between;
+        border-bottom: 1px solid var(--border); margin-bottom: 0; flex-shrink: 0;
+    }
+    .header-left { display: flex; flex-direction: column; gap: 2px; }
+    h1 { font-family: 'League Spartan', sans-serif; font-weight: 900; font-size: 1.5rem; letter-spacing: 3px; }
+    .header-sub { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+    .nav-links { display: flex; gap: 8px; }
+    .nav-link {
+        font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted);
+        text-decoration: none; border: 1px solid var(--border);
+        padding: 5px 12px; border-radius: 4px; transition: all 0.2s;
+    }
+    .nav-link:hover { color: var(--accent); border-color: var(--accent); }
+
+    /* ── Screens ── */
+    .screen { display: none; width: 100%; }
+    .screen.active { display: flex; }
+
+    /* ── Lobby & setup screens (centered) ── */
+    .screen-centered {
+        max-width: 480px; margin: 0 auto; padding: 24px 20px 40px;
+        flex-direction: column; align-items: center; gap: 16px;
+    }
+
+    /* ── Game screen (split layout) ── */
+    #screen-game {
+        max-width: 1100px; margin: 0 auto; padding: 16px;
+        gap: 16px; align-items: flex-start;
+        grid-template-columns: 1fr 340px;
+        display: none;
+    }
+    #screen-game.active { display: grid; }
+
+    /* ── Cards ── */
+    .card {
+        background: var(--bg2); border: 1px solid var(--border);
+        border-radius: 8px; padding: 24px; width: 100%;
+        display: flex; flex-direction: column; gap: 14px;
+    }
+    .card h2 {
+        font-family: 'League Spartan', sans-serif; font-size: 1rem;
+        letter-spacing: 2px; color: var(--accent); text-transform: uppercase;
+    }
+    .card p { font-size: 13px; color: var(--muted); line-height: 1.7; }
+
+    /* ── Inputs ── */
+    input[type="text"], select {
+        background: var(--bg3); border: 1px solid var(--border);
+        border-radius: 4px; color: var(--text);
+        font-family: 'DM Sans', sans-serif; font-size: 14px;
+        padding: 10px 14px; width: 100%; outline: none; transition: border-color 0.2s;
+    }
+    input[type="text"]:focus, select:focus { border-color: var(--accent); }
+    input[type="text"]::placeholder { color: var(--muted); }
+    select option { background: var(--bg2); }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.05em; }
+
+    /* ── Buttons ── */
+    .btn {
+        padding: 11px 20px; border-radius: 4px; border: none; cursor: pointer;
+        font-family: 'League Spartan', sans-serif; font-size: 14px; font-weight: 700;
+        letter-spacing: 1px; transition: all 0.15s; width: 100%;
+        text-align: center; text-decoration: none; display: block;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-green  { background: var(--green);  color: white; }
+    .btn-yellow { background: var(--yellow); color: white; }
+    .btn-accent { background: var(--accent); color: #121213; }
+    .btn-ghost  { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+    .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
+    .btn-red    { background: var(--red); color: white; }
+
+    .divider {
+        display: flex; align-items: center; gap: 10px;
+        color: var(--muted); font-size: 12px; width: 100%;
+    }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* ── Player list (lobby) ── */
+    .player-list { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+    .player-row {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 10px 14px; background: var(--bg3); border-radius: 6px;
+        border: 1px solid var(--border);
+    }
+    .player-row-name { font-size: 14px; color: var(--text); }
+    .player-badge {
+        font-family: 'DM Mono', monospace; font-size: 10px;
+        padding: 2px 8px; border-radius: 10px;
+        background: var(--accent); color: #121213; font-weight: 700;
+    }
+    .player-badge.guesser { background: var(--bg2); color: var(--muted); border: 1px solid var(--border); }
+
+    /* ── Room code display ── */
+    .room-code-display {
+        font-family: 'League Spartan', sans-serif; font-size: 3rem; font-weight: 900;
+        letter-spacing: 12px; color: var(--accent); text-align: center; padding: 8px 0;
+    }
+
+    /* ─────────────────────── GAME SCREEN ─────────────────────── */
+    /* Left column */
+    .game-left { display: flex; flex-direction: column; gap: 14px; }
+
+    /* Round info bar */
+    .round-bar {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 10px 16px; background: var(--bg2); border: 1px solid var(--border);
+        border-radius: 8px; flex-wrap: wrap; gap: 8px;
+    }
+    .round-label { font-family: 'League Spartan', sans-serif; font-size: 13px; letter-spacing: 1px; color: var(--muted); }
+    .round-label span { color: var(--text); }
+
+    /* Timer */
+    .timer {
+        font-family: 'League Spartan', sans-serif; font-size: 22px; font-weight: 900;
+        color: var(--accent); min-width: 48px; text-align: center;
+    }
+    .timer.urgent { color: var(--red); animation: timerPulse 0.5s ease infinite alternate; }
+    @keyframes timerPulse { from { opacity: 1; } to { opacity: 0.5; } }
+
+    /* Hint bar (letter reveals) */
+    .hint-bar {
+        display: flex; align-items: center; gap: 12px;
+        padding: 10px 16px; background: var(--bg2); border: 1px solid var(--border);
+        border-radius: 8px;
+    }
+    .hint-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .hint-tiles { display: flex; gap: 5px; }
+    .hint-tile {
+        width: 36px; height: 36px; border: 2px solid var(--border);
+        border-radius: 4px; font-size: 16px; font-weight: 900;
+        font-family: 'League Spartan', sans-serif;
+        display: flex; align-items: center; justify-content: center;
+        color: var(--text); background: var(--bg3); transition: all 0.3s;
+    }
+    .hint-tile.revealed { background: var(--yellow); border-color: var(--yellow); color: white; animation: revealPop 0.4s ease; }
+    @keyframes revealPop { 0% { transform: scale(0.7); } 60% { transform: scale(1.15); } 100% { transform: scale(1); } }
+
+    /* Setter waiting panel */
+    .setter-panel {
+        display: none; flex-direction: column; gap: 16px; align-items: center;
+        padding: 32px; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
+    }
+    .setter-panel.show { display: flex; }
+    .setter-panel h3 { font-family: 'League Spartan', sans-serif; font-size: 1.1rem; letter-spacing: 2px; color: var(--accent); text-align: center; }
+
+    .word-input-row { display: flex; gap: 8px; justify-content: center; }
+    .word-input-tile {
+        width: 52px; height: 52px; background: var(--bg3); border: 2px solid var(--border);
+        border-radius: 4px; font-size: 22px; font-weight: 900;
+        font-family: 'League Spartan', sans-serif; color: var(--text);
+        text-align: center; text-transform: uppercase; outline: none;
+        transition: border-color 0.2s; caret-color: transparent;
+    }
+    .word-input-tile:focus { border-color: var(--accent); }
+    .word-input-tile.filled { border-color: #565758; }
+
+    /* Guessing board */
+    .guesser-panel { display: none; flex-direction: column; gap: 12px; }
+    .guesser-panel.show { display: flex; }
+
+    .board-wrapper { display: flex; flex-direction: column; gap: 5px; align-items: center; }
+    .board-row { display: flex; gap: 5px; }
+    .tile {
+        width: 52px; height: 52px; border: 2px solid var(--border);
+        border-radius: 4px; font-size: 22px; font-weight: 900;
+        font-family: 'League Spartan', sans-serif;
+        display: flex; align-items: center; justify-content: center; text-transform: uppercase;
+        transition: background 0.2s, border-color 0.2s;
+    }
+    .tile.filled  { border-color: #565758; }
+    .tile.correct { background: var(--green);  border-color: var(--green);  color: white; }
+    .tile.present { background: var(--yellow); border-color: var(--yellow); color: white; }
+    .tile.absent  { background: var(--grey);   border-color: var(--grey);   color: white; }
+    .tile.active  { border-color: var(--accent); }
+
+    /* Player status bar (who solved, who failed) */
+    .players-status {
+        display: flex; flex-wrap: wrap; gap: 8px;
+        padding: 10px 14px; background: var(--bg2);
+        border: 1px solid var(--border); border-radius: 8px;
+    }
+    .player-status-chip {
+        display: flex; align-items: center; gap: 5px;
+        font-family: 'DM Mono', monospace; font-size: 11px;
+        padding: 4px 10px; border-radius: 20px;
+        border: 1px solid var(--border); color: var(--muted); background: var(--bg3);
+        transition: all 0.3s;
+    }
+    .player-status-chip.solved  { border-color: var(--green);  color: var(--green); background: rgba(83,141,78,0.12); }
+    .player-status-chip.failed  { border-color: var(--red);    color: var(--red);   background: rgba(192,57,43,0.1); }
+    .player-status-chip.setter  { border-color: var(--accent); color: var(--accent); }
+    .player-status-chip.guessing { animation: guessingPulse 2s ease infinite; }
+    @keyframes guessingPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+    /* Keyboard */
+    .keyboard { display: flex; flex-direction: column; gap: 7px; width: 100%; max-width: 480px; margin: 0 auto; user-select: none; }
+    .kb-row   { display: flex; justify-content: center; gap: 5px; }
+    .kb-key {
+        height: 54px; min-width: 38px; flex: 1; max-width: 40px;
+        border: none; border-radius: 4px; background: #818384; color: white;
+        font-family: 'League Spartan', sans-serif; font-size: 12px; font-weight: 700;
+        cursor: pointer; display: flex; align-items: center; justify-content: center;
+        transition: background 0.2s, transform 0.1s; touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+    }
+    .kb-key:active  { transform: scale(0.93); }
+    .kb-wide        { min-width: 58px; max-width: 58px; font-size: 10px; }
+    .kb-key.correct { background: var(--green); }
+    .kb-key.present { background: var(--yellow); }
+    .kb-key.absent  { background: #3a3a3c; }
+    .kb-key:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* Round results overlay */
+    .overlay {
+        display: none; position: fixed; inset: 0;
+        background: rgba(0,0,0,0.8); z-index: 300;
+        align-items: center; justify-content: center; padding: 20px;
+    }
+    .overlay.show { display: flex; }
+    .result-card {
+        background: var(--bg2); border: 1px solid var(--border);
+        border-radius: 12px; padding: 32px 28px;
+        max-width: 420px; width: 100%; display: flex; flex-direction: column; gap: 16px;
+        max-height: 90vh; overflow-y: auto;
+    }
+    .result-card h2 {
+        font-family: 'League Spartan', sans-serif; font-size: 1.3rem;
+        font-weight: 900; letter-spacing: 2px; text-align: center;
+    }
+    .word-reveal {
+        font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); text-align: center;
+    }
+    .word-reveal span {
+        font-family: 'League Spartan', sans-serif; font-size: 22px; font-weight: 900;
+        color: var(--accent); letter-spacing: 6px; display: block; margin-top: 4px;
+    }
+    .result-list { display: flex; flex-direction: column; gap: 8px; }
+    .result-row {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 10px 14px; background: var(--bg3); border-radius: 6px;
+        border: 1px solid var(--border);
+    }
+    .result-row-name { font-size: 14px; color: var(--text); }
+    .result-row-pts {
+        font-family: 'League Spartan', sans-serif; font-weight: 900;
+        font-size: 16px; color: var(--accent);
+    }
+    .result-row-pts.zero { color: var(--muted); }
+
+    /* ── RIGHT COLUMN ── */
+    .game-right { display: flex; flex-direction: column; gap: 12px; position: sticky; top: 16px; }
+
+    /* Scoreboard */
+    .scoreboard {
+        background: var(--bg2); border: 1px solid var(--border);
+        border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 10px;
+    }
+    .scoreboard-title {
+        font-family: 'League Spartan', sans-serif; font-size: 11px;
+        letter-spacing: 2px; text-transform: uppercase; color: var(--accent);
+    }
+    .score-row {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 7px 10px; background: var(--bg3); border-radius: 5px;
+        border: 1px solid var(--border); transition: background 0.3s;
+    }
+    .score-row.leader { border-color: var(--accent); background: rgba(200,185,122,0.08); }
+    .score-name { font-size: 13px; color: var(--text); }
+    .score-pts  { font-family: 'League Spartan', sans-serif; font-size: 15px; font-weight: 900; color: var(--accent); }
+
+    /* Chat */
+    .chat-panel {
+        background: var(--bg2); border: 1px solid var(--border);
+        border-radius: 8px; display: flex; flex-direction: column; overflow: hidden;
+        height: 380px;
+    }
+    .chat-header {
+        padding: 10px 14px; border-bottom: 1px solid var(--border);
+        font-family: 'League Spartan', sans-serif; font-size: 11px;
+        letter-spacing: 2px; text-transform: uppercase; color: var(--accent);
+        flex-shrink: 0;
+    }
+    .chat-messages {
+        flex: 1; overflow-y: auto; padding: 10px 12px;
+        display: flex; flex-direction: column; gap: 6px;
+    }
+    .chat-msg { font-size: 12px; line-height: 1.5; }
+    .chat-msg-name { font-weight: 700; color: var(--accent); margin-right: 4px; }
+    .chat-msg.system { color: var(--muted); font-style: italic; font-family: 'DM Mono', monospace; font-size: 11px; }
+    .chat-input-row {
+        display: flex; gap: 8px; padding: 10px 12px;
+        border-top: 1px solid var(--border); flex-shrink: 0;
+    }
+    .chat-input {
+        flex: 1; background: var(--bg3); border: 1px solid var(--border);
+        border-radius: 4px; color: var(--text); font-family: 'DM Sans', sans-serif;
+        font-size: 13px; padding: 8px 12px; outline: none;
+    }
+    .chat-input:focus { border-color: var(--accent); }
+    .chat-send {
+        padding: 8px 14px; border-radius: 4px; border: none;
+        background: var(--accent); color: #121213;
+        font-family: 'League Spartan', sans-serif; font-size: 11px; font-weight: 700;
+        cursor: pointer; letter-spacing: 1px; transition: opacity 0.2s;
+        white-space: nowrap;
+    }
+    .chat-send:hover { opacity: 0.85; }
+
+    /* Toast */
+    .toast {
+        position: fixed; top: 80px; left: 50%;
+        transform: translateX(-50%) translateY(-10px);
+        background: var(--text); color: var(--bg);
+        padding: 10px 20px; border-radius: 6px;
+        font-family: 'League Spartan', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 1px;
+        opacity: 0; transition: opacity 0.2s, transform 0.2s;
+        z-index: 999; pointer-events: none; max-width: 320px; text-align: center;
+    }
+    .toast.show  { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { background: var(--red); color: white; }
+
+    .error-msg { color: #e74c3c; font-size: 12px; font-family: 'DM Mono', monospace; text-align: center; min-height: 16px; }
+
+    @keyframes shake {
+        0%,100% { transform: translateX(0); } 20% { transform: translateX(-6px); }
+        40% { transform: translateX(6px); }   60% { transform: translateX(-4px); }
+        80% { transform: translateX(4px); }
+    }
+
+    @media (max-width: 768px) {
+        #screen-game.active { grid-template-columns: 1fr; }
+        .game-right { position: static; }
+        .chat-panel { height: 280px; }
+        .tile { width: 44px; height: 44px; font-size: 18px; }
+        .kb-key { height: 46px; min-width: 30px; max-width: 33px; font-size: 11px; }
+        .kb-wide { min-width: 52px; max-width: 52px; }
+    }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <h1>WORDLE PARTY</h1>
+        <span class="header-sub">multiplayer · chat · letter reveals</span>
+    </div>
+    <div class="nav-links">
+        <a href="index.html"     class="nav-link">Solo</a>
+        <a href="duel.html"      class="nav-link">Duel</a>
+        <a href="challenge.html" class="nav-link">Challenge</a>
+    </div>
+</header>
+
+<div class="toast" id="toast"></div>
+
+<!-- ── HOME ── -->
+<div class="screen screen-centered active" id="screen-home">
+    <div class="card">
+        <h2>Create a Party Room</h2>
+        <p>Set the word length, timer, and how often letters get revealed. You'll be the host.</p>
+        <input type="text" id="hostName" placeholder="Your name" maxlength="16" />
+        <div class="form-row">
+            <div class="form-group">
+                <span class="form-label">Word Length</span>
+                <select id="wordLength">
+                    <option value="5" selected>5 letters</option>
+                    <option value="4">4 letters</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <span class="form-label">Round Timer</span>
+                <select id="timerSeconds">
+                    <option value="60">60 seconds</option>
+                    <option value="90" selected>90 seconds</option>
+                    <option value="120">120 seconds</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <span class="form-label">Reveal a letter every</span>
+            <select id="revealInterval">
+                <option value="10">10 seconds</option>
+                <option value="15" selected>15 seconds</option>
+                <option value="20">20 seconds</option>
+            </select>
+        </div>
+        <p class="error-msg" id="createRoomError"></p>
+        <button class="btn btn-accent" onclick="createRoom()">Create Room</button>
+    </div>
+
+    <div class="divider">or</div>
+
+    <div class="card">
+        <h2>Join a Room</h2>
+        <input type="text" id="joinName" placeholder="Your name" maxlength="16" />
+        <input type="text" id="joinCode" placeholder="Room code (e.g. XK92)" maxlength="4"
+               style="text-transform:uppercase;letter-spacing:4px;font-family:'DM Mono',monospace;font-size:18px;" />
+        <p class="error-msg" id="joinRoomError"></p>
+        <button class="btn btn-green" onclick="joinRoom()">Join Room</button>
+    </div>
+</div>
+
+<!-- ── LOBBY ── -->
+<div class="screen screen-centered" id="screen-lobby">
+    <p style="color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;">Share this code with friends</p>
+    <div class="room-code-display" id="lobbyCode">----</div>
+    <button class="btn btn-ghost" style="width:auto;padding:6px 20px;font-size:12px;" onclick="copyRoomCode()">Copy Code</button>
+
+    <div class="card">
+        <h2>Players <span id="playerCount" style="color:var(--muted);font-weight:400;font-size:0.85rem;"></span></h2>
+        <div class="player-list" id="playerList"></div>
+        <p style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;" id="lobbySettings"></p>
+        <p class="error-msg" id="lobbyError"></p>
+        <button class="btn btn-accent" id="startBtn" style="display:none;" onclick="startGame()">Start Game</button>
+        <p style="font-size:12px;color:var(--muted);text-align:center;" id="waitingForHost">Waiting for host to start...</p>
+    </div>
+    <button class="btn btn-ghost" style="max-width:200px;" onclick="leaveRoom()">Leave Room</button>
+</div>
+
+<!-- ── GAME ── -->
+<div class="screen" id="screen-game">
+
+    <!-- LEFT: game area -->
+    <div class="game-left">
+
+        <!-- Round bar -->
+        <div class="round-bar">
+            <span class="round-label">Round <span id="roundNum">1</span> / <span id="totalRounds">?</span></span>
+            <div class="timer" id="timerDisplay">--</div>
+            <span class="round-label" id="roundRole">—</span>
+        </div>
+
+        <!-- Hint bar -->
+        <div class="hint-bar" id="hintBar">
+            <span class="hint-label">HINTS</span>
+            <div class="hint-tiles" id="hintTiles"></div>
+        </div>
+
+        <!-- Player status chips -->
+        <div class="players-status" id="playersStatus"></div>
+
+        <!-- Setter: pick a word -->
+        <div class="setter-panel" id="setterPanel">
+            <h3>YOU'RE THE SETTER</h3>
+            <p style="color:var(--muted);font-size:13px;text-align:center;">Pick a <span id="wordLenLabel">5</span>-letter word. Others will try to guess it.</p>
+            <div class="word-input-row" id="setterInputRow"></div>
+            <p class="error-msg" id="setterError"></p>
+            <button class="btn btn-accent" style="max-width:260px;" onclick="submitWord()">Set Word</button>
+            <div class="keyboard" id="setterKeyboard"></div>
+        </div>
+
+        <!-- Guesser: your board -->
+        <div class="guesser-panel" id="guesserPanel">
+            <div class="board-wrapper" id="boardWrapper"></div>
+            <div class="keyboard" id="guesserKeyboard"></div>
+        </div>
+
+    </div>
+
+    <!-- RIGHT: scoreboard + chat -->
+    <div class="game-right">
+
+        <div class="scoreboard">
+            <div class="scoreboard-title">Scoreboard</div>
+            <div id="scoreList"></div>
+        </div>
+
+        <div class="chat-panel">
+            <div class="chat-header">💬 Chat</div>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input-row">
+                <input class="chat-input" id="chatInput" placeholder="Say something..." maxlength="200"
+                       onkeydown="if(event.key==='Enter') sendChat()" />
+                <button class="chat-send" onclick="sendChat()">Send</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ── ROUND RESULTS OVERLAY ── -->
+<div class="overlay" id="overlay">
+    <div class="result-card">
+        <h2 id="roundResultTitle">ROUND OVER</h2>
+        <div class="word-reveal">The word was<span id="revealedWord">—</span></div>
+        <div class="result-list" id="roundResultList"></div>
+        <div id="overlayActions" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+            <button class="btn btn-accent" id="nextRoundBtn" onclick="dismissOverlay()">Next Round →</button>
+            <button class="btn btn-ghost"  onclick="leaveRoom()">Leave Room</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────
+// CONFIG — update to your deployed party server URL
+// ─────────────────────────────────────────────────────
+const SERVER_URL = 'https://web-production-a12a9.up.railway.app';
+
+if (typeof io === 'undefined') {
+    document.body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:12px;font-family:monospace;color:#e8e6e0;padding:20px;text-align:center;">
+        <div style="font-size:2rem;">⚠️</div><div>Failed to load Socket.io</div>
+        <div style="color:#818384;font-size:12px;">Check your connection or disable ad blockers.</div>
+        <a href="index.html" style="color:#c8b97a;margin-top:8px;">← Back</a></div>`;
+    throw new Error('Socket.io not loaded');
+}
+
+const socket = io(SERVER_URL, { autoConnect: false });
+
+// ── State ─────────────────────────────────────────────
+let myId          = null;
+let myName        = '';
+let roomCode      = '';
+let isHost        = false;
+let isSetter      = false;
+let wordLength    = 5;
+let maxGuesses    = 6;
+let currentRow    = 0;
+let currentCol    = 0;
+let gameOver      = false;
+let isSubmitting  = false;
+let tiles         = [];
+let setterInputs  = [];
+let hintsData     = [];
+
+const KB_ROWS = [
+    ['Q','W','E','R','T','Y','U','I','O','P'],
+    ['A','S','D','F','G','H','J','K','L'],
+    ['ENTER','Z','X','C','V','B','N','M','⌫']
+];
+
+// ── Helpers ───────────────────────────────────────────
+let toastTimer;
+function showToast(msg, isError = false, dur = 2500) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.toggle('error', isError);
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show','error'), dur);
+}
+
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+function copyRoomCode() {
+    navigator.clipboard.writeText(roomCode)
+        .then(() => showToast('Code copied!'))
+        .catch(() => showToast(roomCode));
+}
+
+// ── Home: create/join ─────────────────────────────────
+function createRoom() {
+    myName = document.getElementById('hostName').value.trim();
+    const wl = parseInt(document.getElementById('wordLength').value);
+    const ts = parseInt(document.getElementById('timerSeconds').value);
+    const ri = parseInt(document.getElementById('revealInterval').value);
+    document.getElementById('createRoomError').textContent = '';
+    if (!myName) { showToast('Enter your name', true); return; }
+    socket.connect();
+    socket.emit('party_create', { playerName: myName, wordLength: wl, timerSeconds: ts, revealInterval: ri });
+}
+
+function joinRoom() {
+    myName = document.getElementById('joinName').value.trim();
+    const code = document.getElementById('joinCode').value.trim().toUpperCase();
+    document.getElementById('joinRoomError').textContent = '';
+    if (!myName) { showToast('Enter your name', true); return; }
+    if (code.length !== 4) { showToast('Enter a 4-letter room code', true); return; }
+    socket.connect();
+    socket.emit('party_join', { roomCode: code, playerName: myName });
+}
+
+function startGame() {
+    socket.emit('party_start');
+}
+
+function leaveRoom() {
+    socket.disconnect();
+    showScreen('screen-home');
+    document.getElementById('overlay').classList.remove('show');
+}
+
+// ── Lobby state ───────────────────────────────────────
+function renderLobby(data) {
+    roomCode = data.code;
+    isHost   = data.hostId === myId;
+    document.getElementById('lobbyCode').textContent = data.code;
+    document.getElementById('playerCount').textContent = `(${data.players.length}/8)`;
+
+    const list = document.getElementById('playerList');
+    list.innerHTML = '';
+    data.players.forEach(p => {
+        const row = document.createElement('div');
+        row.className = 'player-row';
+        row.innerHTML = `<span class="player-row-name">${p.name}${p.id === myId ? ' (you)' : ''}</span>
+            <span class="player-badge ${p.id === data.hostId ? '' : 'guesser'}">${p.id === data.hostId ? 'HOST' : 'PLAYER'}</span>`;
+        list.appendChild(row);
+    });
+
+    const s = data.settings;
+    document.getElementById('lobbySettings').textContent =
+        `${s.wordLength}-letter words · ${s.timerSeconds}s timer · reveal every ${s.revealInterval}s`;
+
+    document.getElementById('startBtn').style.display    = isHost ? 'block' : 'none';
+    document.getElementById('waitingForHost').style.display = isHost ? 'none' : 'block';
+    document.getElementById('lobbyError').textContent = '';
+}
+
+// ── Round start ───────────────────────────────────────
+function onRoundStart(data) {
+    document.getElementById('overlay').classList.remove('show');
+    wordLength = data.wordLength;
+    maxGuesses = 6;
+    isSetter   = data.setterId === myId;
+
+    // Update round bar
+    document.getElementById('roundNum').textContent    = data.roundNumber;
+    document.getElementById('totalRounds').textContent = data.totalRounds;
+    document.getElementById('roundRole').textContent   = isSetter ? '👑 You\'re the Setter' : `👑 ${data.setterName} is setting`;
+    document.getElementById('timerDisplay').textContent = '--';
+    document.getElementById('timerDisplay').classList.remove('urgent');
+
+    // Reset hints
+    hintsData = [];
+    buildHintBar();
+
+    // Player status chips
+    buildPlayerStatus(data);
+
+    // Scoreboard
+    renderScoreboard(data.scores);
+
+    showScreen('screen-game');
+
+    if (isSetter) {
+        showSetterPanel(data.wordLength);
+    } else {
+        showGuesserPanel();
+    }
+
+    addChatSystem(`Round ${data.roundNumber}: ${data.setterName} is picking a word...`);
+}
+
+// ── Setter panel ──────────────────────────────────────
+function showSetterPanel(wl) {
+    document.getElementById('setterPanel').classList.add('show');
+    document.getElementById('guesserPanel').classList.remove('show');
+    document.getElementById('wordLenLabel').textContent = wl;
+
+    const row = document.getElementById('setterInputRow');
+    row.innerHTML = '';
+    setterInputs = [];
+
+    for (let i = 0; i < wl; i++) {
+        const inp = document.createElement('input');
+        inp.className = 'word-input-tile';
+        inp.maxLength = 1;
+        inp.id = 'si' + i;
+        inp.addEventListener('input', (e) => {
+            const val = e.target.value.replace(/[^a-zA-Z]/g,'').toUpperCase();
+            inp.value = val ? val[val.length-1] : '';
+            inp.classList.toggle('filled', !!inp.value);
+            if (inp.value && i < wl - 1) setterInputs[i+1].focus();
+            document.getElementById('setterError').textContent = '';
+        });
+        inp.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && !inp.value && i > 0) {
+                setterInputs[i-1].focus();
+                setterInputs[i-1].value = '';
+                setterInputs[i-1].classList.remove('filled');
+            }
+            if (e.key === 'Enter') submitWord();
+        });
+        inp.addEventListener('focus', () => inp.select());
+        row.appendChild(inp);
+        setterInputs.push(inp);
+    }
+
+    buildSetterKeyboard(wl);
+    setTimeout(() => setterInputs[0]?.focus(), 50);
+}
+
+function buildSetterKeyboard(wl) {
+    const kb = document.getElementById('setterKeyboard');
+    kb.innerHTML = '';
+    KB_ROWS.forEach(row => {
+        const rowEl = document.createElement('div');
+        rowEl.className = 'kb-row';
+        row.forEach(key => {
+            const btn = document.createElement('button');
+            btn.className   = 'kb-key' + (key === 'ENTER' || key === '⌫' ? ' kb-wide' : '');
+            btn.textContent = key;
+            btn.addEventListener('click', () => handleSetterKey(key, wl));
+            rowEl.appendChild(btn);
+        });
+        kb.appendChild(rowEl);
+    });
+}
+
+function handleSetterKey(key, wl) {
+    const filled = setterInputs.filter(i => i.value).length;
+    if (key === '⌫') {
+        if (filled > 0) {
+            const t = setterInputs[filled-1];
+            t.value = ''; t.classList.remove('filled'); t.focus();
+        }
+    } else if (key === 'ENTER') {
+        submitWord();
+    } else if (/^[A-Z]$/.test(key) && filled < wl) {
+        const t = setterInputs[filled];
+        t.value = key; t.classList.add('filled');
+        document.getElementById('setterError').textContent = '';
+        if (filled < wl-1) setterInputs[filled+1].focus();
+    }
+}
+
+function submitWord() {
+    const word = setterInputs.map(i => i.value.toUpperCase()).join('');
+    const errEl = document.getElementById('setterError');
+    if (word.length !== wordLength) { errEl.textContent = `Enter all ${wordLength} letters.`; return; }
+    errEl.textContent = 'Checking...';
+    socket.emit('party_set_word', { word });
+}
+
+// ── Guesser panel ─────────────────────────────────────
+function showGuesserPanel() {
+    document.getElementById('setterPanel').classList.remove('show');
+    document.getElementById('guesserPanel').classList.add('show');
+    currentRow = 0; currentCol = 0; gameOver = false; isSubmitting = false;
+    buildBoard();
+    buildGuesserKeyboard();
+}
+
+function buildBoard() {
+    const wrapper = document.getElementById('boardWrapper');
+    wrapper.innerHTML = ''; tiles = [];
+    for (let r = 0; r < maxGuesses; r++) {
+        const row = document.createElement('div');
+        row.className = 'board-row';
+        const rt = [];
+        for (let c = 0; c < wordLength; c++) {
+            const tile = document.createElement('div');
+            tile.className = 'tile';
+            row.appendChild(tile); rt.push(tile);
+        }
+        wrapper.appendChild(row); tiles.push(rt);
+    }
+    tiles[0]?.forEach(t => t.classList.add('active'));
+}
+
+function buildGuesserKeyboard() {
+    const kb = document.getElementById('guesserKeyboard');
+    kb.innerHTML = '';
+    KB_ROWS.forEach(row => {
+        const rowEl = document.createElement('div');
+        rowEl.className = 'kb-row';
+        row.forEach(key => {
+            const btn = document.createElement('button');
+            btn.className   = 'kb-key' + (key === 'ENTER' || key === '⌫' ? ' kb-wide' : '');
+            btn.textContent = key;
+            btn.setAttribute('data-key', key);
+            btn.addEventListener('click', () => handleGuesserKey(key));
+            rowEl.appendChild(btn);
+        });
+        kb.appendChild(rowEl);
+    });
+}
+
+function handleGuesserKey(key) {
+    if (gameOver || isSubmitting) return;
+    if (key === '⌫')           deleteLetter();
+    else if (key === 'ENTER')  submitGuess();
+    else if (/^[A-Z]$/.test(key)) addLetter(key);
+}
+
+function addLetter(key) {
+    if (currentCol >= wordLength || gameOver) return;
+    tiles[currentRow][currentCol].textContent = key;
+    tiles[currentRow][currentCol].classList.add('filled');
+    currentCol++;
+}
+
+function deleteLetter() {
+    if (currentCol <= 0) return;
+    currentCol--;
+    tiles[currentRow][currentCol].textContent = '';
+    tiles[currentRow][currentCol].classList.remove('filled');
+}
+
+function submitGuess() {
+    if (gameOver || isSubmitting) return;
+    const guess = tiles[currentRow].map(t => t.textContent).join('');
+    if (guess.length !== wordLength) { showToast('Not enough letters', true); shakeRow(currentRow); return; }
+    isSubmitting = true;
+    setGuesserKeyboardEnabled(false);
+    socket.emit('party_guess', { guess });
+}
+
+function setGuesserKeyboardEnabled(enabled) {
+    document.querySelectorAll('#guesserKeyboard .kb-key').forEach(b => { b.disabled = !enabled; });
+}
+
+function shakeRow(row) {
+    tiles[row]?.forEach(tile => { tile.style.animation='none'; tile.offsetHeight; tile.style.animation='shake 0.4s ease'; });
+}
+
+// ── Hint bar ──────────────────────────────────────────
+function buildHintBar() {
+    const container = document.getElementById('hintTiles');
+    container.innerHTML = '';
+    for (let i = 0; i < wordLength; i++) {
+        const tile = document.createElement('div');
+        tile.className = 'hint-tile';
+        tile.id = `hint-${i}`;
+        tile.textContent = '?';
+        container.appendChild(tile);
+    }
+}
+
+function applyHints(hints) {
+    hintsData = hints;
+    hints.forEach(h => {
+        const tile = document.getElementById(`hint-${h.index}`);
+        if (tile && !tile.classList.contains('revealed')) {
+            tile.textContent = h.letter;
+            tile.classList.add('revealed');
+        }
+    });
+}
+
+// ── Player status chips ───────────────────────────────
+let playersInRoom = [];
+
+function buildPlayerStatus(data) {
+    playersInRoom = data.players || [];
+    const container = document.getElementById('playersStatus');
+    container.innerHTML = '';
+    playersInRoom.forEach(p => {
+        const chip = document.createElement('div');
+        chip.className = 'player-status-chip' + (p.id === data.setterId ? ' setter' : ' guessing');
+        chip.id = `chip-${p.id}`;
+        chip.textContent = (p.id === data.setterId ? '👑 ' : '⏳ ') + p.name;
+        container.appendChild(chip);
+    });
+}
+
+function updatePlayerChip(playerId, state, label) {
+    const chip = document.getElementById(`chip-${playerId}`);
+    if (!chip) return;
+    chip.className = `player-status-chip ${state}`;
+    chip.textContent = label;
+}
+
+// ── Scoreboard ────────────────────────────────────────
+function renderScoreboard(scores) {
+    const list = document.getElementById('scoreList');
+    list.innerHTML = '';
+    scores.forEach((s, idx) => {
+        const row = document.createElement('div');
+        row.className = 'score-row' + (idx === 0 && s.score > 0 ? ' leader' : '');
+        row.innerHTML = `<span class="score-name">${idx === 0 ? '🏆 ' : ''}${s.name}${s.playerId === myId ? ' (you)' : ''}</span>
+                         <span class="score-pts">${s.score}</span>`;
+        list.appendChild(row);
+    });
+}
+
+// ── Chat ──────────────────────────────────────────────
+function sendChat() {
+    const input = document.getElementById('chatInput');
+    const msg   = input.value.trim();
+    if (!msg) return;
+    socket.emit('party_chat', { message: msg });
+    input.value = '';
+}
+
+function addChatMsg(data) {
+    const box = document.getElementById('chatMessages');
+    const el  = document.createElement('div');
+    el.className = 'chat-msg';
+    if (data.senderName) {
+        el.innerHTML = `<span class="chat-msg-name">${data.senderName}</span>${data.message}`;
+    } else {
+        el.className += ' system';
+        el.textContent = data.message;
+    }
+    box.appendChild(el);
+    box.scrollTop = box.scrollHeight;
+}
+
+function addChatSystem(msg) {
+    addChatMsg({ senderName: null, message: msg });
+}
+
+// ── Round end overlay ─────────────────────────────────
+function showRoundEnd(data) {
+    document.getElementById('revealedWord').textContent = data.word;
+    document.getElementById('roundResultTitle').textContent =
+        data.isLastRound ? 'FINAL ROUND!' : `ROUND ${document.getElementById('roundNum').textContent} OVER`;
+
+    const list = document.getElementById('roundResultList');
+    list.innerHTML = '';
+    data.results.forEach(r => {
+        const row = document.createElement('div');
+        row.className = 'result-row';
+        const label = r.role === 'setter' ? '👑 Setter'
+            : r.solved ? `✅ Solved in ${r.guessCount}` : '❌ Did not solve';
+        row.innerHTML = `<span class="result-row-name">${r.playerName}${r.playerId === myId ? ' (you)' : ''} — ${label}</span>
+                         <span class="result-row-pts ${r.points === 0 ? 'zero' : ''}">+${r.points} pts</span>`;
+        list.appendChild(row);
+    });
+
+    renderScoreboard(data.scores);
+
+    const nextBtn = document.getElementById('nextRoundBtn');
+    nextBtn.textContent = data.isLastRound ? 'See Final Results' : 'Next Round →';
+
+    document.getElementById('overlay').classList.add('show');
+    gameOver = true;
+    setGuesserKeyboardEnabled(false);
+}
+
+function dismissOverlay() {
+    document.getElementById('overlay').classList.remove('show');
+}
+
+// ── Socket events ─────────────────────────────────────
+socket.on('connect', () => { myId = socket.id; });
+
+socket.on('party_room_created', ({ code }) => {
+    roomCode = code; isHost = true;
+    showScreen('screen-lobby');
+});
+
+socket.on('party_lobby_state', (data) => {
+    renderLobby(data);
+    if (document.getElementById('screen-lobby').classList.contains('active')) return;
+    showScreen('screen-lobby');
+});
+
+socket.on('party_round_start', onRoundStart);
+
+socket.on('party_guessing_start', ({ wordLength: wl, timerSeconds, revealInterval }) => {
+    wordLength = wl;
+    document.getElementById('setterPanel').classList.remove('show');
+    document.getElementById('setterError').textContent = '';
+    if (!isSetter) return; // guessers already have their panel
+    // Setter just waits and watches
+    document.getElementById('roundRole').textContent = '👑 You set the word — watch others guess!';
+    addChatSystem('Your word is set! Guessing phase started.');
+});
+
+socket.on('party_tick', ({ timeLeft }) => {
+    const el = document.getElementById('timerDisplay');
+    el.textContent = timeLeft;
+    el.classList.toggle('urgent', timeLeft <= 10);
+});
+
+socket.on('party_letter_reveal', ({ hints, wordLength: wl }) => {
+    wordLength = wl;
+    buildHintBar(); // rebuild in case wl changed
+    applyHints(hints);
+});
+
+socket.on('party_guess_result', ({ guess, result, guessNum, isCorrect }) => {
+    if (!tiles[currentRow]) return;
+    tiles[currentRow].forEach((tile, i) => {
+        tile.classList.remove('active','filled');
+        tile.classList.add(result[i]);
+        tile.textContent = guess[i];
+    });
+
+    // Update keyboard
+    guess.split('').forEach((letter, i) => {
+        const btn = document.querySelector(`#guesserKeyboard .kb-key[data-key="${letter}"]`);
+        if (!btn) return;
+        const priority = { correct:3, present:2, absent:1 };
+        const cur = ['correct','present','absent'].find(c => btn.classList.contains(c));
+        if (cur && priority[cur] >= priority[result[i]]) return;
+        btn.classList.remove('correct','present','absent');
+        btn.classList.add(result[i]);
+    });
+
+    currentRow++;
+    currentCol = 0;
+    isSubmitting = false;
+
+    if (isCorrect) {
+        gameOver = true;
+        setGuesserKeyboardEnabled(false);
+        showToast('🎉 You got it!', false, 3000);
+    } else if (currentRow >= maxGuesses) {
+        gameOver = true;
+        setGuesserKeyboardEnabled(false);
+        showToast('No more guesses!', true, 3000);
+    } else {
+        setGuesserKeyboardEnabled(true);
+        tiles[currentRow]?.forEach(t => t.classList.add('active'));
+    }
+});
+
+socket.on('party_invalid', ({ message }) => {
+    showToast(message, true);
+    shakeRow(currentRow);
+    isSubmitting = false;
+    setGuesserKeyboardEnabled(true);
+});
+
+socket.on('party_player_solved', ({ playerId, playerName, guessCount, points }) => {
+    updatePlayerChip(playerId, 'solved', `✅ ${playerName} (${guessCount})`);
+});
+
+socket.on('party_player_failed', ({ playerId, playerName }) => {
+    updatePlayerChip(playerId, 'failed', `❌ ${playerName}`);
+});
+
+socket.on('party_round_end', showRoundEnd);
+
+socket.on('party_game_end', ({ scores, winner }) => {
+    document.getElementById('roundResultTitle').textContent = '🏆 GAME OVER!';
+    document.getElementById('revealedWord').style.display = 'none';
+    renderScoreboard(scores);
+    const nextBtn = document.getElementById('nextRoundBtn');
+    nextBtn.textContent = 'Play Again';
+    nextBtn.onclick = () => { leaveRoom(); };
+    document.getElementById('overlay').classList.add('show');
+    addChatSystem(`🏆 ${winner.name} wins with ${winner.score} points!`);
+});
+
+socket.on('party_chat_msg', addChatMsg);
+
+socket.on('party_error', ({ message }) => {
+    showToast(message, true);
+    document.getElementById('createRoomError').textContent = message;
+    document.getElementById('joinRoomError').textContent   = message;
+    document.getElementById('lobbyError').textContent      = message;
+    socket.disconnect();
+});
+
+socket.on('party_host_assigned', () => {
+    isHost = true;
+    showToast('You are now the host!');
+    document.getElementById('startBtn').style.display    = 'block';
+    document.getElementById('waitingForHost').style.display = 'none';
+});
+
+socket.on('disconnect', () => {
+    if (document.getElementById('screen-game').classList.contains('active') ||
+        document.getElementById('screen-lobby').classList.contains('active')) {
+        showToast('Disconnected from server.', true, 4000);
+    }
+});
+
+// Physical keyboard (guesser only)
+document.addEventListener('keydown', e => {
+    const activeId = document.querySelector('.screen.active')?.id;
+    if (activeId !== 'screen-game') return;
+    if (isSetter || gameOver || isSubmitting) return;
+    const key = e.key.toUpperCase();
+    if (key === 'BACKSPACE')       { e.preventDefault(); deleteLetter(); }
+    else if (key === 'ENTER')      { e.preventDefault(); submitGuess(); }
+    else if (/^[A-Z]$/.test(key)) addLetter(key);
+});
+
+// Chat enter key
+document.getElementById('chatInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.stopPropagation(); sendChat(); }
+});
+</script>
+</body>
+</html>
