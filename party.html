@@ -535,7 +535,14 @@ if (typeof io === 'undefined') {
     throw new Error('Socket.io not loaded');
 }
 
-const socket = io(SERVER_URL, { autoConnect: false });
+const socket = io(SERVER_URL, {
+    autoConnect: false,
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 5000,
+    timeout: 20000,
+});
 
 // ── State ─────────────────────────────────────────────
 let myId          = null;
@@ -1074,6 +1081,18 @@ socket.on('party_host_assigned', () => {
     showToast('You are now the host!');
     document.getElementById('startBtn').style.display    = 'block';
     document.getElementById('waitingForHost').style.display = 'none';
+});
+
+socket.on('reconnecting', (attempt) => {
+    showToast(`Reconnecting... (${attempt}/5)`);
+});
+
+socket.on('reconnect', () => {
+    showToast('Reconnected!');
+});
+
+socket.on('reconnect_failed', () => {
+    showToast('Connection lost. Please refresh the page.', true, 8000);
 });
 
 socket.on('disconnect', () => {
