@@ -515,7 +515,7 @@
         <div class="word-reveal">The word was<span id="revealedWord">—</span></div>
         <div class="result-list" id="roundResultList"></div>
         <div id="overlayActions" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
-            <button class="btn btn-accent" id="nextRoundBtn" onclick="dismissOverlay()">Next Round →</button>
+            <button class="btn btn-accent" id="nextRoundBtn" onclick="voteNextRound()">Next Round →</button>
             <button class="btn btn-ghost"  onclick="leaveRoom()">Leave Room</button>
         </div>
     </div>
@@ -649,6 +649,10 @@ function renderLobby(data) {
 // ── Round start ───────────────────────────────────────
 function onRoundStart(data) {
     document.getElementById('overlay').classList.remove('show');
+    document.getElementById('nextRoundWaiting').classList.remove('show');
+    document.getElementById('overlayActions').style.display = 'flex';
+    const btn = document.getElementById('nextRoundBtn');
+    if (btn) { btn.textContent = 'Next Round →'; btn.style.display = ''; btn.onclick = voteNextRound; }
     wordLength = data.wordLength;
     maxGuesses = 6;
     isSetter   = data.setterId === myId;
@@ -961,6 +965,15 @@ function showRoundEnd(data) {
 
 function dismissOverlay() {
     document.getElementById('overlay').classList.remove('show');
+    document.getElementById('nextRoundWaiting').classList.remove('show');
+    document.getElementById('overlayActions').style.display = 'flex';
+}
+
+function voteNextRound() {
+    // Hide buttons, show waiting — board only clears when server confirms all ready
+    document.getElementById('overlayActions').style.display = 'none';
+    document.getElementById('nextRoundWaiting').classList.add('show');
+    socket.emit('party_next_round');
 }
 
 // ── Socket events ─────────────────────────────────────
@@ -1058,15 +1071,30 @@ socket.on('party_round_end', showRoundEnd);
 socket.on('party_game_end', ({ scores, winner }) => {
     document.getElementById('roundResultTitle').textContent = '🏆 GAME OVER!';
     document.getElementById('revealedWord').style.display = 'none';
+    document.getElementById('nextRoundWaiting').classList.remove('show');
+    document.getElementById('overlayActions').style.display = 'flex';
     renderScoreboard(scores);
     const nextBtn = document.getElementById('nextRoundBtn');
-    nextBtn.textContent = 'Play Again';
-    nextBtn.onclick = () => { leaveRoom(); };
+    nextBtn.style.display = 'none'; // hide Next Round on game over
     document.getElementById('overlay').classList.add('show');
     addChatSystem(`🏆 ${winner.name} wins with ${winner.score} points!`);
 });
 
 socket.on('party_chat_msg', addChatMsg);
+
+socket.on('party_next_round_pending', ({ voterName, votes, total }) => {
+    // Update waiting message to show progress
+    const waitEl = document.getElementById('nextRoundWaiting');
+    waitEl.textContent = `⏳ ${voterName} is ready... (${votes}/${total})`;
+    waitEl.classList.add('show');
+    // Show accept button if we haven't voted yet
+    const actions = document.getElementById('overlayActions');
+    if (actions.style.display !== 'none') {
+        // This player hasn't voted — update button text
+        const btn = document.getElementById('nextRoundBtn');
+        if (btn) btn.textContent = 'Ready! →';
+    }
+});
 
 socket.on('party_set_error', ({ message }) => {
     // Invalid word from setter — show error but don't disconnect
