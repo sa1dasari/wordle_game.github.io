@@ -490,11 +490,11 @@
 </div>
 
 <script>
-    const SERVER_URL = 'https://web-production-a12a9.up.railway.app';
+const SERVER_URL = 'https://web-production-a12a9.up.railway.app';
 
-    // Guard: if Socket.io failed to load, show a clear error rather than crashing
-    if (typeof io === 'undefined') {
-        document.body.innerHTML = `
+// Guard: if Socket.io failed to load, show a clear error rather than crashing
+if (typeof io === 'undefined') {
+    document.body.innerHTML = `
         <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
                     height:100vh;gap:16px;font-family:monospace;color:#e8e6e0;text-align:center;padding:20px;">
             <div style="font-size:2rem;">⚠️</div>
@@ -502,419 +502,454 @@
             <div style="font-size:12px;color:#818384;">Check your internet connection or disable any ad blockers, then refresh.</div>
             <a href="index.html" style="color:#c8b97a;font-size:13px;margin-top:8px;">← Back to Solo Mode</a>
         </div>`;
-        throw new Error('Socket.io failed to load');
-    }
+    throw new Error('Socket.io failed to load');
+}
 
-    const socket = io(SERVER_URL, {
-        autoConnect: false,
-        reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-        reconnectionDelayMax: 5000,
-        timeout: 20000,
+const socket = io(SERVER_URL, {
+    autoConnect: false,
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 5000,
+    timeout: 20000,
+});
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let myId        = null;
+let myName      = '';
+let roomCode    = '';
+let isMyTurn    = false;
+let currentCol  = 0;
+let players     = [];
+let guessCounts = {};
+let pendingType = null;
+let gameStarted = false; // false on very first start, true on rematch/new word
+
+const KB_ROWS = [
+    ['Q','W','E','R','T','Y','U','I','O','P'],
+    ['A','S','D','F','G','H','J','K','L'],
+    ['ENTER','Z','X','C','V','B','N','M','⌫']
+];
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+let toastTimer;
+function showToast(msg, duration = 2500, isError = false) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.toggle('error', isError);
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+        el.classList.remove('show');
+        el.classList.remove('error');
+    }, duration);
+}
+
+function copyCode() {
+    navigator.clipboard.writeText(roomCode)
+        .then(() => showToast('Code copied!'))
+        .catch(() => showToast(roomCode));
+}
+
+// ── Lobby ─────────────────────────────────────────────────────────────────────
+function createRoom() {
+    myName = document.getElementById('nameCreate').value.trim();
+    if (!myName) { showToast('Enter your name first', 2000, true); return; }
+    socket.connect();
+    socket.emit('create_room', { playerName: myName });
+}
+
+function joinRoom() {
+    myName = document.getElementById('nameJoin').value.trim();
+    const code = document.getElementById('codeInput').value.trim().toUpperCase();
+    document.getElementById('joinError').textContent = '';
+    if (!myName) { showToast('Enter your name first', 2000, true); return; }
+    if (code.length !== 4) { showToast('Enter a 4-letter room code', 2000, true); return; }
+    socket.connect();
+    socket.emit('join_room', { roomCode: code, playerName: myName });
+}
+
+function backToLobby() {
+    socket.disconnect();
+    gameStarted = false;
+    showScreen('screen-lobby');
+}
+
+// ── In-game actions ───────────────────────────────────────────────────────────
+function requestNewWord() {
+    // Just emit — don't touch the board at all.
+    // Board only clears when server confirms BOTH players agreed (game_start fires).
+    // Show a subtle toast so the requester knows their vote was sent.
+    showToast('New word requested — waiting for opponent to accept...');
+    socket.emit('new_word');
+}
+
+function exitRoom() {
+    socket.emit('exit_room');
+    socket.disconnect();
+    hidePendingBanner();
+    gameStarted = false;
+    document.getElementById('overlay').classList.remove('show');
+    document.getElementById('boardWrapper').innerHTML = '';
+    guessCounts = {};
+    showScreen('screen-lobby');
+}
+
+// ── Rematch / new word voting ─────────────────────────────────────────────────
+function voteRematch() {
+    // Hide buttons, show waiting — but don't clear board yet.
+    // Board clears only when server confirms both agreed via game_start.
+    document.getElementById('resultBtns').style.display = 'none';
+    document.getElementById('rematchWaiting').classList.add('show');
+    socket.emit('rematch');
+}
+
+function voteNewWord() {
+    document.getElementById('resultBtns').style.display = 'none';
+    document.getElementById('rematchWaiting').classList.add('show');
+    socket.emit('new_word');
+}
+
+function showPendingBanner(type, voterName) {
+    pendingType = type;
+    const label = type === 'rematch' ? 'rematch' : 'a new word';
+    document.getElementById('pendingMsg').innerHTML =
+        `<span>${voterName}</span> wants ${label}!`;
+    document.getElementById('pendingBanner').classList.add('show');
+}
+
+function hidePendingBanner() {
+    document.getElementById('pendingBanner').classList.remove('show');
+    pendingType = null;
+}
+
+function acceptPending() {
+    hidePendingBanner();
+    if (pendingType === 'rematch')   socket.emit('rematch');
+    else if (pendingType === 'new_word') socket.emit('new_word');
+}
+
+// ── Board ─────────────────────────────────────────────────────────────────────
+function appendGuessRow(entry) {
+    const wrapper = document.getElementById('boardWrapper');
+    const row     = document.createElement('div');
+    row.className = 'guess-row';
+
+    const isMe    = entry.playerId === myId;
+    const ownerEl = document.createElement('span');
+    ownerEl.className   = 'guess-owner' + (isMe ? ' me' : '');
+    ownerEl.textContent = isMe ? 'you' : entry.playerName;
+    row.appendChild(ownerEl);
+
+    const tilesEl = document.createElement('div');
+    tilesEl.className = 'guess-tiles';
+    entry.guess.split('').forEach((letter, i) => {
+        const tile = document.createElement('div');
+        tile.className   = `tile ${entry.result[i]}`;
+        tile.textContent = letter;
+        tilesEl.appendChild(tile);
     });
+    row.appendChild(tilesEl);
+    wrapper.appendChild(row);
+    wrapper.scrollTop = wrapper.scrollHeight;
+}
 
-    // ── State ─────────────────────────────────────────────────────────────────────
-    let myId        = null;
-    let myName      = '';
-    let roomCode    = '';
-    let isMyTurn    = false;
-    let currentCol  = 0;
-    let players     = [];
-    let guessCounts = {};
-    let pendingType = null;
-    let gameStarted = false; // false on very first start, true on rematch/new word
-
-    const KB_ROWS = [
-        ['Q','W','E','R','T','Y','U','I','O','P'],
-        ['A','S','D','F','G','H','J','K','L'],
-        ['ENTER','Z','X','C','V','B','N','M','⌫']
-    ];
-
-    // ── Helpers ───────────────────────────────────────────────────────────────────
-    function showScreen(id) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-    }
-
-    let toastTimer;
-    function showToast(msg, duration = 2500, isError = false) {
-        const el = document.getElementById('toast');
-        el.textContent = msg;
-        el.classList.toggle('error', isError);
-        el.classList.add('show');
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => {
-            el.classList.remove('show');
-            el.classList.remove('error');
-        }, duration);
-    }
-
-    function copyCode() {
-        navigator.clipboard.writeText(roomCode)
-            .then(() => showToast('Code copied!'))
-            .catch(() => showToast(roomCode));
-    }
-
-    // ── Lobby ─────────────────────────────────────────────────────────────────────
-    function createRoom() {
-        myName = document.getElementById('nameCreate').value.trim();
-        if (!myName) { showToast('Enter your name first', 2000, true); return; }
-        socket.connect();
-        socket.emit('create_room', { playerName: myName });
-    }
-
-    function joinRoom() {
-        myName = document.getElementById('nameJoin').value.trim();
-        const code = document.getElementById('codeInput').value.trim().toUpperCase();
-        document.getElementById('joinError').textContent = '';
-        if (!myName) { showToast('Enter your name first', 2000, true); return; }
-        if (code.length !== 4) { showToast('Enter a 4-letter room code', 2000, true); return; }
-        socket.connect();
-        socket.emit('join_room', { roomCode: code, playerName: myName });
-    }
-
-    function backToLobby() {
-        socket.disconnect();
-        gameStarted = false;
-        showScreen('screen-lobby');
-    }
-
-    // ── In-game actions ───────────────────────────────────────────────────────────
-    function requestNewWord() {
-        // Just emit — don't touch the board at all.
-        // Board only clears when server confirms BOTH players agreed (game_start fires).
-        // Show a subtle toast so the requester knows their vote was sent.
-        showToast('New word requested — waiting for opponent to accept...');
-        socket.emit('new_word');
-    }
-
-    function exitRoom() {
-        socket.emit('exit_room');
-        socket.disconnect();
-        hidePendingBanner();
-        gameStarted = false;
-        document.getElementById('overlay').classList.remove('show');
-        document.getElementById('boardWrapper').innerHTML = '';
-        guessCounts = {};
-        showScreen('screen-lobby');
-    }
-
-    // ── Rematch / new word voting ─────────────────────────────────────────────────
-    function voteRematch() {
-        // Hide buttons, show waiting — but don't clear board yet.
-        // Board clears only when server confirms both agreed via game_start.
-        document.getElementById('resultBtns').style.display = 'none';
-        document.getElementById('rematchWaiting').classList.add('show');
-        socket.emit('rematch');
-    }
-
-    function voteNewWord() {
-        document.getElementById('resultBtns').style.display = 'none';
-        document.getElementById('rematchWaiting').classList.add('show');
-        socket.emit('new_word');
-    }
-
-    function showPendingBanner(type, voterName) {
-        pendingType = type;
-        const label = type === 'rematch' ? 'rematch' : 'a new word';
-        document.getElementById('pendingMsg').innerHTML =
-            `<span>${voterName}</span> wants ${label}!`;
-        document.getElementById('pendingBanner').classList.add('show');
-    }
-
-    function hidePendingBanner() {
-        document.getElementById('pendingBanner').classList.remove('show');
-        pendingType = null;
-    }
-
-    function acceptPending() {
-        hidePendingBanner();
-        if (pendingType === 'rematch')   socket.emit('rematch');
-        else if (pendingType === 'new_word') socket.emit('new_word');
-    }
-
-    // ── Board ─────────────────────────────────────────────────────────────────────
-    function appendGuessRow(entry) {
-        const wrapper = document.getElementById('boardWrapper');
-        const row     = document.createElement('div');
-        row.className = 'guess-row';
-
-        const isMe    = entry.playerId === myId;
-        const ownerEl = document.createElement('span');
-        ownerEl.className   = 'guess-owner' + (isMe ? ' me' : '');
-        ownerEl.textContent = isMe ? 'you' : entry.playerName;
-        row.appendChild(ownerEl);
-
-        const tilesEl = document.createElement('div');
-        tilesEl.className = 'guess-tiles';
-        entry.guess.split('').forEach((letter, i) => {
-            const tile = document.createElement('div');
-            tile.className   = `tile ${entry.result[i]}`;
-            tile.textContent = letter;
-            tilesEl.appendChild(tile);
-        });
-        row.appendChild(tilesEl);
-        wrapper.appendChild(row);
-        wrapper.scrollTop = wrapper.scrollHeight;
-    }
-
-    // ── Input ─────────────────────────────────────────────────────────────────────
-    function clearInputTiles() {
-        currentCol = 0;
-        for (let i = 0; i < 5; i++) {
-            const t = document.getElementById('t' + i);
-            t.textContent = '';
-            t.className   = 'tile';
-        }
-    }
-
-    function addLetter(key) {
-        if (currentCol >= 5 || !isMyTurn) return;
-        const t = document.getElementById('t' + currentCol);
-        t.textContent = key;
-        t.className   = 'tile filled';
-        currentCol++;
-        emitTyping(true);
-    }
-
-    function deleteLetter() {
-        if (currentCol <= 0 || !isMyTurn) return;
-        currentCol--;
-        const t = document.getElementById('t' + currentCol);
+// ── Input ─────────────────────────────────────────────────────────────────────
+function clearInputTiles() {
+    currentCol = 0;
+    for (let i = 0; i < 5; i++) {
+        const t = document.getElementById('t' + i);
         t.textContent = '';
         t.className   = 'tile';
-        // Stop dots if player cleared everything back to empty
-        if (currentCol === 0) emitTyping(false);
     }
+}
 
-    // Throttle typing emits — no need to fire on every single keystroke
-    let typingEmitTimer = null;
-    function emitTyping(isTyping) {
-        clearTimeout(typingEmitTimer);
-        if (isTyping) {
-            socket.emit('typing', { isTyping: true });
-            // Auto-clear after 3s in case submit/clear events are missed
-            typingEmitTimer = setTimeout(() => {
-                socket.emit('typing', { isTyping: false });
-            }, 3000);
-        } else {
+function addLetter(key) {
+    if (currentCol >= 5 || !isMyTurn) return;
+    const t = document.getElementById('t' + currentCol);
+    t.textContent = key;
+    t.className   = 'tile filled';
+    currentCol++;
+    emitTyping(true);
+}
+
+function deleteLetter() {
+    if (currentCol <= 0 || !isMyTurn) return;
+    currentCol--;
+    const t = document.getElementById('t' + currentCol);
+    t.textContent = '';
+    t.className   = 'tile';
+    // Stop dots if player cleared everything back to empty
+    if (currentCol === 0) emitTyping(false);
+}
+
+// Throttle typing emits — no need to fire on every single keystroke
+let typingEmitTimer = null;
+function emitTyping(isTyping) {
+    clearTimeout(typingEmitTimer);
+    if (isTyping) {
+        socket.emit('typing', { isTyping: true });
+        // Auto-clear after 3s in case submit/clear events are missed
+        typingEmitTimer = setTimeout(() => {
             socket.emit('typing', { isTyping: false });
-        }
+        }, 3000);
+    } else {
+        socket.emit('typing', { isTyping: false });
     }
+}
 
-    function hideTypingDots() {
-        document.getElementById('typingDots').classList.remove('show');
-    }
+function hideTypingDots() {
+    document.getElementById('typingDots').classList.remove('show');
+}
 
-    function submitGuess() {
-        if (!isMyTurn) return;
-        let word = '';
-        for (let i = 0; i < 5; i++) word += document.getElementById('t' + i).textContent;
-        if (word.length !== 5) { showToast('Not enough letters', 2000, true); return; }
-        emitTyping(false); // stop dots on opponent's screen
-        // Disable keyboard while server validates to prevent double-submit
-        setKeyboardEnabled(false);
-        socket.emit('submit_guess', { guess: word });
-    }
+function submitGuess() {
+    if (!isMyTurn) return;
+    let word = '';
+    for (let i = 0; i < 5; i++) word += document.getElementById('t' + i).textContent;
+    if (word.length !== 5) { showToast('Not enough letters', 2000, true); return; }
+    emitTyping(false); // stop dots on opponent's screen
+    // Disable keyboard while server validates to prevent double-submit
+    setKeyboardEnabled(false);
+    socket.emit('submit_guess', { guess: word });
+}
 
-    // ── Keyboard ──────────────────────────────────────────────────────────────────
-    function buildKeyboard() {
-        const kb = document.getElementById('keyboard');
-        kb.innerHTML = '';
-        KB_ROWS.forEach(row => {
-            const rowEl = document.createElement('div');
-            rowEl.className = 'kb-row';
-            row.forEach(key => {
-                const btn = document.createElement('button');
-                btn.className   = 'kb-key' + (key === 'ENTER' || key === '⌫' ? ' kb-wide' : '');
-                btn.textContent = key;
-                btn.setAttribute('data-key', key);
-                btn.addEventListener('click', () => {
-                    if (!isMyTurn) return;
-                    if (key === '⌫')          deleteLetter();
-                    else if (key === 'ENTER') submitGuess();
-                    else                      addLetter(key);
-                });
-                rowEl.appendChild(btn);
+// ── Keyboard ──────────────────────────────────────────────────────────────────
+function buildKeyboard() {
+    const kb = document.getElementById('keyboard');
+    kb.innerHTML = '';
+    KB_ROWS.forEach(row => {
+        const rowEl = document.createElement('div');
+        rowEl.className = 'kb-row';
+        row.forEach(key => {
+            const btn = document.createElement('button');
+            btn.className   = 'kb-key' + (key === 'ENTER' || key === '⌫' ? ' kb-wide' : '');
+            btn.textContent = key;
+            btn.setAttribute('data-key', key);
+            btn.addEventListener('click', () => {
+                if (!isMyTurn) return;
+                if (key === '⌫')          deleteLetter();
+                else if (key === 'ENTER') submitGuess();
+                else                      addLetter(key);
             });
-            kb.appendChild(rowEl);
+            rowEl.appendChild(btn);
         });
+        kb.appendChild(rowEl);
+    });
+}
+
+function resetKeyboard() {
+    document.querySelectorAll('.kb-key').forEach(btn => {
+        btn.classList.remove('correct','present','absent');
+    });
+}
+
+function updateKeyboard(guess, result) {
+    guess.split('').forEach((letter, i) => {
+        const btn = document.querySelector(`.kb-key[data-key="${letter}"]`);
+        if (!btn) return;
+        const priority = { correct: 3, present: 2, absent: 1 };
+        const cur = ['correct','present','absent'].find(c => btn.classList.contains(c));
+        if (cur && priority[cur] >= priority[result[i]]) return;
+        btn.classList.remove('correct','present','absent');
+        btn.classList.add(result[i]);
+    });
+}
+
+function setKeyboardEnabled(enabled) {
+    document.querySelectorAll('.kb-key').forEach(btn => { btn.disabled = !enabled; });
+}
+
+// ── Turn UI ───────────────────────────────────────────────────────────────────
+function setTurnUI(currentTurnId) {
+    isMyTurn = currentTurnId === myId;
+    const indicator = document.getElementById('turnIndicator');
+
+    if (isMyTurn) {
+        indicator.textContent = 'Your Turn';
+        indicator.className   = 'turn-indicator your-turn';
+        document.getElementById('inputRow').style.opacity = '1';
+        setKeyboardEnabled(true);
+        hideTypingDots(); // opponent finished their turn
+    } else {
+        const opp = players.find(p => p.id !== myId);
+        indicator.textContent = opp ? `${opp.name}'s Turn` : "Opponent's Turn";
+        indicator.className   = 'turn-indicator';
+        document.getElementById('inputRow').style.opacity = '0.3';
+        clearInputTiles();
+        setKeyboardEnabled(false);
     }
+}
 
-    function resetKeyboard() {
-        document.querySelectorAll('.kb-key').forEach(btn => {
-            btn.classList.remove('correct','present','absent');
-        });
+function updateGuessCount(playerId, count) {
+    guessCounts[playerId] = count;
+    players.forEach((p, idx) => {
+        const n = idx === 0 ? 'p1' : 'p2';
+        const c = guessCounts[p.id] || 0;
+        document.getElementById(n + 'Guesses').textContent = `${c} guess${c !== 1 ? 'es' : ''}`;
+    });
+}
+
+function resetGameUI() {
+    hideTypingDots();
+    document.getElementById('boardWrapper').innerHTML     = '';
+    document.getElementById('overlay').classList.remove('show');
+    document.getElementById('rematchWaiting').classList.remove('show');
+    document.getElementById('resultBtns').style.display  = 'flex';
+    hidePendingBanner();
+    resetKeyboard();
+    clearInputTiles();
+    guessCounts = {};
+    players.forEach((p, idx) => {
+        document.getElementById((idx === 0 ? 'p1' : 'p2') + 'Guesses').textContent = '0 guesses';
+    });
+}
+
+// ── Physical keyboard ─────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+    if (!isMyTurn) return;
+    const key = e.key.toUpperCase();
+    if (key === 'BACKSPACE')       { e.preventDefault(); deleteLetter(); }
+    else if (key === 'ENTER')      { e.preventDefault(); submitGuess(); }
+    else if (/^[A-Z]$/.test(key)) addLetter(key);
+});
+
+// ── Socket events ─────────────────────────────────────────────────────────────
+socket.on('connect', () => {
+    myId = socket.id;
+    // Full state reset on every new connection — prevents stale board from previous game
+    gameStarted  = false;
+    isMyTurn     = false;
+    currentCol   = 0;
+    players      = [];
+    guessCounts  = {};
+    pendingType  = null;
+    // Clear board DOM completely
+    document.getElementById('boardWrapper').innerHTML = '';
+    // Clear input tiles
+    for (let i = 0; i < 5; i++) {
+        const t = document.getElementById('t' + i);
+        if (t) { t.textContent = ''; t.className = 'tile'; }
     }
+    // Reset keyboard colours
+    document.querySelectorAll('.kb-key').forEach(btn => {
+        btn.classList.remove('correct', 'present', 'absent');
+        btn.disabled = false;
+    });
+    // Hide overlay and pending banner
+    document.getElementById('overlay').classList.remove('show');
+    hidePendingBanner();
+});
 
-    function updateKeyboard(guess, result) {
-        guess.split('').forEach((letter, i) => {
-            const btn = document.querySelector(`.kb-key[data-key="${letter}"]`);
-            if (!btn) return;
-            const priority = { correct: 3, present: 2, absent: 1 };
-            const cur = ['correct','present','absent'].find(c => btn.classList.contains(c));
-            if (cur && priority[cur] >= priority[result[i]]) return;
-            btn.classList.remove('correct','present','absent');
-            btn.classList.add(result[i]);
-        });
-    }
+socket.on('room_created', ({ code }) => {
+    roomCode = code;
+    document.getElementById('displayCode').textContent = code;
+    showScreen('screen-waiting');
+});
 
-    function setKeyboardEnabled(enabled) {
-        document.querySelectorAll('.kb-key').forEach(btn => { btn.disabled = !enabled; });
-    }
+socket.on('game_start', ({ players: p, currentTurn }) => {
+    players = p;
 
-    // ── Turn UI ───────────────────────────────────────────────────────────────────
-    function setTurnUI(currentTurnId) {
-        isMyTurn = currentTurnId === myId;
-        const indicator = document.getElementById('turnIndicator');
-
-        if (isMyTurn) {
-            indicator.textContent = 'Your Turn';
-            indicator.className   = 'turn-indicator your-turn';
-            document.getElementById('inputRow').style.opacity = '1';
-            setKeyboardEnabled(true);
-            hideTypingDots(); // opponent finished their turn
-        } else {
-            const opp = players.find(p => p.id !== myId);
-            indicator.textContent = opp ? `${opp.name}'s Turn` : "Opponent's Turn";
-            indicator.className   = 'turn-indicator';
-            document.getElementById('inputRow').style.opacity = '0.3';
-            clearInputTiles();
-            setKeyboardEnabled(false);
-        }
-    }
-
-    function updateGuessCount(playerId, count) {
-        guessCounts[playerId] = count;
-        players.forEach((p, idx) => {
-            const n = idx === 0 ? 'p1' : 'p2';
-            const c = guessCounts[p.id] || 0;
-            document.getElementById(n + 'Guesses').textContent = `${c} guess${c !== 1 ? 'es' : ''}`;
-        });
-    }
-
-    function resetGameUI() {
-        hideTypingDots();
-        document.getElementById('boardWrapper').innerHTML     = '';
-        document.getElementById('overlay').classList.remove('show');
-        document.getElementById('rematchWaiting').classList.remove('show');
-        document.getElementById('resultBtns').style.display  = 'flex';
+    if (gameStarted) {
+        // This is a rematch or new word — both players confirmed.
+        // NOW it's safe to wipe the board and reset everything.
+        resetGameUI();
+    } else {
+        // Very first game start — just initialise UI state without wiping
+        // (there's nothing to wipe yet anyway)
         hidePendingBanner();
-        resetKeyboard();
         clearInputTiles();
         guessCounts = {};
-        players.forEach((p, idx) => {
-            document.getElementById((idx === 0 ? 'p1' : 'p2') + 'Guesses').textContent = '0 guesses';
-        });
+        gameStarted = true;
     }
 
-    // ── Physical keyboard ─────────────────────────────────────────────────────────
-    document.addEventListener('keydown', e => {
-        if (!isMyTurn) return;
-        const key = e.key.toUpperCase();
-        if (key === 'BACKSPACE')       { e.preventDefault(); deleteLetter(); }
-        else if (key === 'ENTER')      { e.preventDefault(); submitGuess(); }
-        else if (/^[A-Z]$/.test(key)) addLetter(key);
+    p.forEach((pl, idx) => {
+        document.getElementById((idx === 0 ? 'p1' : 'p2') + 'Name').textContent = pl.name;
     });
+    buildKeyboard();
+    setTurnUI(currentTurn);
+    showScreen('screen-game');
+});
 
-    // ── Socket events ─────────────────────────────────────────────────────────────
-    socket.on('connect', () => { myId = socket.id; });
+socket.on('guess_result', (entry) => {
+    appendGuessRow(entry);
+    updateKeyboard(entry.guess, entry.result);
+    updateGuessCount(entry.playerId, entry.guessNum);
+    if (entry.playerId === myId) clearInputTiles();
+    // Re-enable keyboard after server confirms guess was accepted
+    if (isMyTurn) setKeyboardEnabled(true);
+});
 
-    socket.on('room_created', ({ code }) => {
-        roomCode = code;
-        document.getElementById('displayCode').textContent = code;
-        showScreen('screen-waiting');
-    });
+socket.on('turn_change', ({ currentTurn }) => {
+    setTurnUI(currentTurn);
+});
 
-    socket.on('game_start', ({ players: p, currentTurn }) => {
-        players = p;
+// Server rejected the word — re-enable keyboard so player can try again
+socket.on('invalid_word', ({ message }) => {
+    showToast(message, 2500, true);
+    setKeyboardEnabled(true); // restore — don't consume the turn
+});
 
-        if (gameStarted) {
-            // This is a rematch or new word — both players confirmed.
-            // NOW it's safe to wipe the board and reset everything.
-            resetGameUI();
-        } else {
-            // Very first game start — just initialise UI state without wiping
-            // (there's nothing to wipe yet anyway)
-            hidePendingBanner();
-            clearInputTiles();
-            guessCounts = {};
-            gameStarted = true;
-        }
+socket.on('game_over', ({ winnerId, winnerName, word }) => {
+    const won        = winnerId === myId;
+    const myGuesses  = guessCounts[myId] || 0;
+    const oppId      = players.find(p => p.id !== myId)?.id;
+    const oppGuesses = guessCounts[oppId] || 0;
 
-        p.forEach((pl, idx) => {
-            document.getElementById((idx === 0 ? 'p1' : 'p2') + 'Name').textContent = pl.name;
+    document.getElementById('resultEmoji').textContent   = won ? '🎉' : '😔';
+    document.getElementById('resultTitle').textContent   = won ? 'YOU WIN!' : `${winnerName} WINS`;
+    document.getElementById('resultWord').textContent    = word;
+    document.getElementById('myGuessCount').textContent  = myGuesses;
+    document.getElementById('oppGuessCount').textContent = oppGuesses;
+    document.getElementById('overlay').classList.add('show');
+    setKeyboardEnabled(false);
+});
+
+socket.on('opponent_typing', ({ isTyping }) => {
+    const dots = document.getElementById('typingDots');
+    if (isTyping) dots.classList.add('show');
+    else          dots.classList.remove('show');
+});
+
+socket.on('rematch_pending', ({ voterName }) => {
+    showPendingBanner('rematch', voterName);
+});
+
+socket.on('new_word_pending', ({ voterName }) => {
+    showPendingBanner('new_word', voterName);
+});
+
+socket.on('opponent_left', ({ message }) => {
+    showToast(message, 4000, true);
+    setKeyboardEnabled(false);
+    setTimeout(() => {
+        // Full reset before returning to lobby
+        gameStarted = false;
+        isMyTurn    = false;
+        players     = [];
+        guessCounts = {};
+        document.getElementById('boardWrapper').innerHTML = '';
+        document.getElementById('overlay').classList.remove('show');
+        hidePendingBanner();
+        // Reset keyboard
+        document.querySelectorAll('.kb-key').forEach(btn => {
+            btn.classList.remove('correct', 'present', 'absent');
+            btn.disabled = false;
         });
-        buildKeyboard();
-        setTurnUI(currentTurn);
-        showScreen('screen-game');
-    });
-
-    socket.on('guess_result', (entry) => {
-        appendGuessRow(entry);
-        updateKeyboard(entry.guess, entry.result);
-        updateGuessCount(entry.playerId, entry.guessNum);
-        if (entry.playerId === myId) clearInputTiles();
-        // Re-enable keyboard after server confirms guess was accepted
-        if (isMyTurn) setKeyboardEnabled(true);
-    });
-
-    socket.on('turn_change', ({ currentTurn }) => {
-        setTurnUI(currentTurn);
-    });
-
-    // Server rejected the word — re-enable keyboard so player can try again
-    socket.on('invalid_word', ({ message }) => {
-        showToast(message, 2500, true);
-        setKeyboardEnabled(true); // restore — don't consume the turn
-    });
-
-    socket.on('game_over', ({ winnerId, winnerName, word }) => {
-        const won        = winnerId === myId;
-        const myGuesses  = guessCounts[myId] || 0;
-        const oppId      = players.find(p => p.id !== myId)?.id;
-        const oppGuesses = guessCounts[oppId] || 0;
-
-        document.getElementById('resultEmoji').textContent   = won ? '🎉' : '😔';
-        document.getElementById('resultTitle').textContent   = won ? 'YOU WIN!' : `${winnerName} WINS`;
-        document.getElementById('resultWord').textContent    = word;
-        document.getElementById('myGuessCount').textContent  = myGuesses;
-        document.getElementById('oppGuessCount').textContent = oppGuesses;
-        document.getElementById('overlay').classList.add('show');
-        setKeyboardEnabled(false);
-    });
-
-    socket.on('opponent_typing', ({ isTyping }) => {
-        const dots = document.getElementById('typingDots');
-        if (isTyping) dots.classList.add('show');
-        else          dots.classList.remove('show');
-    });
-
-    socket.on('rematch_pending', ({ voterName }) => {
-        showPendingBanner('rematch', voterName);
-    });
-
-    socket.on('new_word_pending', ({ voterName }) => {
-        showPendingBanner('new_word', voterName);
-    });
-
-    socket.on('opponent_left', ({ message }) => {
-        showToast(message, 4000, true);
-        setKeyboardEnabled(false);
-        setTimeout(() => {
-            gameStarted = false;
-            document.getElementById('overlay').classList.remove('show');
-            showScreen('screen-lobby');
-            socket.disconnect();
-        }, 4000);
-    });
-
-    socket.on('error', ({ message }) => {
-        showToast(message, 3000, true);
-        document.getElementById('joinError').textContent = message;
+        showScreen('screen-lobby');
         socket.disconnect();
-    });
+    }, 4000);
+});
+
+socket.on('error', ({ message }) => {
+    showToast(message, 3000, true);
+    document.getElementById('joinError').textContent = message;
+    socket.disconnect();
+});
 </script>
 </body>
 </html>
