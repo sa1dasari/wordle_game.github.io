@@ -623,7 +623,9 @@ function leaveRoom() {
 // ── Lobby state ───────────────────────────────────────
 function renderLobby(data) {
     roomCode = data.code;
-    isHost   = data.hostId === myId;
+    // Use socket.id as fallback in case myId hasn't been set yet
+    const effectiveMyId = myId || socket.id;
+    isHost = data.hostId === effectiveMyId;
     document.getElementById('lobbyCode').textContent = data.code;
     document.getElementById('playerCount').textContent = `(${data.players.length}/8)`;
 
@@ -632,7 +634,8 @@ function renderLobby(data) {
     data.players.forEach(p => {
         const row = document.createElement('div');
         row.className = 'player-row';
-        row.innerHTML = `<span class="player-row-name">${p.name}${p.id === myId ? ' (you)' : ''}</span>
+        const eid = myId || socket.id;
+        row.innerHTML = `<span class="player-row-name">${p.name}${p.id === eid ? ' (you)' : ''}</span>
             <span class="player-badge ${p.id === data.hostId ? '' : 'guesser'}">${p.id === data.hostId ? 'HOST' : 'PLAYER'}</span>`;
         list.appendChild(row);
     });
@@ -977,17 +980,25 @@ function voteNextRound() {
 }
 
 // ── Socket events ─────────────────────────────────────
-socket.on('connect', () => { myId = socket.id; });
+socket.on('connect', () => {
+    myId = socket.id;
+    console.log('Connected, myId:', myId);
+});
 
 socket.on('party_room_created', ({ code }) => {
-    roomCode = code; isHost = true;
+    roomCode = code;
+    isHost   = true;
+    // myId is guaranteed set by now since connect fired first
     showScreen('screen-lobby');
 });
 
 socket.on('party_lobby_state', (data) => {
+    // Re-check myId on every lobby state update in case it was set late
+    if (!myId) myId = socket.id;
     renderLobby(data);
-    if (document.getElementById('screen-lobby').classList.contains('active')) return;
-    showScreen('screen-lobby');
+    if (!document.getElementById('screen-lobby').classList.contains('active')) {
+        showScreen('screen-lobby');
+    }
 });
 
 socket.on('party_round_start', onRoundStart);
