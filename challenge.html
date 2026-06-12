@@ -319,6 +319,7 @@
     <div class="nav-links">
         <a href="index.html" class="nav-link">Solo</a>
         <a href="duel.html"  class="nav-link">Duel</a>
+        <a href="party.html" class="nav-link">🎉 Party</a>
     </div>
 </header>
 
@@ -439,6 +440,7 @@
             The word was <span id="resultWord">—</span>
         </div>
         <div class="result-actions">
+            <button class="btn btn-accent" id="shareResultBtn" onclick="shareResult()">Share Result</button>
             <button class="btn btn-green" onclick="playAgain()">Try Another</button>
             <a href="index.html" class="btn btn-ghost">Solo Mode</a>
             <a href="duel.html"  class="btn btn-ghost">⚔️ Duel Mode</a>
@@ -448,6 +450,20 @@
     <div class="board-wrapper" id="boardWrapper"></div>
     <div class="guess-counter">Guess <span id="guessNum">1</span> of <span>6</span></div>
     <div class="keyboard" id="keyboard"></div>
+</div>
+
+<!-- ── ALREADY PLAYED SCREEN ── -->
+<div class="screen" id="screen-already-played">
+    <div class="card" style="text-align:center;">
+        <div style="font-size:2.5rem;">🔒</div>
+        <h2>Already Played</h2>
+        <p>You've already completed this challenge on this device. Each challenge link can only be played once per device.</p>
+        <div class="result-actions">
+            <a href="challenge.html" class="btn btn-accent">Create Your Own Challenge</a>
+            <a href="index.html" class="btn btn-ghost">Solo Mode</a>
+            <a href="duel.html"  class="btn btn-ghost">⚔️ Duel Mode</a>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -692,12 +708,14 @@
     }
 
     // ── PLAY: state ───────────────────────────────────────────────────────────
-    let secretWord   = '';
-    let currentRow   = 0;
-    let currentCol   = 0;
-    let gameOver     = false;
-    let isSubmitting = false; // prevents double-submit on rapid Enter
-    let tiles        = [];
+    let secretWord     = '';
+    let currentRow     = 0;
+    let currentCol     = 0;
+    let gameOver       = false;
+    let isSubmitting   = false; // prevents double-submit on rapid Enter
+    let tiles          = [];
+    let currentChallengeCode = null; // the ?c= code, used to mark as played
+    let guessHistory   = []; // stores results for share grid
 
     function startPlay(word) {
         secretWord   = word;
@@ -705,6 +723,7 @@
         currentCol   = 0;
         gameOver     = false;
         isSubmitting = false;
+        guessHistory = [];
         document.getElementById('resultBanner').className = 'result-banner';
         document.getElementById('headerSub').textContent  = 'guess the word · 6 tries';
         buildBoard();
@@ -785,6 +804,7 @@
         const result = evaluate(guess, secretWord);
         applyResult(currentRow, guess, result);
         updateKeyboard(guess, result);
+        guessHistory.push(result); // save for share grid
 
         const isCorrect = result.every(r => r === 'correct');
         currentRow++;
@@ -795,11 +815,13 @@
             gameOver = true;
             isSubmitting = false;
             setKeyboardEnabled(false);
+            markChallengeAsPlayed();
             setTimeout(() => showResult(true), 400);
         } else if (currentRow === MAX_GUESSES) {
             gameOver = true;
             isSubmitting = false;
             setKeyboardEnabled(false);
+            markChallengeAsPlayed();
             setTimeout(() => showResult(false), 400);
         } else {
             isSubmitting = false;
@@ -855,6 +877,39 @@
         });
     }
 
+    function markChallengeAsPlayed() {
+        if (currentChallengeCode) {
+            localStorage.setItem('played_' + currentChallengeCode, '1');
+        }
+    }
+
+    function buildShareGrid() {
+        // Build emoji grid: 🟩 correct, 🟨 present, ⬛ absent
+        return guessHistory.map(row =>
+            row.map(r => r === 'correct' ? '🟩' : r === 'present' ? '🟨' : '⬛').join('')
+        ).join('\n');
+    }
+
+    function shareResult() {
+        const won   = guessHistory.length > 0 && guessHistory[guessHistory.length-1].every(r => r === 'correct');
+        const tries = won ? guessHistory.length : 'X';
+        const grid  = buildShareGrid();
+        const baseUrl = window.location.href.split('?')[0];
+
+        const text = `Wordle Challenge ${tries}/6\n\n${grid}\n\nThink you can beat me? ${baseUrl}`;
+
+        if (navigator.share) {
+            navigator.share({ title: 'Wordle Challenge Result', text }).catch(() => {});
+        } else {
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.getElementById('shareResultBtn');
+                const original = btn.textContent;
+                btn.textContent = 'Copied!';
+                setTimeout(() => { btn.textContent = original; }, 2000);
+            }).catch(() => showToast(text));
+        }
+    }
+
     function showResult(won) {
         const banner = document.getElementById('resultBanner');
         banner.className = 'result-banner show ' + (won ? 'win' : 'lose');
@@ -903,6 +958,14 @@
                 showScreen('screen-home');
                 return;
             }
+
+            // Check if this challenge was already played on this device
+            if (localStorage.getItem('played_' + code)) {
+                showScreen('screen-already-played');
+                return;
+            }
+
+            currentChallengeCode = code;
             startPlay(word);
         } else {
             showScreen('screen-home');
