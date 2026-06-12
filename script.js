@@ -3,6 +3,7 @@ let currentRow = 0;
 let currentCol = 0;
 let gameOver = false;
 let secretWord = '';
+let guessHistory = []; // tracks results for share grid
 const MAX_ROWS = 6;
 const MAX_COLS = 5;
 let tiles = [];
@@ -48,7 +49,7 @@ function initializeGame() {
     createGameBoard();
     resetKeyboard();
     secretWord = getRandomWord();
-    console.log('Secret word:', secretWord); // Remove before production
+    guessHistory = [];
     gameOver = false;
     currentRow = 0;
     currentCol = 0;
@@ -181,6 +182,7 @@ async function submitWord() {
     showMessage('', '');
 
     const result = evaluateWord(word);
+    guessHistory.push(result); // save for share grid
     currentRow++;
     currentCol = 0;
 
@@ -191,10 +193,73 @@ async function submitWord() {
         gameOver = true;
         const messages = ['Genius!', 'Magnificent!', 'Impressive!', 'Splendid!', 'Great!', 'Phew!'];
         showMessage(messages[currentRow - 1] || '🎉 You got it!', 'success');
+        showShareResult(true);
     } else if (currentRow === MAX_ROWS) {
         gameOver = true;
         showMessage(`The word was: ${secretWord}`, 'failure');
+        showShareResult(false);
     }
+}
+
+// ── Share result ──────────────────────────────────────────────────────────────
+// Encode/decode — same XOR scheme as challenge.html for cross-mode link sharing
+function encodeWordForShare(word) {
+    const key = [7, 13, 3, 19, 11];
+    const bytes = word.toUpperCase().split('').map((c, i) => c.charCodeAt(0) ^ key[i % key.length]);
+    return btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
+function buildShareGrid() {
+    return guessHistory.map(row =>
+        row.map(r => r === 'correct' ? '🟩' : r === 'present' ? '🟨' : '⬛').join('')
+    ).join('\n');
+}
+
+function showShareResult(won) {
+    const tries = won ? currentRow : 'X';
+    const grid  = buildShareGrid();
+
+    // Build a challenge link to this exact word so a friend can play it
+    const encoded  = encodeWordForShare(secretWord);
+    const baseUrl  = window.location.href.split('?')[0].replace(/index\.html$/, '');
+    const challengeUrl = `${baseUrl}challenge.html?c=${encoded}`;
+
+    const shareText = `Wordle ${tries}/6\n\n${grid}\n\nThink you can guess my word? ${challengeUrl}`;
+
+    // Build / show the share button + container under the message
+    let container = document.getElementById('shareContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'shareContainer';
+        container.className = 'share-container';
+        const messageEl = document.getElementById('message');
+        messageEl.insertAdjacentElement('afterend', container);
+    }
+
+    container.innerHTML = '';
+    container.style.display = 'flex';
+
+    const shareBtn = document.createElement('button');
+    shareBtn.className = 'reset-btn';
+    shareBtn.style.background = '#c8b97a';
+    shareBtn.textContent = '📤 Share Result';
+    shareBtn.onclick = () => {
+        if (navigator.share) {
+            navigator.share({ title: 'Wordle Result', text: shareText }).catch(() => {});
+        } else {
+            navigator.clipboard.writeText(shareText).then(() => {
+                shareBtn.textContent = 'Copied!';
+                setTimeout(() => { shareBtn.textContent = '📤 Share Result'; }, 2000);
+            }).catch(() => showMessage('Copy failed — try manually', 'failure'));
+        }
+    };
+
+    container.appendChild(shareBtn);
+}
+
+function hideShareResult() {
+    const container = document.getElementById('shareContainer');
+    if (container) container.style.display = 'none';
 }
 
 function getEnteredWord() {
@@ -258,5 +323,6 @@ function showMessage(text, className = '') {
 function resetGame() {
     document.getElementById('message').textContent = '';
     document.getElementById('message').className = 'message';
+    hideShareResult();
     initializeGame();
 }
