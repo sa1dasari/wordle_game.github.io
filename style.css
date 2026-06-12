@@ -1,5 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;700;900&family=DM+Sans:wght@400;500&display=swap');
 
+:root {
+    --bg:      #121213;
+    --bg2:     #1a1a1b;
+    --bg3:     #242426;
+    --border:  #3a3a3c;
+    --text:    #e8e6e0;
+    --muted:   #818384;
+    --green:   #538d4e;
+    --yellow:  #b59f3b;
+    --grey:    #3a3a3c;
+    --accent:  #c8b97a;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -12,16 +25,17 @@ body {
     justify-content: center;
     align-items: flex-start;
     min-height: 100vh;
-    background-color: #f5f5f5;
+    background-color: var(--bg);
     padding: 20px;
+    color: var(--text);
 }
 
 .container {
     text-align: center;
-    background-color: white;
+    background-color: var(--bg2);
     padding: 30px;
     border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border);
     width: 100%;
     max-width: 420px;
 }
@@ -38,7 +52,7 @@ body {
 h1 {
     font-family: 'League Spartan', sans-serif;
     font-weight: 900;
-    color: #333;
+    color: var(--text);
     letter-spacing: 3px;
     font-size: 2rem;
 }
@@ -49,9 +63,9 @@ h1 {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    border: 2px solid #333;
+    border: 2px solid var(--text);
     background: transparent;
-    color: #333;
+    color: var(--text);
     font-size: 16px;
     font-weight: 700;
     cursor: pointer;
@@ -64,8 +78,8 @@ h1 {
 }
 
 .help-btn:hover {
-    background: #333;
-    color: white;
+    background: var(--text);
+    color: var(--bg);
 }
 
 /* ── Game board ──────────────────────────────────────────────────────────────── */
@@ -80,7 +94,7 @@ h1 {
 .tile {
     width: 60px;
     height: 60px;
-    border: 2px solid #d3d6da;
+    border: 2px solid var(--border);
     border-radius: 4px;
     font-size: 28px;
     font-weight: bold;
@@ -88,63 +102,159 @@ h1 {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #ffffff;
+    background-color: var(--bg3);
     cursor: text;
     text-transform: uppercase;
     transition: border-color 0.1s;
+    color: var(--text);
 }
 
-.tile.active  { border-color: #333; }
+.tile.active  { border-color: #565758; }
 
 .tile.correct {
-    background-color: #6aaa64;
+    background-color: var(--green);
     color: white;
-    border-color: #6aaa64;
+    border-color: var(--green);
 }
 
 .tile.present {
-    background-color: #b59f3b;
+    background-color: var(--yellow);
     color: white;
-    border-color: #b59f3b;
+    border-color: var(--yellow);
 }
 
 .tile.absent {
-    background-color: #787c7e;
+    background-color: var(--grey);
     color: white;
-    border-color: #787c7e;
+    border-color: var(--grey);
 }
 
-.tile.filled { border-color: #999; }
+.tile.filled { border-color: #565758; }
 
 /* ── Message ─────────────────────────────────────────────────────────────────── */
 .message {
     font-size: 16px;
     margin: 20px 0;
     height: 30px;
-    color: #333;
+    color: var(--text);
     font-weight: 600;
 }
 
-.message.success { color: #6aaa64; }
-.message.failure  { color: #d32f2f; }
+.message.success { color: var(--green); }
+.message.failure  { color: #e74c3c; }
 
-/* ── Reset button ────────────────────────────────────────────────────────────── */
+/* ── Buttons ──────────────────────────────────────────────────────────────────── */
+.buttons-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+    margin-top: 24px;
+}
+
+.btn {
+    padding: 14px 32px;
+    font-size: 15px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    min-width: 120px;
+}
+
+.btn:active {
+    transform: scale(0.96);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+/* Colors synced with page palette */
+.btn-duel {
+    background-color: var(--green);
+}
+
+.btn-duel:hover {
+    background-color: #4a7a3f;
+}
+
+.btn-challenge {
+    background-color: var(--yellow);
+}
+
+.btn-challenge:hover {
+    background-color: #a88e30;
+}
+
+.btn-party {
+    background-color: #d97706;
+}
+
+.btn-party:hover {
+    background-color: #b45309;
+}
+
+.btn-new-game {
+    background-color: #5b9bd5;
+}
+
+.btn-new-game:hover {
+    background-color: #4a7fb8;
+}
+
+/* Keep old reset-btn for backward compatibility */
 .reset-btn {
     padding: 12px 30px;
     font-size: 15px;
     font-family: 'DM Sans', sans-serif;
     font-weight: 700;
-    background-color: #6aaa64;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     letter-spacing: 0.5px;
     transition: background-color 0.2s, transform 0.1s;
+    text-decoration: none;
+    display: inline-block;
+    white-space: nowrap;
 }
 
-.reset-btn:hover  { background-color: #5a9a54; }
 .reset-btn:active { transform: scale(0.98); }
+
+.duel-btn {
+    background-color: var(--green);
+}
+
+.duel-btn:hover {
+    background-color: #4a7a3f;
+}
+
+.challenge-btn {
+    background-color: var(--yellow);
+}
+
+.challenge-btn:hover {
+    background-color: #a88e30;
+}
+
+.new-game-btn {
+    background-color: #5b9bd5;
+}
+
+.new-game-btn:hover {
+    background-color: #4a7fb8;
+}
 
 /* ── How to Play Modal ───────────────────────────────────────────────────────── */
 .modal-overlay {
@@ -167,13 +277,14 @@ h1 {
 }
 
 .modal {
-    background: white;
+    background: var(--bg2);
     border-radius: 12px;
     padding: 32px 28px 28px;
     max-width: 380px;
     width: 100%;
     position: relative;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    border: 1px solid var(--border);
     transform: translateY(12px);
     transition: transform 0.2s;
 }
@@ -190,7 +301,7 @@ h1 {
     border: none;
     font-size: 22px;
     cursor: pointer;
-    color: #888;
+    color: var(--muted);
     line-height: 1;
     padding: 2px 6px;
     border-radius: 4px;
@@ -198,8 +309,8 @@ h1 {
 }
 
 .modal-close:hover {
-    color: #333;
-    background: #f0f0f0;
+    color: var(--text);
+    background: var(--bg3);
 }
 
 .modal h2 {
@@ -207,14 +318,14 @@ h1 {
     font-weight: 900;
     font-size: 1.3rem;
     letter-spacing: 2px;
-    color: #333;
+    color: var(--accent);
     margin-bottom: 18px;
     text-align: center;
 }
 
 .modal p {
     font-size: 14px;
-    color: #555;
+    color: var(--text);
     line-height: 1.6;
     margin-bottom: 18px;
     text-align: left;
@@ -222,7 +333,7 @@ h1 {
 
 .modal-divider {
     border: none;
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid var(--border);
     margin: 18px 0;
 }
 
@@ -241,7 +352,7 @@ h1 {
 .ex-tile {
     width: 44px;
     height: 44px;
-    border: 2px solid #d3d6da;
+    border: 2px solid var(--border);
     border-radius: 4px;
     font-size: 20px;
     font-weight: 900;
@@ -250,35 +361,36 @@ h1 {
     align-items: center;
     justify-content: center;
     text-transform: uppercase;
-    color: #333;
+    color: var(--text);
+    background-color: var(--bg3);
 }
 
 .ex-tile.correct {
-    background: #6aaa64;
-    border-color: #6aaa64;
+    background: var(--green);
+    border-color: var(--green);
     color: white;
 }
 
 .ex-tile.present {
-    background: #b59f3b;
-    border-color: #b59f3b;
+    background: var(--yellow);
+    border-color: var(--yellow);
     color: white;
 }
 
 .ex-tile.absent {
-    background: #787c7e;
-    border-color: #787c7e;
+    background: var(--grey);
+    border-color: var(--grey);
     color: white;
 }
 
 .example p {
     font-size: 13px;
-    color: #444;
+    color: var(--text);
     margin: 0;
 }
 
 .example p strong {
-    color: #222;
+    color: var(--accent);
 }
 
 /* ── Responsive ──────────────────────────────────────────────────────────────── */
@@ -317,8 +429,8 @@ h1 {
     max-width: 43px;
     border: none;
     border-radius: 4px;
-    background-color: #d3d6da;
-    color: #333;
+    background-color: var(--muted);
+    color: white;
     font-family: 'League Spartan', sans-serif;
     font-size: 13px;
     font-weight: 700;
@@ -343,17 +455,17 @@ h1 {
 
 /* Colour states — match tile colours */
 .kb-key.correct {
-    background-color: #6aaa64;
+    background-color: var(--green);
     color: white;
 }
 
 .kb-key.present {
-    background-color: #b59f3b;
+    background-color: var(--yellow);
     color: white;
 }
 
 .kb-key.absent {
-    background-color: #787c7e;
+    background-color: var(--grey);
     color: white;
 }
 
@@ -381,9 +493,14 @@ h1 {
 }
 
 .share-container .reset-btn {
-    color: #1a1a1b;
+    background-color: var(--accent);
+    color: var(--bg);
     font-weight: 700;
-    transition: opacity 0.2s, transform 0.1s;
+    transition: opacity 0.2s, transform 0.1s, background-color 0.2s;
+}
+
+.share-container .reset-btn:hover {
+    background-color: #d4c68a;
 }
 
 .share-container .reset-btn:active {
