@@ -613,6 +613,13 @@ function shareDailyResult() {
 }
 
 // ── LEADERBOARD ────────────────────────────────────────────────
+function formatSolveTime(seconds) {
+    if (seconds == null) return null;
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return m > 0 ? `${m}m ${s}s` : `${s}s`;
+}
+
 async function loadLeaderboard(type) {
     document.getElementById('tabToday').classList.toggle('active', type === 'today');
     document.getElementById('tabAlltime').classList.toggle('active', type === 'alltime');
@@ -633,14 +640,23 @@ async function loadLeaderboard(type) {
         leaderboard.forEach((entry, idx) => {
             const row = document.createElement('div');
             row.className = 'lb-row';
-            const statText = type === 'today'
-                ? (entry.solved ? `${entry.guess_count}/6` : 'X/6')
-                : `🔥 ${entry.max_streak} · ${entry.win_pct}%`;
+            let statText, rankLabel;
+            if (type === 'today') {
+                const guessLabel = entry.solved ? `${entry.guess_count}/6` : 'X/6';
+                const timeLabel  = formatSolveTime(entry.time_taken_seconds);
+                statText = timeLabel ? `${guessLabel} · ${timeLabel}` : guessLabel;
+                // Use the server-computed dense_rank so exact ties share a rank
+                rankLabel = entry.rank ?? (idx + 1);
+            } else {
+                statText  = `🔥 ${entry.max_streak} · ${entry.win_pct}%`;
+                rankLabel = idx + 1;
+            }
+
             row.innerHTML = `
-                <span class="lb-rank">${idx + 1}</span>
-                <span class="lb-name">${entry.username}</span>
-                <span class="lb-stat">${statText}</span>
-            `;
+            <span class="lb-rank">${rankLabel}</span>
+            <span class="lb-name">${entry.username}</span>
+            <span class="lb-stat">${statText}</span>
+        `;
             listEl.appendChild(row);
         });
     } catch (err) {
