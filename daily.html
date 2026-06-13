@@ -189,11 +189,11 @@
 <div class="screen active" id="screen-login">
     <div class="card">
         <h2>Sign In</h2>
-        <p>Enter your email to get a magic link — no password needed. Sign in to track your streak and appear on the leaderboard.</p>
+        <p>Enter your email — no password needed. Sign in to track your streak and appear on the leaderboard.</p>
         <input type="email" id="emailInput" placeholder="you@example.com" />
         <p class="error-msg" id="loginError"></p>
         <p class="success-msg" id="loginSuccess"></p>
-        <button class="btn btn-accent" onclick="sendMagicLink()" id="sendLinkBtn">Send Magic Link</button>
+        <button class="btn btn-accent" onclick="sendMagicLink()" id="sendLinkBtn">Verify Email</button>
     </div>
 </div>
 
@@ -319,7 +319,7 @@ async function sendMagicLink() {
         options: { emailRedirectTo: window.location.href }
     });
 
-    btn.disabled = false; btn.textContent = 'Send Magic Link';
+    btn.disabled = false; btn.textContent = 'Verify Email';
 
     if (error) {
         errEl.textContent = error.message;
