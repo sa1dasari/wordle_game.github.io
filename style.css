@@ -43,7 +43,7 @@ body {
 /* ── Top page header (consistent across all modes) ──────────────────────────── */
 header {
     width: 100%;
-    max-width: 600px;
+    max-width: 700px;
     padding: 16px 20px;
     display: flex;
     align-items: center;
@@ -89,6 +89,7 @@ header h1 {
     background: transparent;
     transition: all 0.2s;
     white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .nav-link:hover {
