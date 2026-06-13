@@ -51,7 +51,8 @@
         .header-sub { font-size: 12px; color: var(--muted); font-family: monospace; }
 
         /* Solo mode link in header */
-        .solo-link {
+        .nav-links { display: flex; gap: 8px; flex-wrap: wrap; }
+        .nav-link {
             font-family: monospace;
             font-size: 12px;
             color: var(--muted);
@@ -62,7 +63,7 @@
             transition: all 0.2s;
             white-space: nowrap;
         }
-        .solo-link:hover { color: var(--accent); border-color: var(--accent); }
+        .nav-link:hover { color: var(--accent); border-color: var(--accent); }
 
         /* ── Screens ── */
         .screen { display: none; width: 100%; max-width: 480px; padding: 0 20px; }
@@ -366,11 +367,11 @@
         <h1>WORDLE DUEL</h1>
         <span class="header-sub">turn-based · unlimited guesses</span>
     </div>
-    <div style="display:flex;gap:8px;">
-        <a href="daily.html" class="solo-link">📅 Daily</a>
-        <a href="party.html" class="solo-link">🎉 Party</a>
-        <a href="challenge.html" class="solo-link">🎯 Challenge</a>
-        <a href="index.html" class="solo-link">← Solo</a>
+    <div class="nav-links">
+        <a href="index.html"     class="nav-link">🟩 Solo</a>
+        <a href="daily.html"     class="nav-link">📅 Daily</a>
+        <a href="challenge.html" class="nav-link">🎯 Challenge</a>
+        <a href="party.html"     class="nav-link">🎉 Party</a>
     </div>
 </header>
 
@@ -395,8 +396,6 @@
         <p class="error-msg" id="joinError"></p>
     </div>
 
-    <!-- Solo mode shortcut from lobby -->
-    <a href="index.html" class="btn btn-ghost" style="max-width:200px; text-align:center;">🎮 Play Solo Instead</a>
 </div>
 
 <!-- ── WAITING ── -->
@@ -405,10 +404,7 @@
     <div class="room-code-display" id="displayCode">----</div>
     <button class="btn btn-ghost copy-btn" onclick="copyCode()">Copy code</button>
     <p class="waiting-label">⏳ Waiting for opponent to join...</p>
-    <div style="display:flex;gap:10px;margin-top:8px;width:100%;">
-        <button class="btn btn-ghost" style="flex:1;" onclick="backToLobby()">Cancel</button>
-        <a href="index.html" class="btn btn-ghost" style="flex:1;text-align:center;">Solo Mode</a>
-    </div>
+    <button class="btn btn-ghost" style="width:100%;margin-top:8px;" onclick="backToLobby()">Cancel</button>
 </div>
 
 <!-- ── GAME ── -->
@@ -485,7 +481,6 @@
         <div class="result-btns" id="resultBtns">
             <button class="btn btn-green"  onclick="voteRematch()">Rematch</button>
             <button class="btn btn-ghost"  onclick="exitRoom()">Exit Room</button>
-            <a href="index.html" class="btn btn-ghost">🎮 Solo Mode</a>
         </div>
     </div>
 </div>
