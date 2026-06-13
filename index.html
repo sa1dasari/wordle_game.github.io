@@ -8,13 +8,21 @@
 </head>
 <body>
 
-<div class="container">
-
-    <!-- Header -->
-    <div class="header">
+<header>
+    <div class="header-left">
         <h1>WORDLE</h1>
-        <button class="help-btn" id="helpBtn" aria-label="How to play">?</button>
+        <span class="header-sub">guess in 6 tries · new word every game</span>
     </div>
+    <div class="nav-links">
+        <a href="daily.html"     class="nav-link">📅 Daily</a>
+        <a href="duel.html"      class="nav-link">⚔️ Duel</a>
+        <a href="challenge.html" class="nav-link">🎯 Challenge</a>
+        <a href="party.html"     class="nav-link">🎉 Party</a>
+        <button class="nav-link" id="helpBtn" aria-label="How to play">❓ Help</button>
+    </div>
+</header>
+
+<div class="container">
 
     <!-- Game board -->
     <div class="game-board" id="gameBoard"></div>
@@ -27,10 +35,6 @@
 
     <!-- Buttons -->
     <div class="buttons-container">
-        <a href="daily.html"     class="btn btn-daily">📅 Daily</a>
-        <a href="duel.html"      class="btn btn-duel">⚔️ Duel</a>
-        <a href="challenge.html" class="btn btn-challenge">🎯 Challenge</a>
-        <a href="party.html"     class="btn btn-party">🎉 Party</a>
         <button class="btn btn-new-game" id="resetBtn">New Game</button>
     </div>
 
