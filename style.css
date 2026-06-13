@@ -213,6 +213,14 @@ h1 {
     background-color: #4a7fb8;
 }
 
+.btn-daily {
+    background-color: var(--green);
+}
+
+.btn-daily:hover {
+    background-color: #4a7a3f;
+}
+
 /* Keep old reset-btn for backward compatibility */
 .reset-btn {
     padding: 12px 30px;
