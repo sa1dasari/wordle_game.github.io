@@ -22,12 +22,12 @@
 body {
     font-family: 'DM Sans', sans-serif;
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
+    flex-direction: column;
+    align-items: center;
     min-height: 100vh;
     background-color: var(--bg);
-    padding: 20px;
     color: var(--text);
+    padding: 0 16px 30px;
 }
 
 .container {
@@ -40,46 +40,69 @@ body {
     max-width: 420px;
 }
 
-/* ── Header ──────────────────────────────────────────────────────────────────── */
-.header {
+/* ── Top page header (consistent across all modes) ──────────────────────────── */
+header {
+    width: 100%;
+    max-width: 600px;
+    padding: 16px 20px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    position: relative;
-    margin-bottom: 30px;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
+.header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+header h1 {
+    font-size: 1.5rem;
+}
+
+.header-sub {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: monospace;
+}
+
+.nav-links {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.nav-link {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    background: transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.nav-link:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+/* ── Page title (used in top header) ────────────────────────────────────────── */
 h1 {
     font-family: 'League Spartan', sans-serif;
     font-weight: 900;
     color: var(--text);
     letter-spacing: 3px;
     font-size: 2rem;
-}
-
-.help-btn {
-    position: absolute;
-    right: 0;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    border: 2px solid var(--text);
-    background: transparent;
-    color: var(--text);
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s, color 0.2s;
-    font-family: 'League Spartan', sans-serif;
-    line-height: 1;
-}
-
-.help-btn:hover {
-    background: var(--text);
-    color: var(--bg);
 }
 
 /* ── Game board ──────────────────────────────────────────────────────────────── */
@@ -213,13 +236,6 @@ h1 {
     background-color: #4a7fb8;
 }
 
-.btn-daily {
-    background-color: var(--green);
-}
-
-.btn-daily:hover {
-    background-color: #4a7a3f;
-}
 
 /* Keep old reset-btn for backward compatibility */
 .reset-btn {
