@@ -314,9 +314,14 @@ async function sendMagicLink() {
     const btn = document.getElementById('sendLinkBtn');
     btn.disabled = true; btn.textContent = 'Sending...';
 
+    // Always redirect to the canonical domain after magic link click
+    const redirectUrl = window.location.hostname === 'wordlegames.co'
+        ? 'https://wordlegames.co/daily.html'
+        : window.location.href.split('?')[0];
+
     const { error } = await supabaseClient.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: window.location.href }
+        options: { emailRedirectTo: redirectUrl }
     });
 
     btn.disabled = false; btn.textContent = 'Verify Email';
