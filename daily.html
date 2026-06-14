@@ -333,26 +333,65 @@ async function sendMagicLink() {
     }
 }
 
+// Guard against afterLogin running multiple times simultaneously
+let authHandled = false;
+
 async function checkAuth() {
+    // If URL contains a magic link token, let onAuthStateChange handle it
+    // Don't call getSession() immediately — the token needs a moment to process
+    if (window.location.hash.includes('access_token') ||
+        window.location.hash.includes('type=magiclink') ||
+        window.location.hash.includes('type=recovery')) {
+        // Show a loading state while Supabase processes the token
+        showLoadingScreen();
+        // onAuthStateChange will fire and take over
+        return;
+    }
+
+    // No token in URL — check for existing session normally
     const { data } = await supabaseClient.auth.getSession();
     session = data.session;
 
     if (session) {
         accessToken = session.access_token;
-        await afterLogin();
+        if (!authHandled) {
+            authHandled = true;
+            await afterLogin();
+        }
     } else {
         showScreen('screen-login');
     }
 }
 
-// Listen for auth state changes (after clicking magic link)
+// Listen for auth state changes (magic link clicks, token refresh, sign out)
 supabaseClient.auth.onAuthStateChange(async (event, newSession) => {
-    if (newSession) {
-        session = newSession;
+    console.log('Auth event:', event);
+
+    if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        if (!newSession) return;
+        session     = newSession;
         accessToken = newSession.access_token;
-        await afterLogin();
+        if (!authHandled) {
+            authHandled = true;
+            await afterLogin();
+        }
+    } else if (event === 'SIGNED_OUT') {
+        authHandled = false;
+        session     = null;
+        accessToken = null;
+        showScreen('screen-login');
     }
 });
+
+function showLoadingScreen() {
+    // Show a neutral loading state while magic link token is being processed
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    // Reuse the login card area but show loading text
+    const loginScreen = document.getElementById('screen-login');
+    loginScreen.classList.add('active');
+    const card = loginScreen.querySelector('.card');
+    if (card) card.innerHTML = '<p style="text-align:center;color:var(--muted);font-family:monospace;font-size:13px;padding:20px 0;">Signing you in...</p>';
+}
 
 async function afterLogin() {
     // Check if user has a profile/username
