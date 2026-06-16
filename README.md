@@ -1,6 +1,6 @@
-# Wordle
+# WordForge - A Wordle-Inspired Game with multiple Modes
 
-A browser-based Wordle clone with daily shared words, real-time dictionary validation, and a multiplayer Duel Mode. Features a dark theme and a first-visit how-to-play guide. Pure vanilla JS with optional backend support.
+A browser-based game with daily shared words, real-time dictionary validation, and a multiplayer Duel Mode. Features a dark theme and a first-visit how-to-play guide. Pure vanilla JS with optional backend support.
 
 🎮 **[Play it live →](https://sa1dasari.github.io/wordle_game.github.io/)**
 
@@ -9,10 +9,21 @@ A browser-based Wordle clone with daily shared words, real-time dictionary valid
 ## Features
 
 ### Solo Mode
-- **Daily word mode** — everyone gets the same word each calendar day, derived deterministically from the date so no server needed
+- **Quick play** — no login needed, instant gameplay
+- **One word per game** — new word generated randomly each session
 - **Real-time validation** — guesses are checked against the [Free Dictionary API](https://api.dictionaryapi.dev)
 - **How to Play modal** — shown automatically on first visit, accessible anytime via the `?` button
 - **6 attempts**, colour-coded feedback (green / yellow / grey) matching standard Wordle rules
+
+### Daily Mode
+- **Shared daily word** — everyone gets the same word each calendar day
+- **Magic link authentication** — sign in with email (no password needed)
+- **Streak tracking** — maintain daily winning streaks
+- **Detailed stats** — track games played, win percentage, and solve time
+- **Dual leaderboards** — compete on Today's ranking and All-Time ranking
+- **Share results** — emoji grid snapshot of your solution
+- **Countdown timer** — see when the next daily word arrives (resets at local midnight)
+- **Real-time validation** — guesses checked against the [Free Dictionary API](https://api.dictionaryapi.dev)
 
 ### Challenge Mode
 - **Custom words** — create a challenge by setting any 5-letter word
@@ -39,7 +50,8 @@ A browser-based Wordle clone with daily shared words, real-time dictionary valid
 
 ```
 wordle_game.github.io/
-├── index.html       # Solo mode: daily shared word with How to Play modal
+├── index.html       # Solo mode: random word with How to Play modal
+├── daily.html       # Daily mode: shared daily word with authentication & leaderboards
 ├── challenge.html   # Challenge mode: create custom word challenges & share
 ├── duel.html        # Duel mode: multiplayer real-time matches with Socket.io
 ├── style.css        # Shared styles: dark theme, tiles, keyboard, responsive
@@ -70,7 +82,8 @@ wordle_game.github.io/
 | Styling | Vanilla CSS with CSS variables | Dark theme with consistent color palette |
 | Fonts | League Spartan + DM Sans | Clean, bold feel matching the game's personality |
 | Dictionary | [Free Dictionary API](https://api.dictionaryapi.dev) | Free, no API key, good English word coverage |
+| Database | [Supabase](https://supabase.com) (PostgreSQL) | Real-time auth, user profiles, leaderboards, stats |
 | Multiplayer | Node.js + Express + Socket.io | Real-time bidirectional communication for Duel Mode |
-| Hosting | GitHub Pages (single player) / Railway (Duel backend) | Zero-config static + cloud backend |
+| Hosting | GitHub Pages (Solo/Challenge) / Supabase (Daily auth) / Railway (Duel backend) | Zero-config static + cloud DB + dedicated backend |
 
 ---

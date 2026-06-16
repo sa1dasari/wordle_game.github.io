@@ -225,7 +225,7 @@ function showShareResult(won) {
     const challengeUrl = `${baseUrl}challenge.html?c=${encoded}`;
 
     const shareText = [
-        `🟩 Wordle Solo ${tries}/6`,
+        `🟩 WordForge Solo ${tries}/6`,
         '',
         grid,
         '',
@@ -252,7 +252,7 @@ function showShareResult(won) {
     shareBtn.textContent = '📤 Share Result';
     shareBtn.onclick = () => {
         if (navigator.share) {
-            navigator.share({ title: 'Wordle Result', text: shareText }).catch(() => {});
+            navigator.share({ title: 'WordForge Result', text: shareText }).catch(() => {});
         } else {
             navigator.clipboard.writeText(shareText).then(() => {
                 shareBtn.textContent = 'Copied!';
