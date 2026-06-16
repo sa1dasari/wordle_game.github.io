@@ -224,7 +224,14 @@ function showShareResult(won) {
     const baseUrl  = window.location.href.split('?')[0].replace(/index\.html$/, '');
     const challengeUrl = `${baseUrl}challenge.html?c=${encoded}`;
 
-    const shareText = `Wordle ${tries}/6\n\n${grid}\n\nThink you can guess my word? ${challengeUrl}`;
+    const shareText = [
+        `🟩 Wordle Solo ${tries}/6`,
+        '',
+        grid,
+        '',
+        'Think you can guess my word?',
+        `Challenge me: ${challengeUrl}`
+    ].join('\n');
 
     // Build / show the share button + container under the message
     let container = document.getElementById('shareContainer');
