@@ -897,7 +897,22 @@
         const grid  = buildShareGrid();
         const baseUrl = window.location.href.split('?')[0];
 
-        const text = `Wordle Challenge ${tries}/6\n\n${grid}\n\nThink you can beat me? ${baseUrl}`;
+        // Different message for win vs loss, no link (challenge page = create your own)
+        const wonMessages = ['Genius!', 'Got it in 2!', 'Nailed it!', 'Figured it out!', 'Got it!', 'Just barely!'];
+        const resultLine  = won
+            ? wonMessages[Math.min(tries - 1, wonMessages.length - 1)]
+            : "Couldn't crack it this time!";
+
+        const text = [
+            `🎯 Wordle Challenge ${tries}/6`,
+            resultLine,
+            '',
+            grid,
+            '',
+            'Think you can do better?',
+            'Create your own challenge:',
+            baseUrl
+        ].join('\n');
 
         if (navigator.share) {
             navigator.share({ title: 'Wordle Challenge Result', text }).catch(() => {});
@@ -905,7 +920,7 @@
             navigator.clipboard.writeText(text).then(() => {
                 const btn = document.getElementById('shareResultBtn');
                 const original = btn.textContent;
-                btn.textContent = 'Copied!';
+                btn.textContent = 'Copied! ✓';
                 setTimeout(() => { btn.textContent = original; }, 2000);
             }).catch(() => showToast(text));
         }
