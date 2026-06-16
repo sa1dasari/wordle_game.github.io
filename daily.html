@@ -750,8 +750,11 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
                 return;
             }
 
-            // Track rank changes for arrows
-            const prevRanks = JSON.parse(sessionStorage.getItem('lb_prev_ranks_' + type) || '{}');
+            // Track rank changes for arrows — use localStorage so mobile doesn't lose state
+            // Key includes the date so ranks reset daily automatically
+            const today = getLocalDateStr();
+            const storageKey = `lb_ranks_${type}_${today}`;
+            const prevRanks = JSON.parse(localStorage.getItem(storageKey) || '{}');
             const newRanks  = {};
 
             leaderboard.forEach((entry, idx) => {
@@ -792,7 +795,7 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
             });
 
             // Save ranks for next refresh
-            sessionStorage.setItem('lb_prev_ranks_' + type, JSON.stringify(newRanks));
+            localStorage.setItem(storageKey, JSON.stringify(newRanks));
         } catch (err) {
             listEl.innerHTML = `<p class="error-msg">${err.message}</p>`;
         }
