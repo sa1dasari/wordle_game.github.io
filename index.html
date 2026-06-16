@@ -20,6 +20,16 @@
         <a href="party.html"     class="nav-link">🎉 Party</a>
         <button class="nav-link" id="helpBtn" aria-label="How to play">❓</button>
     </div>
+    <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
+        <span></span><span></span><span></span>
+    </button>
+    <div class="nav-dropdown" id="navDropdown">
+        <a href="daily.html" class="nav-link">📅 Daily</a>
+        <a href="duel.html" class="nav-link">⚔️ Duel</a>
+        <a href="challenge.html" class="nav-link">🎯 Challenge</a>
+        <a href="party.html" class="nav-link">🎉 Party</a>
+        <button class="nav-link" id="helpBtnMobile" onclick="document.getElementById('helpBtn').click();">❓ Help</button>
+    </div>
 </header>
 
 <div class="container">
@@ -96,5 +106,27 @@
 
 <script src="words.js"></script>
 <script src="script.js"></script>
+
+<script>
+    // ── Hamburger menu ────────────────────────────────────────────────────────────
+    (function() {
+        const btn = document.getElementById('hamburgerBtn');
+        const dropdown = document.getElementById('navDropdown');
+        if (!btn || !dropdown) return;
+
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = dropdown.classList.toggle('open');
+            btn.classList.toggle('open', isOpen);
+        });
+
+        // Close on outside click
+        document.addEventListener('click', () => {
+            dropdown.classList.remove('open');
+            btn.classList.remove('open');
+        });
+    })();
+</script>
+
 </body>
 </html>
