@@ -35,7 +35,7 @@
     }
     .nav-link:hover { color: var(--accent); border-color: var(--accent); }
 
-    .screen { display: none; width: 100%; max-width: 480px; padding: 24px 20px 40px; flex-direction: column; align-items: center; gap: 16px; }
+    .screen { display: none; width: 100%; max-width: 480px; padding: 16px 12px 32px; flex-direction: column; align-items: center; gap: 12px; }
     .screen.active { display: flex; }
 
     .card {
@@ -149,6 +149,10 @@
     .lb-name { flex: 1; }
     .lb-stat { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); }
     .lb-row.me { border-color: var(--accent); background: rgba(200,185,122,0.08); }
+    .lb-arrow { font-size: 10px; margin-left: 4px; }
+    .lb-arrow.up   { color: var(--green); }
+    .lb-arrow.down { color: #e74c3c; }
+    .lb-arrow.same { color: var(--muted); }
 
     .toast {
         position: fixed; top: 80px; left: 50%; transform: translateX(-50%) translateY(-10px);
@@ -160,11 +164,19 @@
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     .toast.error { background: #c0392b; color: white; }
 
+    @media (max-width: 480px) {
+        .tile { width: 52px; height: 52px; font-size: 22px; }
+        .game-board { grid-template-columns: repeat(5, 52px); gap: 6px; }
+        .kb-key { height: 50px; min-width: 30px; max-width: 36px; font-size: 12px; }
+        .kb-wide { min-width: 54px; max-width: 54px; font-size: 10px; }
+        .keyboard { max-width: 100%; padding: 0 2px; gap: 6px; }
+        .kb-row { gap: 4px; }
+    }
     @media (max-width: 380px) {
-        .tile { width: 50px; height: 50px; font-size: 22px; }
-        .game-board { grid-template-columns: repeat(5, 50px); }
-        .kb-key { height: 48px; min-width: 30px; max-width: 33px; font-size: 11px; }
-        .kb-wide { min-width: 50px; max-width: 50px; }
+        .tile { width: 44px; height: 44px; font-size: 18px; }
+        .game-board { grid-template-columns: repeat(5, 44px); gap: 5px; }
+        .kb-key { height: 44px; min-width: 25px; max-width: 30px; font-size: 11px; }
+        .kb-wide { min-width: 46px; max-width: 46px; font-size: 10px; }
     }
     </style>
 </head>
@@ -184,6 +196,16 @@
 </header>
 
 <div class="toast" id="toast"></div>
+<div id="resetBanner" style="
+width:100%; max-width:700px;
+background: var(--bg2); border-bottom: 1px solid var(--border);
+padding: 6px 20px; text-align:center;
+font-family:'DM Mono',monospace; font-size:11px; color:var(--muted);
+display:flex; align-items:center; justify-content:center; gap:8px;
+">
+<span>🕛 New word at midnight EST</span>
+<span id="resetCountdown" style="color:var(--accent); font-weight:700;"></span>
+</div>
 
 <!-- ── LOGIN SCREEN ── -->
 <div class="screen active" id="screen-login">
@@ -221,7 +243,11 @@
         <div class="result-summary">
             <div class="result-emoji" id="resultEmoji">🎉</div>
             <div class="result-title" id="resultTitle">SOLVED!</div>
-            <p id="resultSub" style="margin:0;">Come back tomorrow for a new word.</p>
+            <div id="resultWordReveal" style="display:none; font-family:'DM Mono',monospace; font-size:12px; color:var(--muted); text-align:center;">
+                The word was
+                <span id="revealedWord" style="display:block; font-family:'League Spartan',sans-serif; font-size:22px; font-weight:900; color:var(--accent); letter-spacing:6px; margin-top:4px;">—</span>
+            </div>
+            <p id="resultSub" style="margin:0; font-size:12px; color:var(--muted);">Come back tomorrow for a new word.</p>
             <div class="result-grid" id="resultGrid"></div>
         </div>
 
@@ -229,6 +255,7 @@
             <div class="stat"><div class="stat-num" id="statStreak">0</div><div class="stat-label">Streak</div></div>
             <div class="stat"><div class="stat-num" id="statGames">0</div><div class="stat-label">Played</div></div>
             <div class="stat"><div class="stat-num" id="statWinPct">0%</div><div class="stat-label">Win Rate</div></div>
+            <div class="stat"><div class="stat-num" id="statTime">—</div><div class="stat-label">Today's Time</div></div>
         </div>
 
         <button class="btn btn-accent" onclick="shareDailyResult()" id="shareDailyBtn">Share Result</button>
@@ -606,7 +633,16 @@ async function showResultScreen(result) {
     document.getElementById('resultEmoji').textContent = solved ? '🎉' : '😔';
     document.getElementById('resultTitle').textContent = solved
         ? ['GENIUS!','MAGNIFICENT!','IMPRESSIVE!','SPLENDID!','GREAT!','PHEW!'][guessCount - 1] || 'SOLVED!'
-        : 'TOMORROW IS A NEW DAY';
+        : 'BETTER LUCK TOMORROW';
+
+    // Show the word on loss, hide on win
+    const wordRevealEl = document.getElementById('resultWordReveal');
+    if (!solved && result.word) {
+        wordRevealEl.style.display = 'block';
+        document.getElementById('revealedWord').textContent = result.word;
+    } else {
+        wordRevealEl.style.display = 'none';
+    }
 
     // Build result grid
     const gridEl = document.getElementById('resultGrid');
@@ -626,6 +662,11 @@ async function showResultScreen(result) {
 
     guessHistory = result.guesses || [];
 
+    // Show solve time if available
+    if (result.time_taken_seconds != null) {
+        document.getElementById('statTime').textContent = formatSolveTime(result.time_taken_seconds);
+    }
+
     // Load profile stats
     try {
         const { profile } = await apiCall('/api/profile');
@@ -641,11 +682,24 @@ async function showResultScreen(result) {
 function shareDailyResult() {
     const grid = guessHistory.map(g =>
         g.result.map(r => r === 'correct' ? '🟩' : r === 'present' ? '🟨' : '⬛').join('')
-    ).join('\\n');
+    ).join('\n');
 
-    const tries = guessHistory.length;
-    const won = guessHistory.length > 0 && guessHistory[guessHistory.length-1].result.every(r => r === 'correct');
-    const text = `Wordle Daily ${won ? tries : 'X'}/6\\n\\n${grid}\\n\\n${window.location.href.split('?')[0]}`;
+    const won   = guessHistory.length > 0 && guessHistory[guessHistory.length-1].result.every(r => r === 'correct');
+    const tries = won ? guessHistory.length : 'X';
+    const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const timeEl = document.getElementById('statTime').textContent;
+    const timeLine = timeEl && timeEl !== '—' ? `\nSolved in ${timeEl}` : '';
+
+    const text = [
+        `🟩 Wordle Daily — ${today}`,
+        `Mode: Daily`,
+        `Guesses: ${tries}/6${timeLine}`,
+        '',
+        grid,
+        '',
+        'Play today\'s word at:',
+        'https://wordlegames.co/daily.html'
+    ].join('\n');
 
     if (navigator.share) {
         navigator.share({ title: 'Wordle Daily', text }).catch(() => {});
@@ -653,7 +707,7 @@ function shareDailyResult() {
         navigator.clipboard.writeText(text).then(() => {
             const btn = document.getElementById('shareDailyBtn');
             const orig = btn.textContent;
-            btn.textContent = 'Copied!';
+            btn.textContent = 'Copied! ✓';
             setTimeout(() => { btn.textContent = orig; }, 2000);
         }).catch(() => showToast(text));
     }
@@ -715,6 +769,33 @@ async function loadLeaderboard(type) {
 }
 
 // ── INIT ───────────────────────────────────────────────────────
+
+// Countdown to midnight EST (UTC-5 standard, UTC-4 EDT)
+function updateResetCountdown() {
+    const now = new Date();
+    // Get current time in EST (UTC-5)
+    const estOffset = -5 * 60; // EST in minutes
+    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const estNow = new Date(utc + (estOffset * 60000));
+
+    // Next midnight EST
+    const midnight = new Date(estNow);
+    midnight.setHours(24, 0, 0, 0);
+
+    const diff = midnight - estNow;
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+
+    const el = document.getElementById('resetCountdown');
+    if (el) {
+        el.textContent = `(${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')})`;
+    }
+}
+
+updateResetCountdown();
+setInterval(updateResetCountdown, 1000);
+
 checkAuth();
 </script>
 
