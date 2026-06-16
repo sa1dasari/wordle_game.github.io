@@ -301,6 +301,7 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
     let isSubmitting  = false;
     let tiles         = [];
     let guessHistory  = [];
+    let myUsername    = null; // logged-in user's username for leaderboard highlighting
 
     // Local date string YYYY-MM-DD — resets at local midnight
     function getLocalDateStr() {
@@ -437,6 +438,7 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
             if (!profile || !profile.username) {
                 showScreen('screen-username');
             } else {
+                myUsername = profile.username;
                 await loadGameState();
             }
         } catch (err) {
@@ -456,6 +458,7 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
 
         try {
             await apiCall('/api/profile', { method: 'POST', body: JSON.stringify({ username }) });
+            myUsername = username;
             await loadGameState();
         } catch (err) {
             errEl.textContent = err.message;
@@ -796,9 +799,17 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
                 // Medals for top 3
                 const medal = rankLabel === 1 ? '🥇' : rankLabel === 2 ? '🥈' : rankLabel === 3 ? '🥉' : rankLabel;
 
+                // Highlight the logged-in user's own row
+                const isMe = myUsername && entry.username === myUsername;
+                if (isMe) row.classList.add('me');
+
                 row.innerHTML = `
                 <span class="lb-rank">${medal}</span>
-                <span class="lb-name">${entry.username}${arrowHtml}</span>
+                <span class="lb-name">
+                    ${entry.username}
+                    ${isMe ? '<span style="font-size:10px;color:var(--accent);font-family:'DM Mono',monospace;margin-left:4px;">(you)</span>' : ''}
+                    ${arrowHtml}
+                </span>
                 <span class="lb-stat">${statText}</span>
             `;
                 listEl.appendChild(row);
