@@ -2,7 +2,7 @@
 
 A browser-based game with daily shared words, real-time dictionary validation, and a multiplayer Duel Mode. Features a dark theme and a first-visit how-to-play guide. Pure vanilla JS with optional backend support.
 
-🎮 **[Play it live →](https://sa1dasari.github.io/wordle_game.github.io/)**
+🎮 **[Play it live →](https://wordlegames.co/index.html)**
 
 ---
 
