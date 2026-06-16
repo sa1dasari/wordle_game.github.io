@@ -8,7 +8,7 @@ const MAX_ROWS = 6;
 const MAX_COLS = 5;
 let tiles = [];
 
-// Keyboard rows matching NYT Wordle layout
+// Keyboard rows
 const KB_ROWS = [
     ['Q','W','E','R','T','Y','U','I','O','P'],
     ['A','S','D','F','G','H','J','K','L'],
