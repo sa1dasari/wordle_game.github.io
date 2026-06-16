@@ -153,6 +153,7 @@
         .lb-arrow.up   { color: var(--green); }
         .lb-arrow.down { color: #e74c3c; }
         .lb-arrow.same { color: var(--muted); }
+        .lb-you { font-size: 10px; color: var(--accent); font-family: 'DM Mono', monospace; margin-left: 4px; }
 
         .toast {
             position: fixed; top: 80px; left: 50%; transform: translateX(-50%) translateY(-10px);
@@ -807,7 +808,7 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
                 <span class="lb-rank">${medal}</span>
                 <span class="lb-name">
                     ${entry.username}
-                    ${isMe ? '<span style="font-size:10px;color:var(--accent);font-family:'DM Mono',monospace;margin-left:4px;">(you)</span>' : ''}
+                    ${isMe ? '<span class="lb-you">(you)</span>' : ''}
                     ${arrowHtml}
                 </span>
                 <span class="lb-stat">${statText}</span>
