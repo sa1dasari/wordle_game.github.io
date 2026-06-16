@@ -7,177 +7,177 @@
     <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;700;900&family=DM+Sans:wght@400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-        --bg: #121213; --bg2: #1a1a1b; --bg3: #242426;
-        --border: #3a3a3c; --text: #e8e6e0; --muted: #818384;
-        --green: #538d4e; --yellow: #b59f3b; --grey: #3a3a3c; --accent: #c8b97a;
-    }
-    body {
-        background: var(--bg); color: var(--text);
-        font-family: 'DM Sans', sans-serif;
-        min-height: 100vh; display: flex; flex-direction: column; align-items: center;
-    }
-    header {
-        width: 100%; max-width: 700px; padding: 14px 20px;
-        display: flex; align-items: center; justify-content: space-between;
-        border-bottom: 1px solid var(--border); margin-bottom: 0;
-    }
-    .header-left { display: flex; flex-direction: column; gap: 2px; }
-    h1 { font-family: 'League Spartan', sans-serif; font-weight: 900; font-size: 1.5rem; letter-spacing: 3px; }
-    .header-sub { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
-    .nav-links { display: flex; gap: 8px; align-items: center; }
-    .nav-link {
-        font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted);
-        text-decoration: none; border: 1px solid var(--border);
-        padding: 5px 12px; border-radius: 4px; transition: all 0.2s;
-        white-space: nowrap; flex-shrink: 0;
-    }
-    .nav-link:hover { color: var(--accent); border-color: var(--accent); }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #121213; --bg2: #1a1a1b; --bg3: #242426;
+            --border: #3a3a3c; --text: #e8e6e0; --muted: #818384;
+            --green: #538d4e; --yellow: #b59f3b; --grey: #3a3a3c; --accent: #c8b97a;
+        }
+        body {
+            background: var(--bg); color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+        }
+        header {
+            width: 100%; max-width: 700px; padding: 14px 20px;
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid var(--border); margin-bottom: 0;
+        }
+        .header-left { display: flex; flex-direction: column; gap: 2px; }
+        h1 { font-family: 'League Spartan', sans-serif; font-weight: 900; font-size: 1.5rem; letter-spacing: 3px; }
+        .header-sub { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+        .nav-links { display: flex; gap: 8px; align-items: center; }
+        .nav-link {
+            font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted);
+            text-decoration: none; border: 1px solid var(--border);
+            padding: 5px 12px; border-radius: 4px; transition: all 0.2s;
+            white-space: nowrap; flex-shrink: 0;
+        }
+        .nav-link:hover { color: var(--accent); border-color: var(--accent); }
 
-    .screen { display: none; width: 100%; max-width: 480px; padding: 16px 12px 32px; flex-direction: column; align-items: center; gap: 12px; }
-    .screen.active { display: flex; }
+        .screen { display: none; width: 100%; max-width: 480px; padding: 16px 12px 32px; flex-direction: column; align-items: center; gap: 12px; }
+        .screen.active { display: flex; }
 
-    .card {
-        background: var(--bg2); border: 1px solid var(--border);
-        border-radius: 8px; padding: 28px; width: 100%;
-        display: flex; flex-direction: column; gap: 16px;
-    }
-    .card h2 {
-        font-family: 'League Spartan', sans-serif; font-size: 1rem;
-        letter-spacing: 2px; color: var(--accent); text-transform: uppercase;
-    }
-    .card p { font-size: 13px; color: var(--muted); line-height: 1.7; }
+        .card {
+            background: var(--bg2); border: 1px solid var(--border);
+            border-radius: 8px; padding: 28px; width: 100%;
+            display: flex; flex-direction: column; gap: 16px;
+        }
+        .card h2 {
+            font-family: 'League Spartan', sans-serif; font-size: 1rem;
+            letter-spacing: 2px; color: var(--accent); text-transform: uppercase;
+        }
+        .card p { font-size: 13px; color: var(--muted); line-height: 1.7; }
 
-    input[type="text"], input[type="email"] {
-        background: var(--bg3); border: 1px solid var(--border);
-        border-radius: 4px; color: var(--text);
-        font-family: 'DM Sans', sans-serif; font-size: 14px;
-        padding: 11px 14px; width: 100%; outline: none; transition: border-color 0.2s;
-    }
-    input:focus { border-color: var(--accent); }
-    input::placeholder { color: var(--muted); }
+        input[type="text"], input[type="email"] {
+            background: var(--bg3); border: 1px solid var(--border);
+            border-radius: 4px; color: var(--text);
+            font-family: 'DM Sans', sans-serif; font-size: 14px;
+            padding: 11px 14px; width: 100%; outline: none; transition: border-color 0.2s;
+        }
+        input:focus { border-color: var(--accent); }
+        input::placeholder { color: var(--muted); }
 
-    .btn {
-        padding: 12px 20px; border-radius: 4px; border: none; cursor: pointer;
-        font-family: 'League Spartan', sans-serif; font-size: 14px; font-weight: 700;
-        letter-spacing: 1px; transition: all 0.15s; width: 100%;
-        text-align: center; text-decoration: none; display: block;
-    }
-    .btn:active { transform: scale(0.98); }
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .btn-accent { background: var(--accent); color: #121213; }
-    .btn-green  { background: var(--green);  color: white; }
-    .btn-ghost  { background: transparent; color: var(--muted); border: 1px solid var(--border); }
-    .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
+        .btn {
+            padding: 12px 20px; border-radius: 4px; border: none; cursor: pointer;
+            font-family: 'League Spartan', sans-serif; font-size: 14px; font-weight: 700;
+            letter-spacing: 1px; transition: all 0.15s; width: 100%;
+            text-align: center; text-decoration: none; display: block;
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn-accent { background: var(--accent); color: #121213; }
+        .btn-green  { background: var(--green);  color: white; }
+        .btn-ghost  { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+        .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
 
-    .error-msg { color: #e74c3c; font-size: 12px; font-family: 'DM Mono', monospace; text-align: center; min-height: 16px; }
-    .success-msg { color: var(--green); font-size: 12px; font-family: 'DM Mono', monospace; text-align: center; min-height: 16px; }
+        .error-msg { color: #e74c3c; font-size: 12px; font-family: 'DM Mono', monospace; text-align: center; min-height: 16px; }
+        .success-msg { color: var(--green); font-size: 12px; font-family: 'DM Mono', monospace; text-align: center; min-height: 16px; }
 
-    /* ── Game board ── */
-    .game-board {
-        display: grid; grid-template-columns: repeat(5, 60px); gap: 8px;
-        justify-content: center;
-    }
-    .tile {
-        width: 60px; height: 60px; border: 2px solid var(--border); border-radius: 4px;
-        font-size: 28px; font-weight: 900; font-family: 'League Spartan', sans-serif;
-        display: flex; align-items: center; justify-content: center;
-        background: var(--bg3); text-transform: uppercase; color: var(--text);
-        transition: background 0.2s, border-color 0.2s;
-    }
-    .tile.active  { border-color: #565758; }
-    .tile.filled  { border-color: #565758; }
-    .tile.correct { background: var(--green);  border-color: var(--green);  color: white; }
-    .tile.present { background: var(--yellow); border-color: var(--yellow); color: white; }
-    .tile.absent  { background: var(--grey);   border-color: var(--grey);   color: white; }
+        /* ── Game board ── */
+        .game-board {
+            display: grid; grid-template-columns: repeat(5, 60px); gap: 8px;
+            justify-content: center;
+        }
+        .tile {
+            width: 60px; height: 60px; border: 2px solid var(--border); border-radius: 4px;
+            font-size: 28px; font-weight: 900; font-family: 'League Spartan', sans-serif;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--bg3); text-transform: uppercase; color: var(--text);
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .tile.active  { border-color: #565758; }
+        .tile.filled  { border-color: #565758; }
+        .tile.correct { background: var(--green);  border-color: var(--green);  color: white; }
+        .tile.present { background: var(--yellow); border-color: var(--yellow); color: white; }
+        .tile.absent  { background: var(--grey);   border-color: var(--grey);   color: white; }
 
-    .message { font-size: 14px; min-height: 24px; text-align: center; font-weight: 600; }
-    .message.success { color: var(--green); }
-    .message.failure { color: #e74c3c; }
+        .message { font-size: 14px; min-height: 24px; text-align: center; font-weight: 600; }
+        .message.success { color: var(--green); }
+        .message.failure { color: #e74c3c; }
 
-    /* ── Keyboard ── */
-    .keyboard { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 500px; margin: 0 auto; user-select: none; }
-    .kb-row { display: flex; justify-content: center; gap: 6px; }
-    .kb-key {
-        height: 56px; min-width: 40px; flex: 1; max-width: 42px;
-        border: none; border-radius: 4px; background: var(--muted); color: white;
-        font-family: 'League Spartan', sans-serif; font-size: 13px; font-weight: 700;
-        cursor: pointer; display: flex; align-items: center; justify-content: center;
-        transition: background 0.2s, transform 0.1s; touch-action: manipulation;
-        -webkit-tap-highlight-color: transparent;
-    }
-    .kb-key:active { transform: scale(0.95); }
-    .kb-wide { min-width: 62px; max-width: 62px; font-size: 11px; }
-    .kb-key.correct { background: var(--green); }
-    .kb-key.present { background: var(--yellow); }
-    .kb-key.absent  { background: #3a3a3c; }
-    .kb-key:disabled { opacity: 0.35; cursor: not-allowed; }
+        /* ── Keyboard ── */
+        .keyboard { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 500px; margin: 0 auto; user-select: none; }
+        .kb-row { display: flex; justify-content: center; gap: 6px; }
+        .kb-key {
+            height: 56px; min-width: 40px; flex: 1; max-width: 42px;
+            border: none; border-radius: 4px; background: var(--muted); color: white;
+            font-family: 'League Spartan', sans-serif; font-size: 13px; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s, transform 0.1s; touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .kb-key:active { transform: scale(0.95); }
+        .kb-wide { min-width: 62px; max-width: 62px; font-size: 11px; }
+        .kb-key.correct { background: var(--green); }
+        .kb-key.present { background: var(--yellow); }
+        .kb-key.absent  { background: #3a3a3c; }
+        .kb-key:disabled { opacity: 0.35; cursor: not-allowed; }
 
-    /* ── Already played card ── */
-    .result-summary { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
-    .result-emoji { font-size: 3rem; }
-    .result-title { font-family: 'League Spartan', sans-serif; font-size: 1.4rem; font-weight: 900; letter-spacing: 2px; }
-    .result-grid { display: flex; flex-direction: column; gap: 4px; align-items: center; }
-    .result-grid-row { display: flex; gap: 4px; }
-    .result-grid-tile {
-        width: 28px; height: 28px; border-radius: 3px;
-        display: flex; align-items: center; justify-content: center; font-size: 16px;
-    }
+        /* ── Already played card ── */
+        .result-summary { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
+        .result-emoji { font-size: 3rem; }
+        .result-title { font-family: 'League Spartan', sans-serif; font-size: 1.4rem; font-weight: 900; letter-spacing: 2px; }
+        .result-grid { display: flex; flex-direction: column; gap: 4px; align-items: center; }
+        .result-grid-row { display: flex; gap: 4px; }
+        .result-grid-tile {
+            width: 28px; height: 28px; border-radius: 3px;
+            display: flex; align-items: center; justify-content: center; font-size: 16px;
+        }
 
-    /* ── Stats row ── */
-    .stats-row { display: flex; justify-content: space-around; width: 100%; padding: 12px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-    .stat { text-align: center; }
-    .stat-num { font-family: 'League Spartan', sans-serif; font-size: 1.8rem; font-weight: 900; color: var(--accent); }
-    .stat-label { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; }
+        /* ── Stats row ── */
+        .stats-row { display: flex; justify-content: space-around; width: 100%; padding: 12px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+        .stat { text-align: center; }
+        .stat-num { font-family: 'League Spartan', sans-serif; font-size: 1.8rem; font-weight: 900; color: var(--accent); }
+        .stat-label { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; }
 
-    /* ── Leaderboard ── */
-    .tabs { display: flex; gap: 6px; width: 100%; }
-    .tab-btn {
-        flex: 1; padding: 8px; border-radius: 4px; border: 1px solid var(--border);
-        background: var(--bg3); color: var(--muted); font-family: 'League Spartan', sans-serif;
-        font-size: 11px; font-weight: 700; letter-spacing: 1px; cursor: pointer; transition: all 0.2s;
-    }
-    .tab-btn.active { background: var(--accent); color: #121213; border-color: var(--accent); }
+        /* ── Leaderboard ── */
+        .tabs { display: flex; gap: 6px; width: 100%; }
+        .tab-btn {
+            flex: 1; padding: 8px; border-radius: 4px; border: 1px solid var(--border);
+            background: var(--bg3); color: var(--muted); font-family: 'League Spartan', sans-serif;
+            font-size: 11px; font-weight: 700; letter-spacing: 1px; cursor: pointer; transition: all 0.2s;
+        }
+        .tab-btn.active { background: var(--accent); color: #121213; border-color: var(--accent); }
 
-    .lb-row {
-        display: flex; align-items: center; justify-content: space-between;
-        padding: 10px 14px; background: var(--bg3); border-radius: 6px; border: 1px solid var(--border);
-        font-size: 13px;
-    }
-    .lb-rank { font-family: 'League Spartan', sans-serif; font-weight: 900; color: var(--accent); width: 28px; }
-    .lb-name { flex: 1; }
-    .lb-stat { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); }
-    .lb-row.me { border-color: var(--accent); background: rgba(200,185,122,0.08); }
-    .lb-arrow { font-size: 10px; margin-left: 4px; }
-    .lb-arrow.up   { color: var(--green); }
-    .lb-arrow.down { color: #e74c3c; }
-    .lb-arrow.same { color: var(--muted); }
+        .lb-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 14px; background: var(--bg3); border-radius: 6px; border: 1px solid var(--border);
+            font-size: 13px;
+        }
+        .lb-rank { font-family: 'League Spartan', sans-serif; font-weight: 900; color: var(--accent); width: 28px; }
+        .lb-name { flex: 1; }
+        .lb-stat { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); }
+        .lb-row.me { border-color: var(--accent); background: rgba(200,185,122,0.08); }
+        .lb-arrow { font-size: 10px; margin-left: 4px; }
+        .lb-arrow.up   { color: var(--green); }
+        .lb-arrow.down { color: #e74c3c; }
+        .lb-arrow.same { color: var(--muted); }
 
-    .toast {
-        position: fixed; top: 80px; left: 50%; transform: translateX(-50%) translateY(-10px);
-        background: var(--text); color: var(--bg); padding: 10px 20px; border-radius: 6px;
-        font-family: 'League Spartan', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 1px;
-        opacity: 0; transition: opacity 0.2s, transform 0.2s; z-index: 999; pointer-events: none;
-        max-width: 320px; text-align: center;
-    }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-    .toast.error { background: #c0392b; color: white; }
+        .toast {
+            position: fixed; top: 80px; left: 50%; transform: translateX(-50%) translateY(-10px);
+            background: var(--text); color: var(--bg); padding: 10px 20px; border-radius: 6px;
+            font-family: 'League Spartan', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 1px;
+            opacity: 0; transition: opacity 0.2s, transform 0.2s; z-index: 999; pointer-events: none;
+            max-width: 320px; text-align: center;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.error { background: #c0392b; color: white; }
 
-    @media (max-width: 480px) {
-        .tile { width: 52px; height: 52px; font-size: 22px; }
-        .game-board { grid-template-columns: repeat(5, 52px); gap: 6px; }
-        .kb-key { height: 50px; min-width: 30px; max-width: 36px; font-size: 12px; }
-        .kb-wide { min-width: 54px; max-width: 54px; font-size: 10px; }
-        .keyboard { max-width: 100%; padding: 0 2px; gap: 6px; }
-        .kb-row { gap: 4px; }
-    }
-    @media (max-width: 380px) {
-        .tile { width: 44px; height: 44px; font-size: 18px; }
-        .game-board { grid-template-columns: repeat(5, 44px); gap: 5px; }
-        .kb-key { height: 44px; min-width: 25px; max-width: 30px; font-size: 11px; }
-        .kb-wide { min-width: 46px; max-width: 46px; font-size: 10px; }
-    }
+        @media (max-width: 480px) {
+            .tile { width: 52px; height: 52px; font-size: 22px; }
+            .game-board { grid-template-columns: repeat(5, 52px); gap: 6px; }
+            .kb-key { height: 50px; min-width: 30px; max-width: 36px; font-size: 12px; }
+            .kb-wide { min-width: 54px; max-width: 54px; font-size: 10px; }
+            .keyboard { max-width: 100%; padding: 0 2px; gap: 6px; }
+            .kb-row { gap: 4px; }
+        }
+        @media (max-width: 380px) {
+            .tile { width: 44px; height: 44px; font-size: 18px; }
+            .game-board { grid-template-columns: repeat(5, 44px); gap: 5px; }
+            .kb-key { height: 44px; min-width: 25px; max-width: 30px; font-size: 11px; }
+            .kb-wide { min-width: 46px; max-width: 46px; font-size: 10px; }
+        }
     </style>
 </head>
 <body>
@@ -188,23 +188,24 @@
         <span class="header-sub" id="headerSub">one word · everyone · today</span>
     </div>
     <div class="nav-links">
-        <a href="index.html"     class="nav-link">🟩 Solo</a>
-        <a href="duel.html"      class="nav-link">⚔️ Duel</a>
-        <a href="challenge.html" class="nav-link">🎯 Challenge</a>
-        <a href="party.html"     class="nav-link">🎉 Party</a>
+        <a href="/index.html"     class="nav-link">🟩 Solo</a>
+        <a href="/duel.html"      class="nav-link">⚔️ Duel</a>
+        <a href="/challenge.html" class="nav-link">🎯 Challenge</a>
+        <a href="/party.html"     class="nav-link">🎉 Party</a>
     </div>
 </header>
 
 <div class="toast" id="toast"></div>
 <div id="resetBanner" style="
-width:100%; max-width:700px;
-background: var(--bg2); border-bottom: 1px solid var(--border);
-padding: 6px 20px; text-align:center;
-font-family:'DM Mono',monospace; font-size:11px; color:var(--muted);
-display:flex; align-items:center; justify-content:center; gap:8px;
+    width:100%; max-width:700px;
+    background: var(--bg2); border-bottom: 1px solid var(--border);
+    padding: 6px 20px; text-align:center;
+    font-family:'DM Mono',monospace; font-size:11px; color:var(--muted);
+    display:flex; align-items:center; justify-content:center; gap:8px;
 ">
-<span>🕛 New word at midnight EST</span>
-<span id="resetCountdown" style="color:var(--accent); font-weight:700;"></span>
+    <span>🕛 New word in</span>
+    <span id="resetCountdown" style="color:var(--accent); font-weight:700;"></span>
+    <span>(resets at your local midnight)</span>
 </div>
 
 <!-- ── LOGIN SCREEN ── -->
@@ -281,530 +282,556 @@ const SUPABASE_URL = 'https://kqhsqmwkwzihumgamjcb.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_argdX5axBVbWZwxADImHDw_HgAmFOE4';
 const API_URL = 'https://web-production-a12a9.up.railway.app';
 
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const MAX_GUESSES = 6;
-const MAX_COLS    = 5;
-const KB_ROWS = [
-    ['Q','W','E','R','T','Y','U','I','O','P'],
-    ['A','S','D','F','G','H','J','K','L'],
-    ['ENTER','Z','X','C','V','B','N','M','⌫']
-];
+    const MAX_GUESSES = 6;
+    const MAX_COLS    = 5;
+    const KB_ROWS = [
+        ['Q','W','E','R','T','Y','U','I','O','P'],
+        ['A','S','D','F','G','H','J','K','L'],
+        ['ENTER','Z','X','C','V','B','N','M','⌫']
+    ];
 
-// ── State ──────────────────────────────────────────────────────
-let session       = null;
-let accessToken   = null;
-let currentRow    = 0;
-let currentCol    = 0;
-let gameOver      = false;
-let isSubmitting  = false;
-let tiles         = [];
-let guessHistory  = [];
+    // ── State ──────────────────────────────────────────────────────
+    let session       = null;
+    let accessToken   = null;
+    let currentRow    = 0;
+    let currentCol    = 0;
+    let gameOver      = false;
+    let isSubmitting  = false;
+    let tiles         = [];
+    let guessHistory  = [];
 
-// ── Helpers ────────────────────────────────────────────────────
-let toastTimer;
-function showToast(msg, isError = false, dur = 2500) {
-    const el = document.getElementById('toast');
-    el.textContent = msg;
-    el.classList.toggle('error', isError);
-    el.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => el.classList.remove('show','error'), dur);
-}
-
-function showScreen(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-}
-
-async function apiCall(path, options = {}) {
-    const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
-    if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
-    const res = await fetch(`${API_URL}${path}`, { ...options, headers });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Request failed');
-    return data;
-}
-
-// ── AUTH ───────────────────────────────────────────────────────
-async function sendMagicLink() {
-    const email = document.getElementById('emailInput').value.trim();
-    const errEl = document.getElementById('loginError');
-    const okEl  = document.getElementById('loginSuccess');
-    errEl.textContent = ''; okEl.textContent = '';
-
-    if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
-        errEl.textContent = 'Enter a valid email address.';
-        return;
+    // Local date string YYYY-MM-DD — resets at local midnight
+    function getLocalDateStr() {
+        const d = new Date();
+        const yyyy = d.getFullYear();
+        const mm   = String(d.getMonth() + 1).padStart(2, '0');
+        const dd   = String(d.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
     }
 
-    const btn = document.getElementById('sendLinkBtn');
-    btn.disabled = true; btn.textContent = 'Sending...';
-
-    // Always redirect to the canonical domain after magic link click
-    const redirectUrl = window.location.hostname === 'wordlegames.co'
-        ? 'https://wordlegames.co/daily.html'
-        : window.location.href.split('?')[0];
-
-    const { error } = await supabaseClient.auth.signInWithOtp({
-        email,
-        options: { emailRedirectTo: redirectUrl }
-    });
-
-    btn.disabled = false; btn.textContent = 'Verify Email';
-
-    if (error) {
-        errEl.textContent = error.message;
-    } else {
-        okEl.textContent = `Check your email! We sent a sign-in link to ${email}.`;
-    }
-}
-
-// Guard against afterLogin running multiple times simultaneously
-let authHandled = false;
-
-async function checkAuth() {
-    // If URL contains a magic link token, let onAuthStateChange handle it
-    // Don't call getSession() immediately — the token needs a moment to process
-    if (window.location.hash.includes('access_token') ||
-        window.location.hash.includes('type=magiclink') ||
-        window.location.hash.includes('type=recovery')) {
-        // Show a loading state while Supabase processes the token
-        showLoadingScreen();
-        // onAuthStateChange will fire and take over
-        return;
+    // ── Helpers ────────────────────────────────────────────────────
+    let toastTimer;
+    function showToast(msg, isError = false, dur = 2500) {
+        const el = document.getElementById('toast');
+        el.textContent = msg;
+        el.classList.toggle('error', isError);
+        el.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => el.classList.remove('show','error'), dur);
     }
 
-    // No token in URL — check for existing session normally
-    const { data } = await supabaseClient.auth.getSession();
-    session = data.session;
-
-    if (session) {
-        accessToken = session.access_token;
-        if (!authHandled) {
-            authHandled = true;
-            await afterLogin();
-        }
-    } else {
-        showScreen('screen-login');
-    }
-}
-
-// Listen for auth state changes (magic link clicks, token refresh, sign out)
-supabaseClient.auth.onAuthStateChange(async (event, newSession) => {
-    console.log('Auth event:', event);
-
-    if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        if (!newSession) return;
-        session     = newSession;
-        accessToken = newSession.access_token;
-        if (!authHandled) {
-            authHandled = true;
-            await afterLogin();
-        }
-    } else if (event === 'SIGNED_OUT') {
-        authHandled = false;
-        session     = null;
-        accessToken = null;
-        showScreen('screen-login');
-    }
-});
-
-function showLoadingScreen() {
-    // Show a neutral loading state while magic link token is being processed
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    // Reuse the login card area but show loading text
-    const loginScreen = document.getElementById('screen-login');
-    loginScreen.classList.add('active');
-    const card = loginScreen.querySelector('.card');
-    if (card) card.innerHTML = '<p style="text-align:center;color:var(--muted);font-family:monospace;font-size:13px;padding:20px 0;">Signing you in...</p>';
-}
-
-async function afterLogin() {
-    // Check if user has a profile/username
-    try {
-        const { profile } = await apiCall('/api/profile');
-        if (!profile || !profile.username) {
-            showScreen('screen-username');
-        } else {
-            await loadGameState();
-        }
-    } catch (err) {
-        showScreen('screen-username');
-    }
-}
-
-async function saveUsername() {
-    const username = document.getElementById('usernameInput').value.trim();
-    const errEl = document.getElementById('usernameError');
-    errEl.textContent = '';
-
-    if (!/^[a-zA-Z0-9_]{3,16}$/.test(username)) {
-        errEl.textContent = '3-16 characters: letters, numbers, underscore only.';
-        return;
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
     }
 
-    try {
-        await apiCall('/api/profile', { method: 'POST', body: JSON.stringify({ username }) });
-        await loadGameState();
-    } catch (err) {
-        errEl.textContent = err.message;
+    async function apiCall(path, options = {}) {
+        const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+        if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
+        const res = await fetch(`${API_URL}${path}`, { ...options, headers });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Request failed');
+        return data;
     }
-}
 
-// ── GAME STATE ─────────────────────────────────────────────────
-async function loadGameState() {
-    try {
-        const status = await apiCall('/api/daily/status');
+    // ── AUTH ───────────────────────────────────────────────────────
+    async function sendMagicLink() {
+        const email = document.getElementById('emailInput').value.trim();
+        const errEl = document.getElementById('loginError');
+        const okEl  = document.getElementById('loginSuccess');
+        errEl.textContent = ''; okEl.textContent = '';
 
-        if (status.played) {
-            showResultScreen(status.result);
-        } else {
-            // Resume in-progress session if any
-            guessHistory = status.guesses || [];
-            currentRow = guessHistory.length;
-            startGame();
-        }
-    } catch (err) {
-        showToast(err.message, true);
-    }
-}
-
-function startGame() {
-    showScreen('screen-game');
-    buildBoard();
-    buildKeyboard();
-
-    // Replay any existing guesses from this session
-    guessHistory.forEach((g, rowIdx) => {
-        applyResultToRow(rowIdx, g.guess, g.result);
-        updateKeyboard(g.guess, g.result);
-    });
-
-    if (currentRow < MAX_GUESSES) {
-        tiles[currentRow]?.forEach(t => t.classList.add('active'));
-    }
-}
-
-function buildBoard() {
-    const wrapper = document.getElementById('gameBoard');
-    wrapper.innerHTML = ''; tiles = [];
-    for (let r = 0; r < MAX_GUESSES; r++) {
-        const rowTiles = [];
-        for (let c = 0; c < MAX_COLS; c++) {
-            const tile = document.createElement('div');
-            tile.className = 'tile';
-            wrapper.appendChild(tile);
-            rowTiles.push(tile);
-        }
-        tiles.push(rowTiles);
-    }
-}
-
-function buildKeyboard() {
-    const kb = document.getElementById('keyboard');
-    kb.innerHTML = '';
-    KB_ROWS.forEach(row => {
-        const rowEl = document.createElement('div');
-        rowEl.className = 'kb-row';
-        row.forEach(key => {
-            const btn = document.createElement('button');
-            btn.className   = 'kb-key' + (key === 'ENTER' || key === '⌫' ? ' kb-wide' : '');
-            btn.textContent = key;
-            btn.setAttribute('data-key', key);
-            btn.addEventListener('click', () => handleKey(key));
-            rowEl.appendChild(btn);
-        });
-        kb.appendChild(rowEl);
-    });
-}
-
-function handleKey(key) {
-    if (gameOver || isSubmitting) return;
-    if (key === '⌫')          deleteLetter();
-    else if (key === 'ENTER') submitGuess();
-    else if (/^[A-Z]$/.test(key)) addLetter(key);
-}
-
-function addLetter(key) {
-    if (currentCol >= MAX_COLS) return;
-    tiles[currentRow][currentCol].textContent = key;
-    tiles[currentRow][currentCol].classList.add('filled');
-    currentCol++;
-}
-
-function deleteLetter() {
-    if (currentCol <= 0) return;
-    currentCol--;
-    tiles[currentRow][currentCol].textContent = '';
-    tiles[currentRow][currentCol].classList.remove('filled');
-}
-
-async function submitGuess() {
-    if (gameOver || isSubmitting) return;
-    const guess = tiles[currentRow].map(t => t.textContent).join('');
-    if (guess.length !== MAX_COLS) { showToast('Not enough letters', true); shakeRow(currentRow); return; }
-
-    isSubmitting = true;
-    setKeyboardEnabled(false);
-
-    try {
-        const data = await apiCall('/api/daily/guess', { method: 'POST', body: JSON.stringify({ guess }) });
-
-        if (data.invalid) {
-            showToast('Not a valid word!', true);
-            shakeRow(currentRow);
-            isSubmitting = false;
-            setKeyboardEnabled(true);
+        if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+            errEl.textContent = 'Enter a valid email address.';
             return;
         }
 
-        applyResultToRow(currentRow, data.guess, data.result);
-        updateKeyboard(data.guess, data.result);
-        guessHistory.push({ guess: data.guess, result: data.result });
+        const btn = document.getElementById('sendLinkBtn');
+        btn.disabled = true; btn.textContent = 'Sending...';
 
-        currentRow++;
-        currentCol = 0;
-        isSubmitting = false;
+        // Always redirect to the canonical domain after magic link click
+        const redirectUrl = window.location.hostname === 'wordlegames.co'
+            ? 'https://wordlegames.co/daily.html'
+            : window.location.href.split('?')[0];
 
-        if (data.gameOver) {
-            gameOver = true;
-            setKeyboardEnabled(false);
-            setTimeout(() => loadGameState(), 600); // reload to show result screen
+        const { error } = await supabaseClient.auth.signInWithOtp({
+            email,
+            options: { emailRedirectTo: redirectUrl }
+        });
+
+        btn.disabled = false; btn.textContent = 'Send Magic Link';
+
+        if (error) {
+            errEl.textContent = error.message;
         } else {
-            setKeyboardEnabled(true);
+            okEl.textContent = `Check your email! We sent a sign-in link to ${email}.`;
+        }
+    }
+
+    // Guard against afterLogin running multiple times simultaneously
+    let authHandled = false;
+
+    async function checkAuth() {
+        // If URL contains a magic link token, let onAuthStateChange handle it
+        // Don't call getSession() immediately — the token needs a moment to process
+        if (window.location.hash.includes('access_token') ||
+            window.location.hash.includes('type=magiclink') ||
+            window.location.hash.includes('type=recovery')) {
+            // Show a loading state while Supabase processes the token
+            showLoadingScreen();
+            // onAuthStateChange will fire and take over
+            return;
+        }
+
+        // No token in URL — check for existing session normally
+        const { data } = await supabaseClient.auth.getSession();
+        session = data.session;
+
+        if (session) {
+            accessToken = session.access_token;
+            if (!authHandled) {
+                authHandled = true;
+                await afterLogin();
+            }
+        } else {
+            showScreen('screen-login');
+        }
+    }
+
+    // Listen for auth state changes (magic link clicks, token refresh, sign out)
+    supabaseClient.auth.onAuthStateChange(async (event, newSession) => {
+        console.log('Auth event:', event);
+
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            if (!newSession) return;
+            session     = newSession;
+            accessToken = newSession.access_token;
+            if (!authHandled) {
+                authHandled = true;
+                await afterLogin();
+            }
+        } else if (event === 'SIGNED_OUT') {
+            authHandled = false;
+            session     = null;
+            accessToken = null;
+            showScreen('screen-login');
+        }
+    });
+
+    function showLoadingScreen() {
+        // Show a neutral loading state while magic link token is being processed
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        // Reuse the login card area but show loading text
+        const loginScreen = document.getElementById('screen-login');
+        loginScreen.classList.add('active');
+        const card = loginScreen.querySelector('.card');
+        if (card) card.innerHTML = '<p style="text-align:center;color:var(--muted);font-family:monospace;font-size:13px;padding:20px 0;">Signing you in...</p>';
+    }
+
+    async function afterLogin() {
+        // Check if user has a profile/username
+        try {
+            const { profile } = await apiCall('/api/profile');
+            if (!profile || !profile.username) {
+                showScreen('screen-username');
+            } else {
+                await loadGameState();
+            }
+        } catch (err) {
+            showScreen('screen-username');
+        }
+    }
+
+    async function saveUsername() {
+        const username = document.getElementById('usernameInput').value.trim();
+        const errEl = document.getElementById('usernameError');
+        errEl.textContent = '';
+
+        if (!/^[a-zA-Z0-9_]{3,16}$/.test(username)) {
+            errEl.textContent = '3-16 characters: letters, numbers, underscore only.';
+            return;
+        }
+
+        try {
+            await apiCall('/api/profile', { method: 'POST', body: JSON.stringify({ username }) });
+            await loadGameState();
+        } catch (err) {
+            errEl.textContent = err.message;
+        }
+    }
+
+    // ── GAME STATE ─────────────────────────────────────────────────
+    async function loadGameState() {
+        try {
+            const status = await apiCall('/api/daily/status?date=' + getLocalDateStr());
+
+            if (status.played) {
+                showResultScreen(status.result);
+            } else {
+                // Resume in-progress session if any
+                guessHistory = status.guesses || [];
+                currentRow = guessHistory.length;
+                startGame();
+            }
+        } catch (err) {
+            showToast(err.message, true);
+        }
+    }
+
+    function startGame() {
+        showScreen('screen-game');
+        buildBoard();
+        buildKeyboard();
+
+        // Replay any existing guesses from this session
+        guessHistory.forEach((g, rowIdx) => {
+            applyResultToRow(rowIdx, g.guess, g.result);
+            updateKeyboard(g.guess, g.result);
+        });
+
+        if (currentRow < MAX_GUESSES) {
             tiles[currentRow]?.forEach(t => t.classList.add('active'));
         }
-    } catch (err) {
-        showToast(err.message, true);
-        isSubmitting = false;
-        setKeyboardEnabled(true);
-        if (err.message.includes('already played')) {
-            loadGameState();
+    }
+
+    function buildBoard() {
+        const wrapper = document.getElementById('gameBoard');
+        wrapper.innerHTML = ''; tiles = [];
+        for (let r = 0; r < MAX_GUESSES; r++) {
+            const rowTiles = [];
+            for (let c = 0; c < MAX_COLS; c++) {
+                const tile = document.createElement('div');
+                tile.className = 'tile';
+                wrapper.appendChild(tile);
+                rowTiles.push(tile);
+            }
+            tiles.push(rowTiles);
         }
     }
-}
 
-function applyResultToRow(row, guess, result) {
-    tiles[row].forEach((tile, i) => {
-        tile.classList.remove('active','filled');
-        tile.classList.add(result[i]);
-        tile.textContent = guess[i];
-    });
-}
-
-function updateKeyboard(guess, result) {
-    guess.split('').forEach((letter, i) => {
-        const btn = document.querySelector(`.kb-key[data-key="${letter}"]`);
-        if (!btn) return;
-        const priority = { correct:3, present:2, absent:1 };
-        const cur = ['correct','present','absent'].find(c => btn.classList.contains(c));
-        if (cur && priority[cur] >= priority[result[i]]) return;
-        btn.classList.remove('correct','present','absent');
-        btn.classList.add(result[i]);
-    });
-}
-
-function setKeyboardEnabled(enabled) {
-    document.querySelectorAll('.kb-key').forEach(b => { b.disabled = !enabled; });
-}
-
-function shakeRow(row) {
-    tiles[row]?.forEach(tile => {
-        tile.style.animation='none'; tile.offsetHeight; tile.style.animation='shake 0.4s ease';
-    });
-}
-
-document.addEventListener('keydown', e => {
-    const activeId = document.querySelector('.screen.active')?.id;
-    if (activeId !== 'screen-game') return;
-    if (gameOver || isSubmitting) return;
-    const key = e.key.toUpperCase();
-    if (key === 'BACKSPACE')       { e.preventDefault(); deleteLetter(); }
-    else if (key === 'ENTER')      { e.preventDefault(); submitGuess(); }
-    else if (/^[A-Z]$/.test(key)) addLetter(key);
-});
-
-// ── RESULT SCREEN ──────────────────────────────────────────────
-async function showResultScreen(result) {
-    const solved = result.solved;
-    const guessCount = result.guess_count;
-
-    document.getElementById('resultEmoji').textContent = solved ? '🎉' : '😔';
-    document.getElementById('resultTitle').textContent = solved
-        ? ['GENIUS!','MAGNIFICENT!','IMPRESSIVE!','SPLENDID!','GREAT!','PHEW!'][guessCount - 1] || 'SOLVED!'
-        : 'BETTER LUCK TOMORROW';
-
-    // Show the word on loss, hide on win
-    const wordRevealEl = document.getElementById('resultWordReveal');
-    if (!solved && result.word) {
-        wordRevealEl.style.display = 'block';
-        document.getElementById('revealedWord').textContent = result.word;
-    } else {
-        wordRevealEl.style.display = 'none';
-    }
-
-    // Build result grid
-    const gridEl = document.getElementById('resultGrid');
-    gridEl.innerHTML = '';
-    (result.guesses || []).forEach(g => {
-        const rowEl = document.createElement('div');
-        rowEl.className = 'result-grid-row';
-        g.result.forEach(r => {
-            const tile = document.createElement('div');
-            tile.className = 'result-grid-tile';
-            tile.style.background = r === 'correct' ? '#538d4e' : r === 'present' ? '#b59f3b' : '#3a3a3c';
-            tile.textContent = r === 'correct' ? '🟩' : r === 'present' ? '🟨' : '⬛';
-            rowEl.appendChild(tile);
+    function buildKeyboard() {
+        const kb = document.getElementById('keyboard');
+        kb.innerHTML = '';
+        KB_ROWS.forEach(row => {
+            const rowEl = document.createElement('div');
+            rowEl.className = 'kb-row';
+            row.forEach(key => {
+                const btn = document.createElement('button');
+                btn.className   = 'kb-key' + (key === 'ENTER' || key === '⌫' ? ' kb-wide' : '');
+                btn.textContent = key;
+                btn.setAttribute('data-key', key);
+                btn.addEventListener('click', () => handleKey(key));
+                rowEl.appendChild(btn);
+            });
+            kb.appendChild(rowEl);
         });
-        gridEl.appendChild(rowEl);
-    });
-
-    guessHistory = result.guesses || [];
-
-    // Show solve time if available
-    if (result.time_taken_seconds != null) {
-        document.getElementById('statTime').textContent = formatSolveTime(result.time_taken_seconds);
     }
 
-    // Load profile stats
-    try {
-        const { profile } = await apiCall('/api/profile');
-        document.getElementById('statStreak').textContent = profile.current_streak || 0;
-        document.getElementById('statGames').textContent  = profile.total_games || 0;
-        const winPct = profile.total_games > 0 ? Math.round(100 * profile.total_wins / profile.total_games) : 0;
-        document.getElementById('statWinPct').textContent = winPct + '%';
-    } catch {}
-
-    showScreen('screen-result');
-}
-
-function shareDailyResult() {
-    const grid = guessHistory.map(g =>
-        g.result.map(r => r === 'correct' ? '🟩' : r === 'present' ? '🟨' : '⬛').join('')
-    ).join('\n');
-
-    const won   = guessHistory.length > 0 && guessHistory[guessHistory.length-1].result.every(r => r === 'correct');
-    const tries = won ? guessHistory.length : 'X';
-    const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    const timeEl = document.getElementById('statTime').textContent;
-    const timeLine = timeEl && timeEl !== '—' ? `\nSolved in ${timeEl}` : '';
-
-    const text = [
-        `🟩 Wordle Daily — ${today}`,
-        `Mode: Daily`,
-        `Guesses: ${tries}/6${timeLine}`,
-        '',
-        grid,
-        '',
-        'Play today\'s word at:',
-        'https://wordlegames.co/daily.html'
-    ].join('\n');
-
-    if (navigator.share) {
-        navigator.share({ title: 'Wordle Daily', text }).catch(() => {});
-    } else {
-        navigator.clipboard.writeText(text).then(() => {
-            const btn = document.getElementById('shareDailyBtn');
-            const orig = btn.textContent;
-            btn.textContent = 'Copied! ✓';
-            setTimeout(() => { btn.textContent = orig; }, 2000);
-        }).catch(() => showToast(text));
+    function handleKey(key) {
+        if (gameOver || isSubmitting) return;
+        if (key === '⌫')          deleteLetter();
+        else if (key === 'ENTER') submitGuess();
+        else if (/^[A-Z]$/.test(key)) addLetter(key);
     }
-}
 
-// ── LEADERBOARD ────────────────────────────────────────────────
-function formatSolveTime(seconds) {
-    if (seconds == null) return null;
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return m > 0 ? `${m}m ${s}s` : `${s}s`;
-}
+    function addLetter(key) {
+        if (currentCol >= MAX_COLS) return;
+        tiles[currentRow][currentCol].textContent = key;
+        tiles[currentRow][currentCol].classList.add('filled');
+        currentCol++;
+    }
 
-async function loadLeaderboard(type) {
-    document.getElementById('tabToday').classList.toggle('active', type === 'today');
-    document.getElementById('tabAlltime').classList.toggle('active', type === 'alltime');
+    function deleteLetter() {
+        if (currentCol <= 0) return;
+        currentCol--;
+        tiles[currentRow][currentCol].textContent = '';
+        tiles[currentRow][currentCol].classList.remove('filled');
+    }
 
-    const listEl = document.getElementById('leaderboardList');
-    listEl.innerHTML = '<p style="color:var(--muted);text-align:center;font-size:13px;">Loading...</p>';
+    async function submitGuess() {
+        if (gameOver || isSubmitting) return;
+        const guess = tiles[currentRow].map(t => t.textContent).join('');
+        if (guess.length !== MAX_COLS) { showToast('Not enough letters', true); shakeRow(currentRow); return; }
 
-    try {
-        const path = type === 'today' ? '/api/daily/leaderboard' : '/api/daily/leaderboard/alltime';
-        const { leaderboard } = await apiCall(path);
+        isSubmitting = true;
+        setKeyboardEnabled(false);
 
-        listEl.innerHTML = '';
-        if (!leaderboard || leaderboard.length === 0) {
-            listEl.innerHTML = '<p style="color:var(--muted);text-align:center;font-size:13px;">No results yet today.</p>';
-            return;
-        }
+        try {
+            const data = await apiCall('/api/daily/guess', { method: 'POST', body: JSON.stringify({ guess, date: getLocalDateStr() }) });
 
-        leaderboard.forEach((entry, idx) => {
-            const row = document.createElement('div');
-            row.className = 'lb-row';
-
-            let statText, rankLabel;
-            if (type === 'today') {
-                const guessLabel = entry.solved ? `${entry.guess_count}/6` : 'X/6';
-                const timeLabel  = formatSolveTime(entry.time_taken_seconds);
-                statText = timeLabel ? `${guessLabel} · ${timeLabel}` : guessLabel;
-                // Use the server-computed dense_rank so exact ties share a rank
-                rankLabel = entry.rank ?? (idx + 1);
-            } else {
-                statText  = `🔥 ${entry.max_streak} · ${entry.win_pct}%`;
-                rankLabel = idx + 1;
+            if (data.invalid) {
+                showToast('Not a valid word!', true);
+                shakeRow(currentRow);
+                isSubmitting = false;
+                setKeyboardEnabled(true);
+                return;
             }
 
-            row.innerHTML = `
-            <span class="lb-rank">${rankLabel}</span>
-            <span class="lb-name">${entry.username}</span>
-            <span class="lb-stat">${statText}</span>
-        `;
-            listEl.appendChild(row);
+            applyResultToRow(currentRow, data.guess, data.result);
+            updateKeyboard(data.guess, data.result);
+            guessHistory.push({ guess: data.guess, result: data.result });
+
+            currentRow++;
+            currentCol = 0;
+            isSubmitting = false;
+
+            if (data.gameOver) {
+                gameOver = true;
+                setKeyboardEnabled(false);
+                setTimeout(() => loadGameState(), 600); // reload to show result screen
+            } else {
+                setKeyboardEnabled(true);
+                tiles[currentRow]?.forEach(t => t.classList.add('active'));
+            }
+        } catch (err) {
+            showToast(err.message, true);
+            isSubmitting = false;
+            setKeyboardEnabled(true);
+            if (err.message.includes('already played')) {
+                loadGameState();
+            }
+        }
+    }
+
+    function applyResultToRow(row, guess, result) {
+        tiles[row].forEach((tile, i) => {
+            tile.classList.remove('active','filled');
+            tile.classList.add(result[i]);
+            tile.textContent = guess[i];
         });
-    } catch (err) {
-        listEl.innerHTML = `<p class="error-msg">${err.message}</p>`;
     }
 
-    showScreen('screen-leaderboard');
-}
-
-// ── INIT ───────────────────────────────────────────────────────
-
-// Countdown to midnight EST (UTC-5 standard, UTC-4 EDT)
-function updateResetCountdown() {
-    const now = new Date();
-    // Get current time in EST (UTC-5)
-    const estOffset = -5 * 60; // EST in minutes
-    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-    const estNow = new Date(utc + (estOffset * 60000));
-
-    // Next midnight EST
-    const midnight = new Date(estNow);
-    midnight.setHours(24, 0, 0, 0);
-
-    const diff = midnight - estNow;
-    const h = Math.floor(diff / 3600000);
-    const m = Math.floor((diff % 3600000) / 60000);
-    const s = Math.floor((diff % 60000) / 1000);
-
-    const el = document.getElementById('resetCountdown');
-    if (el) {
-        el.textContent = `(${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')})`;
+    function updateKeyboard(guess, result) {
+        guess.split('').forEach((letter, i) => {
+            const btn = document.querySelector(`.kb-key[data-key="${letter}"]`);
+            if (!btn) return;
+            const priority = { correct:3, present:2, absent:1 };
+            const cur = ['correct','present','absent'].find(c => btn.classList.contains(c));
+            if (cur && priority[cur] >= priority[result[i]]) return;
+            btn.classList.remove('correct','present','absent');
+            btn.classList.add(result[i]);
+        });
     }
-}
 
-updateResetCountdown();
-setInterval(updateResetCountdown, 1000);
+    function setKeyboardEnabled(enabled) {
+        document.querySelectorAll('.kb-key').forEach(b => { b.disabled = !enabled; });
+    }
 
-checkAuth();
+    function shakeRow(row) {
+        tiles[row]?.forEach(tile => {
+            tile.style.animation='none'; tile.offsetHeight; tile.style.animation='shake 0.4s ease';
+        });
+    }
+
+    document.addEventListener('keydown', e => {
+        const activeId = document.querySelector('.screen.active')?.id;
+        if (activeId !== 'screen-game') return;
+        if (gameOver || isSubmitting) return;
+        const key = e.key.toUpperCase();
+        if (key === 'BACKSPACE')       { e.preventDefault(); deleteLetter(); }
+        else if (key === 'ENTER')      { e.preventDefault(); submitGuess(); }
+        else if (/^[A-Z]$/.test(key)) addLetter(key);
+    });
+
+    // ── RESULT SCREEN ──────────────────────────────────────────────
+    async function showResultScreen(result) {
+        const solved = result.solved;
+        const guessCount = result.guess_count;
+
+        document.getElementById('resultEmoji').textContent = solved ? '🎉' : '😔';
+        document.getElementById('resultTitle').textContent = solved
+            ? ['GENIUS!','MAGNIFICENT!','IMPRESSIVE!','SPLENDID!','GREAT!','PHEW!'][guessCount - 1] || 'SOLVED!'
+            : 'BETTER LUCK TOMORROW';
+
+        // Show the word on loss, hide on win
+        const wordRevealEl = document.getElementById('resultWordReveal');
+        if (!solved && result.word) {
+            wordRevealEl.style.display = 'block';
+            document.getElementById('revealedWord').textContent = result.word;
+        } else {
+            wordRevealEl.style.display = 'none';
+        }
+
+        // Build result grid
+        const gridEl = document.getElementById('resultGrid');
+        gridEl.innerHTML = '';
+        (result.guesses || []).forEach(g => {
+            const rowEl = document.createElement('div');
+            rowEl.className = 'result-grid-row';
+            g.result.forEach(r => {
+                const tile = document.createElement('div');
+                tile.className = 'result-grid-tile';
+                tile.style.background = r === 'correct' ? '#538d4e' : r === 'present' ? '#b59f3b' : '#3a3a3c';
+                tile.textContent = r === 'correct' ? '🟩' : r === 'present' ? '🟨' : '⬛';
+                rowEl.appendChild(tile);
+            });
+            gridEl.appendChild(rowEl);
+        });
+
+        guessHistory = result.guesses || [];
+
+        // Show solve time if available
+        if (result.time_taken_seconds != null) {
+            document.getElementById('statTime').textContent = formatSolveTime(result.time_taken_seconds);
+        }
+
+        // Load profile stats
+        try {
+            const { profile } = await apiCall('/api/profile');
+            document.getElementById('statStreak').textContent = profile.current_streak || 0;
+            document.getElementById('statGames').textContent  = profile.total_games || 0;
+            const winPct = profile.total_games > 0 ? Math.round(100 * profile.total_wins / profile.total_games) : 0;
+            document.getElementById('statWinPct').textContent = winPct + '%';
+        } catch {}
+
+        showScreen('screen-result');
+    }
+
+    function shareDailyResult() {
+        const grid = guessHistory.map(g =>
+            g.result.map(r => r === 'correct' ? '🟩' : r === 'present' ? '🟨' : '⬛').join('')
+        ).join('\n');
+
+        const won   = guessHistory.length > 0 && guessHistory[guessHistory.length-1].result.every(r => r === 'correct');
+        const tries = won ? guessHistory.length : 'X';
+        const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const timeEl = document.getElementById('statTime').textContent;
+        const timeLine = timeEl && timeEl !== '—' ? `\nSolved in ${timeEl}` : '';
+
+        const text = [
+            `🟩 Wordle Daily — ${today}`,
+            `Mode: Daily`,
+            `Guesses: ${tries}/6${timeLine}`,
+            '',
+            grid,
+            '',
+            'Play today\'s word at:',
+            'https://wordlegames.co/daily.html'
+        ].join('\n');
+
+        if (navigator.share) {
+            navigator.share({ title: 'Wordle Daily', text }).catch(() => {});
+        } else {
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.getElementById('shareDailyBtn');
+                const orig = btn.textContent;
+                btn.textContent = 'Copied! ✓';
+                setTimeout(() => { btn.textContent = orig; }, 2000);
+            }).catch(() => showToast(text));
+        }
+    }
+
+    // ── LEADERBOARD ────────────────────────────────────────────────
+    function formatSolveTime(seconds) {
+        if (seconds == null) return null;
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return m > 0 ? `${m}m ${s}s` : `${s}s`;
+    }
+
+    async function loadLeaderboard(type) {
+        document.getElementById('tabToday').classList.toggle('active', type === 'today');
+        document.getElementById('tabAlltime').classList.toggle('active', type === 'alltime');
+
+        const listEl = document.getElementById('leaderboardList');
+        listEl.innerHTML = '<p style="color:var(--muted);text-align:center;font-size:13px;">Loading...</p>';
+
+        try {
+            const path = type === 'today'
+                ? '/api/daily/leaderboard?date=' + getLocalDateStr()
+                : '/api/daily/leaderboard/alltime';
+            const { leaderboard } = await apiCall(path);
+
+            listEl.innerHTML = '';
+            if (!leaderboard || leaderboard.length === 0) {
+                listEl.innerHTML = '<p style="color:var(--muted);text-align:center;font-size:13px;">No results yet today.</p>';
+                return;
+            }
+
+            // Track rank changes for arrows
+            const prevRanks = JSON.parse(sessionStorage.getItem('lb_prev_ranks_' + type) || '{}');
+            const newRanks  = {};
+
+            leaderboard.forEach((entry, idx) => {
+                const row = document.createElement('div');
+                row.className = 'lb-row';
+
+                let statText, rankLabel, arrowHtml = '';
+
+                if (type === 'today') {
+                    // Time first, then guesses
+                    const timeLabel  = formatSolveTime(entry.time_taken_seconds);
+                    const guessLabel = entry.solved ? `${entry.guess_count}/6` : 'X/6';
+                    statText  = timeLabel ? `${timeLabel} · ${guessLabel}` : guessLabel;
+                    rankLabel = entry.rank ?? (idx + 1);
+                } else {
+                    statText  = `🔥 ${entry.max_streak} streak · ${entry.win_pct}% wins`;
+                    rankLabel = idx + 1;
+                }
+
+                // Arrow vs previous load
+                newRanks[entry.username] = rankLabel;
+                if (prevRanks[entry.username] != null) {
+                    const diff = prevRanks[entry.username] - rankLabel;
+                    if (diff > 0)      arrowHtml = `<span class="lb-arrow up">▲${diff}</span>`;
+                    else if (diff < 0) arrowHtml = `<span class="lb-arrow down">▼${Math.abs(diff)}</span>`;
+                    else               arrowHtml = `<span class="lb-arrow same">—</span>`;
+                }
+
+                // Medals for top 3
+                const medal = rankLabel === 1 ? '🥇' : rankLabel === 2 ? '🥈' : rankLabel === 3 ? '🥉' : rankLabel;
+
+                row.innerHTML = `
+                <span class="lb-rank">${medal}</span>
+                <span class="lb-name">${entry.username}${arrowHtml}</span>
+                <span class="lb-stat">${statText}</span>
+            `;
+                listEl.appendChild(row);
+            });
+
+            // Save ranks for next refresh
+            sessionStorage.setItem('lb_prev_ranks_' + type, JSON.stringify(newRanks));
+        } catch (err) {
+            listEl.innerHTML = `<p class="error-msg">${err.message}</p>`;
+        }
+
+        showScreen('screen-leaderboard');
+    }
+
+    // ── INIT ───────────────────────────────────────────────────────
+
+    // Countdown to local midnight — resets at midnight in user's own timezone
+    function updateResetCountdown() {
+        const now = new Date();
+        // Next midnight in local time
+        const midnight = new Date(now);
+        midnight.setHours(24, 0, 0, 0);
+
+        const diff = midnight - now;
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+
+        const el = document.getElementById('resetCountdown');
+        if (el) {
+            el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        }
+    }
+
+    updateResetCountdown();
+    setInterval(updateResetCountdown, 1000);
+
+    checkAuth();
 </script>
 
 <style>
-@keyframes shake {
-    0%,100% { transform: translateX(0); } 20% { transform: translateX(-6px); }
-    40% { transform: translateX(6px); }   60% { transform: translateX(-4px); }
-    80% { transform: translateX(4px); }
-}
+    @keyframes shake {
+        0%,100% { transform: translateX(0); } 20% { transform: translateX(-6px); }
+        40% { transform: translateX(6px); }   60% { transform: translateX(-4px); }
+        80% { transform: translateX(4px); }
+    }
 </style>
 </body>
 </html>
