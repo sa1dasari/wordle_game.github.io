@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
-    <title>Wordle Challenge</title>
+    <title>WordForge Challenge</title>
     <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;700;900&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
     <style>
         body {
@@ -298,7 +298,7 @@
 
 <header>
     <div class="header-left">
-        <h1>WORDLE CHALLENGE</h1>
+        <h1>WORDFORGE CHALLENGE</h1>
         <span class="header-sub" id="headerSub">set a word · challenge a friend</span>
     </div>
     <div class="nav-links">
@@ -644,7 +644,7 @@
             code,
             url,
             // Lead with the link since code is device-specific
-            msg: `Can you guess my Wordle? 🟩🟨⬜ You get 6 tries — open this link: ${url}`,
+            msg: `Can you guess my Word? 🟩🟨⬜ \nYou get 6 tries — open this link:\n${url}`,
         };
     }
 
@@ -658,11 +658,11 @@
             // SMS — works on mobile
             window.location.href = `sms:?body=${encoded}`;
         } else if (platform === 'gmail') {
-            const subject = encodeURIComponent('Wordle Challenge — can you guess my word?');
+            const subject = encodeURIComponent('WordForge Challenge — can you guess my word?');
             window.open(`https://mail.google.com/mail/?view=cm&su=${subject}&body=${encoded}`, '_blank');
         } else if (platform === 'native') {
             if (navigator.share) {
-                navigator.share({ title: 'Wordle Challenge', text: msg, url }).catch(() => {});
+                navigator.share({ title: 'WordForge Challenge', text: msg, url }).catch(() => {});
             } else {
                 copyLink();
                 showToast('Link copied — paste it anywhere!');
@@ -898,7 +898,7 @@
             : "Couldn't crack it this time!";
 
         const text = [
-            `🎯 Wordle Challenge ${tries}/6`,
+            `🎯 WordForge Challenge ${tries}/6`,
             resultLine,
             '',
             grid,
@@ -909,7 +909,7 @@
         ].join('\n');
 
         if (navigator.share) {
-            navigator.share({ title: 'Wordle Challenge Result', text }).catch(() => {});
+            navigator.share({ title: 'WordForge Challenge Result', text }).catch(() => {});
         } else {
             navigator.clipboard.writeText(text).then(() => {
                 const btn = document.getElementById('shareResultBtn');

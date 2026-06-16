@@ -4,7 +4,7 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link rel="stylesheet" href="style.css" />
-    <title>Wordle Daily</title>
+    <title>WordForge Daily</title>
     <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;700;900&family=DM+Sans:wght@400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -13,7 +13,7 @@
 
 <header>
     <div class="header-left">
-        <h1>WORDLE DAILY</h1>
+        <h1>WordForge DAILY</h1>
         <span class="header-sub" id="headerSub">one word · everyone · today</span>
     </div>
     <div class="nav-links">
@@ -63,7 +63,7 @@
     <div class="card">
         <h2>Choose a Username</h2>
         <p>This is how you'll appear on the leaderboard. 3-16 characters, letters/numbers/underscore only.</p>
-        <input type="text" id="usernameInput" placeholder="e.g. wordle_wizard" maxlength="16" />
+        <input type="text" id="usernameInput" placeholder="e.g. wordforge_wizard" maxlength="16" />
         <p class="error-msg" id="usernameError"></p>
         <button class="btn btn-accent" onclick="saveUsername()">Continue</button>
     </div>
@@ -542,7 +542,7 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
         const timeLine = timeEl && timeEl !== '—' ? `\nSolved in ${timeEl}` : '';
 
         const text = [
-            `🟩 Wordle Daily — ${today}`,
+            `🟩 WordForge Daily — ${today}`,
             `Mode: Daily`,
             `Guesses: ${tries}/6${timeLine}`,
             '',
@@ -553,7 +553,7 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
         ].join('\n');
 
         if (navigator.share) {
-            navigator.share({ title: 'Wordle Daily', text }).catch(() => {});
+            navigator.share({ title: 'WordForge Daily', text }).catch(() => {});
         } else {
             navigator.clipboard.writeText(text).then(() => {
                 const btn = document.getElementById('shareDailyBtn');
