@@ -414,14 +414,13 @@
         <div class="status-player">
             <span class="player-name"   id="p1Name">—</span>
             <span class="player-guesses" id="p1Guesses">0 guesses</span>
+            <div class="typing-dots" id="typingDotsP1"><span></span><span></span><span></span></div>
         </div>
         <div class="turn-indicator" id="turnIndicator">—</div>
         <div class="status-player" style="text-align:right;">
             <span class="player-name"   id="p2Name">—</span>
             <span class="player-guesses" id="p2Guesses">0 guesses</span>
-            <div class="typing-dots" id="typingDots">
-                <span></span><span></span><span></span>
-            </div>
+            <div class="typing-dots" id="typingDotsP2"><span></span><span></span><span></span></div>
         </div>
     </div>
 
@@ -687,8 +686,19 @@
         }
     }
 
+    function getOpponentDotsEl() {
+        if (!players || players.length < 2) return null;
+        const opponentIdx = players.findIndex(p => p.id !== myId);
+        if (opponentIdx === -1) return null;
+        return document.getElementById(opponentIdx === 0 ? 'typingDotsP1' : 'typingDotsP2');
+    }
+    function showTypingDots() {
+        const el = getOpponentDotsEl();
+        if (el) el.classList.add('show');
+    }
     function hideTypingDots() {
-        document.getElementById('typingDots').classList.remove('show');
+        document.getElementById('typingDotsP1')?.classList.remove('show');
+        document.getElementById('typingDotsP2')?.classList.remove('show');
     }
 
     function submitGuess() {
@@ -894,9 +904,8 @@
     });
 
     socket.on('opponent_typing', ({ isTyping }) => {
-        const dots = document.getElementById('typingDots');
-        if (isTyping) dots.classList.add('show');
-        else          dots.classList.remove('show');
+        if (isTyping) showTypingDots();
+        else          hideTypingDots();
     });
 
     socket.on('rematch_pending', ({ voterName }) => {
