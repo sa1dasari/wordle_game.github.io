@@ -750,12 +750,15 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
                 return;
             }
 
-            // Track rank changes for arrows — use localStorage so mobile doesn't lose state
-            // Key includes the date so ranks reset daily automatically
-            const today = getLocalDateStr();
-            const storageKey = `lb_ranks_${type}_${today}`;
-            const prevRanks = JSON.parse(localStorage.getItem(storageKey) || '{}');
-            const newRanks  = {};
+            // Persistent rank-change arrows:
+            // prevKey = last known ranks (updated only when ranks actually change)
+            // arrowKey = arrows to display (persists until next real change)
+            const today      = getLocalDateStr();
+            const prevKey    = `lb_prev_${type}_${today}`;
+            const arrowKey   = `lb_arrows_${type}_${today}`;
+            const prevRanks  = JSON.parse(localStorage.getItem(prevKey)  || '{}');
+            const savedArrows = JSON.parse(localStorage.getItem(arrowKey) || '{}');
+            const newRanks   = {};
 
             leaderboard.forEach((entry, idx) => {
                 const row = document.createElement('div');
@@ -774,14 +777,21 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
                     rankLabel = idx + 1;
                 }
 
-                // Arrow vs previous load
                 newRanks[entry.username] = rankLabel;
-                if (prevRanks[entry.username] != null) {
+
+                // Check if rank changed vs last known position
+                if (prevRanks[entry.username] != null && prevRanks[entry.username] !== rankLabel) {
+                    // Rank changed — compute new arrow and save it
                     const diff = prevRanks[entry.username] - rankLabel;
-                    if (diff > 0)      arrowHtml = `<span class="lb-arrow up">▲${diff}</span>`;
-                    else if (diff < 0) arrowHtml = `<span class="lb-arrow down">▼${Math.abs(diff)}</span>`;
-                    else               arrowHtml = `<span class="lb-arrow same">—</span>`;
+                    arrowHtml = diff > 0
+                        ? `<span class="lb-arrow up">▲${diff}</span>`
+                        : `<span class="lb-arrow down">▼${Math.abs(diff)}</span>`;
+                    savedArrows[entry.username] = arrowHtml;
+                } else if (savedArrows[entry.username]) {
+                    // No change this load — reuse the previously saved arrow
+                    arrowHtml = savedArrows[entry.username];
                 }
+                // If no previous rank and no saved arrow, arrowHtml stays '' (no indicator)
 
                 // Medals for top 3
                 const medal = rankLabel === 1 ? '🥇' : rankLabel === 2 ? '🥈' : rankLabel === 3 ? '🥉' : rankLabel;
@@ -794,8 +804,10 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
                 listEl.appendChild(row);
             });
 
-            // Save ranks for next refresh
-            localStorage.setItem(storageKey, JSON.stringify(newRanks));
+            // Always update prevRanks to current (so next real change is detected)
+            localStorage.setItem(prevKey,   JSON.stringify(newRanks));
+            // Persist the arrows so they survive refreshes
+            localStorage.setItem(arrowKey,  JSON.stringify(savedArrows));
         } catch (err) {
             listEl.innerHTML = `<p class="error-msg">${err.message}</p>`;
         }
