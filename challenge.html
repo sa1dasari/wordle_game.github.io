@@ -33,6 +33,10 @@
         .header-sub { font-size: 12px; color: var(--muted); font-family: monospace; }
 
         .nav-links { display: flex; gap: 8px; }
+        @media (max-width: 600px) {
+            .nav-links { display: none; }
+            .hamburger { display: flex; }
+        }
         .nav-link {
             font-family: monospace; font-size: 12px; color: var(--muted);
             text-decoration: none; border: 1px solid var(--border);
