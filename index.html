@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WORDFORGE</title>
+    <title>WordForge</title>
     <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -110,20 +110,29 @@
 <script>
     // ── Hamburger menu ────────────────────────────────────────────────────────────
     (function() {
-        const btn = document.getElementById('hamburgerBtn');
+        const btn      = document.getElementById('hamburgerBtn');
         const dropdown = document.getElementById('navDropdown');
         if (!btn || !dropdown) return;
 
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            const isOpen = dropdown.classList.toggle('open');
+            const isOpen = !dropdown.classList.contains('open');
+            dropdown.classList.toggle('open', isOpen);
             btn.classList.toggle('open', isOpen);
         });
 
-        // Close on outside click
-        document.addEventListener('click', () => {
+        // Close when clicking a link inside dropdown
+        dropdown.addEventListener('click', () => {
             dropdown.classList.remove('open');
             btn.classList.remove('open');
+        });
+
+        // Close on outside click — use setTimeout to avoid same-tick close
+        document.addEventListener('click', (e) => {
+            if (!btn.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.classList.remove('open');
+                btn.classList.remove('open');
+            }
         });
     })();
 </script>

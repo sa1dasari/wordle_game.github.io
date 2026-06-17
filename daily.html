@@ -13,7 +13,7 @@
 
 <header>
     <div class="header-left">
-        <h1>WordForge DAILY</h1>
+        <h1>WORDFORGE DAILY</h1>
         <span class="header-sub" id="headerSub">one word · everyone · today</span>
     </div>
     <div class="nav-links">
@@ -542,7 +542,7 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
         const timeLine = timeEl && timeEl !== '—' ? `\nSolved in ${timeEl}` : '';
 
         const text = [
-            `🟩 WordForge Daily — ${today}`,
+            ` WordForge Daily — ${today}`,
             `Mode: Daily`,
             `Guesses: ${tries}/6${timeLine}`,
             '',
@@ -701,20 +701,29 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
 <script>
     // ── Hamburger menu ────────────────────────────────────────────────────────────
     (function() {
-        const btn = document.getElementById('hamburgerBtn');
+        const btn      = document.getElementById('hamburgerBtn');
         const dropdown = document.getElementById('navDropdown');
         if (!btn || !dropdown) return;
 
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            const isOpen = dropdown.classList.toggle('open');
+            const isOpen = !dropdown.classList.contains('open');
+            dropdown.classList.toggle('open', isOpen);
             btn.classList.toggle('open', isOpen);
         });
 
-        // Close on outside click
-        document.addEventListener('click', () => {
+        // Close when clicking a link inside dropdown
+        dropdown.addEventListener('click', () => {
             dropdown.classList.remove('open');
             btn.classList.remove('open');
+        });
+
+        // Close on outside click — use setTimeout to avoid same-tick close
+        document.addEventListener('click', (e) => {
+            if (!btn.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.classList.remove('open');
+                btn.classList.remove('open');
+            }
         });
     })();
 </script>
