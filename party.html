@@ -24,6 +24,10 @@
         h1 { font-family: 'League Spartan', sans-serif; font-weight: 900; font-size: 1.5rem; letter-spacing: 3px; }
         .header-sub { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
         .nav-links { display: flex; gap: 8px; }
+        @media (max-width: 600px) {
+            .nav-links { display: none; }
+            .hamburger { display: flex; }
+        }
         .nav-link {
             font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted);
             text-decoration: none; border: 1px solid var(--border);

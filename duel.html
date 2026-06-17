@@ -37,6 +37,10 @@
 
         /* Solo mode link in header */
         .nav-links { display: flex; gap: 8px; flex-wrap: wrap; }
+        @media (max-width: 600px) {
+            .nav-links { display: none; }
+            .hamburger { display: flex; }
+        }
         .nav-link {
             font-family: monospace;
             font-size: 12px;
