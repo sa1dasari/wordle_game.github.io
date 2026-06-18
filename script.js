@@ -225,7 +225,7 @@ function showShareResult(won) {
     const challengeUrl = `${baseUrl}challenge.html?c=${encoded}`;
 
     const shareText = [
-        `🟩 WordForge Solo ${tries}/6`,
+        ` WordForge Solo ${tries}/6`,
         '',
         grid,
         '',
