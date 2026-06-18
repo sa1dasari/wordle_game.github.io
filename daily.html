@@ -89,9 +89,8 @@
             <p id="resultSub" style="margin:0; font-size:12px; color:var(--muted);">Come back tomorrow for a new word.</p>
             <div class="result-grid" id="resultGrid"></div>
             <button class="btn-show-guesses" id="toggleGuessesBtn" onclick="toggleGuesses()" style="display:none;">
-                Show My Guesses
+                Show Letters
             </button>
-            <div id="guessWordList" style="display:none; width:100%; margin-top:4px;"></div>
         </div>
 
         <div class="stats-row">
@@ -517,32 +516,11 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
 
         guessHistory = result.guesses || [];
 
-        // Build the word list reveal panel
-        const wordListEl = document.getElementById('guessWordList');
-        const toggleBtn  = document.getElementById('toggleGuessesBtn');
-        if (wordListEl && toggleBtn) {
-            wordListEl.innerHTML = '';
-            guessHistory.forEach((g, i) => {
-                const rowEl = document.createElement('div');
-                rowEl.style.cssText = 'display:flex; align-items:center; gap:10px; padding:6px 0; border-bottom:1px solid var(--border);';
-                const numEl = document.createElement('span');
-                numEl.style.cssText = 'font-family:"DM Mono",monospace; font-size:11px; color:var(--muted); width:16px; flex-shrink:0;';
-                numEl.textContent = i + 1;
-                const tilesEl = document.createElement('div');
-                tilesEl.style.cssText = 'display:flex; gap:3px;';
-                g.guess.split('').forEach((letter, j) => {
-                    const t = document.createElement('span');
-                    const r = g.result[j];
-                    const bg = r === 'correct' ? '#538d4e' : r === 'present' ? '#b59f3b' : '#3a3a3c';
-                    t.style.cssText = `width:28px;height:28px;background:${bg};border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:'League Spartan',sans-serif;font-weight:900;font-size:13px;color:white;`;
-                    t.textContent = letter;
-                    tilesEl.appendChild(t);
-                });
-                rowEl.appendChild(numEl);
-                rowEl.appendChild(tilesEl);
-                wordListEl.appendChild(rowEl);
-            });
-            toggleBtn.style.display = guessHistory.length > 0 ? 'block' : 'none';
+        // Build result grid in both emoji and letter modes
+        const toggleBtn = document.getElementById('toggleGuessesBtn');
+        if (toggleBtn && guessHistory.length > 0) {
+            toggleBtn.style.display = 'block';
+            toggleBtn.dataset.mode = 'emoji'; // current mode
         }
 
         // Show solve time if available
@@ -563,11 +541,33 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
     }
 
     function toggleGuesses() {
-        const list = document.getElementById('guessWordList');
-        const btn  = document.getElementById('toggleGuessesBtn');
-        const isVisible = list.style.display !== 'none';
-        list.style.display = isVisible ? 'none' : 'block';
-        btn.textContent    = isVisible ? 'Show My Guesses' : 'Hide Guesses';
+        const btn    = document.getElementById('toggleGuessesBtn');
+        const gridEl = document.getElementById('resultGrid');
+        const mode   = btn.dataset.mode === 'emoji' ? 'letters' : 'emoji';
+        btn.dataset.mode = mode;
+        btn.textContent  = mode === 'emoji' ? 'Show Letters' : 'Show Emojis';
+
+        gridEl.innerHTML = '';
+        guessHistory.forEach(g => {
+            const rowEl = document.createElement('div');
+            rowEl.className = 'result-grid-row';
+            g.guess.split('').forEach((letter, j) => {
+                const tile = document.createElement('div');
+                tile.className = 'result-grid-tile';
+                const r = g.result[j];
+                const bg = r === 'correct' ? '#538d4e' : r === 'present' ? '#b59f3b' : '#3a3a3c';
+                tile.style.background = bg;
+                if (mode === 'letters') {
+                    // Show actual letter in coloured tile
+                    tile.style.cssText += `font-family:'League Spartan',sans-serif;font-weight:900;font-size:13px;color:white;`;
+                    tile.textContent = letter;
+                } else {
+                    tile.textContent = r === 'correct' ? '🟩' : r === 'present' ? '🟨' : '⬛';
+                }
+                rowEl.appendChild(tile);
+            });
+            gridEl.appendChild(rowEl);
+        });
     }
 
     function shareDailyResult() {
