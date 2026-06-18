@@ -145,7 +145,10 @@
             <div class="stat"><div class="stat-num" id="statTime">—</div><div class="stat-label">Today's Time</div></div>
         </div>
 
-        <button class="btn btn-accent" onclick="shareDailyResult()" id="shareDailyBtn">Share Result</button>
+        <div style="display:flex; gap:8px;">
+            <button class="btn btn-accent" onclick="shareDailyResult(false)" id="shareDailyBtn" style="flex:1;">Share Result</button>
+            <button class="btn btn-ghost" onclick="shareDailyResult(true)" id="shareWithWordsBtn" style="flex:1;" title="Share with your actual guesses revealed">Share Revealed Results</button>
+        </div>
         <button class="btn btn-ghost" onclick="showScreen('screen-leaderboard'); loadLeaderboard('today')">View Leaderboard</button>
     </div>
 </div>
@@ -615,19 +618,28 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
         });
     }
 
-    function shareDailyResult() {
-        const grid = guessHistory.map(g =>
-            g.result.map(r => r === 'correct' ? '🟩' : r === 'present' ? '🟨' : '⬛').join('')
-        ).join('\n');
-
+    function shareDailyResult(showWords = false) {
         const won   = guessHistory.length > 0 && guessHistory[guessHistory.length-1].result.every(r => r === 'correct');
         const tries = won ? guessHistory.length : 'X';
         const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         const timeEl = document.getElementById('statTime').textContent;
         const timeLine = timeEl && timeEl !== '—' ? `\nSolved in ${timeEl}` : '';
 
+        let grid;
+        if (showWords) {
+            // Emoji row + actual word side by side
+            grid = guessHistory.map(g => {
+                const emojis = g.result.map(r => r === 'correct' ? '🟩' : r === 'present' ? '🟨' : '⬛').join('');
+                return `${emojis}  ${g.guess}`;
+            }).join('\n');
+        } else {
+            grid = guessHistory.map(g =>
+                g.result.map(r => r === 'correct' ? '🟩' : r === 'present' ? '🟨' : '⬛').join('')
+            ).join('\n');
+        }
+
         const text = [
-            ` WordForge Daily — ${today}`,
+            `WordForge Daily — ${today}`,
             `Mode: Daily`,
             `Guesses: ${tries}/6${timeLine}`,
             '',
@@ -637,11 +649,12 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
             'https://wordlegames.co/daily.html'
         ].join('\n');
 
+        const btnId = showWords ? 'shareWithWordsBtn' : 'shareDailyBtn';
         if (navigator.share) {
             navigator.share({ title: 'WordForge Daily', text }).catch(() => {});
         } else {
             navigator.clipboard.writeText(text).then(() => {
-                const btn = document.getElementById('shareDailyBtn');
+                const btn = document.getElementById(btnId);
                 const orig = btn.textContent;
                 btn.textContent = 'Copied! ✓';
                 setTimeout(() => { btn.textContent = orig; }, 2000);
