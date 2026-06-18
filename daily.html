@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
     <link rel="stylesheet" href="style.css" />
     <title>WordForge Daily</title>
     <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;700;900&family=DM+Sans:wght@400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
@@ -36,6 +36,19 @@
 </header>
 
 <div class="toast" id="toast"></div>
+
+<!-- ── LOADING SCREEN (shown by default, hidden once auth resolves) ── -->
+<div class="screen active" id="screen-loading" style="justify-content:center; align-items:center; flex:1; min-height:60vh;">
+    <div style="display:flex; flex-direction:column; align-items:center; gap:16px;">
+        <div style="
+            width:48px; height:48px; border-radius:50%;
+            border:3px solid var(--border);
+            border-top-color:var(--accent);
+            animation:spin 0.8s linear infinite;
+        "></div>
+        <span style="font-family:'DM Mono',monospace; font-size:12px; color:var(--muted);">Loading...</span>
+    </div>
+</div>
 
 <!-- ── How to Play Modal ── -->
 <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
@@ -80,7 +93,7 @@
 </div>
 
 <!-- ── LOGIN SCREEN ── -->
-<div class="screen active" id="screen-login">
+<div class="screen" id="screen-login">
     <div class="card">
         <h2>Sign In</h2>
         <p>Enter your email — no password needed. Sign in to track your streak and appear on the leaderboard.</p>

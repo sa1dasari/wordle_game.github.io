@@ -252,7 +252,7 @@ function showShareResult(won) {
     // Share + Words button
     const shareWordsBtn = document.createElement('button');
     shareWordsBtn.style.cssText = 'background:transparent;color:#818384;font-family:"League Spartan",sans-serif;font-weight:700;font-size:13px;padding:10px 16px;border:1px solid #3a3a3c;border-radius:4px;cursor:pointer;';
-    shareWordsBtn.textContent = '📤 Share + Words';
+    shareWordsBtn.textContent = '📤 Share Revealed Results';
     shareWordsBtn.onclick = () => doShare(buildShareText(won, true), shareWordsBtn, '📤 Share + Words');
 
     container.appendChild(shareBtn);
