@@ -92,33 +92,6 @@
 <script src="words.js"></script>
 <script src="script.js"></script>
 
-<script>
-    // ── Hamburger menu ────────────────────────────────────────────────────────────
-    (function() {
-        const btn      = document.getElementById('hamburgerBtn');
-        const dropdown = document.getElementById('navDropdown');
-        if (!btn || !dropdown) return;
-
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const isOpen = !dropdown.classList.contains('open');
-            dropdown.classList.toggle('open', isOpen);
-            btn.classList.toggle('open', isOpen);
-        });
-
-        dropdown.addEventListener('click', () => {
-            dropdown.classList.remove('open');
-            btn.classList.remove('open');
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!btn.contains(e.target) && !dropdown.contains(e.target)) {
-                dropdown.classList.remove('open');
-                btn.classList.remove('open');
-            }
-        });
-    })();
-</script>
-
+<script src="shared.js"></script>
 </body>
 </html>

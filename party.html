@@ -394,6 +394,37 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- ── How to Play Modal ── -->
+<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+        <button class="modal-close" id="modalClose" aria-label="Close">&#x2715;</button>
+        <h2 id="modalTitle">HOW TO PLAY</h2>
+        <p>Guess the <strong>WORDFORGE</strong> in <strong>6 tries</strong>. Each guess must be a valid 5-letter word. Hit <strong>Enter</strong> to submit.</p>
+        <hr class="modal-divider" />
+        <p style="font-weight:600; margin-bottom:14px;">After each guess, the tile colours will change:</p>
+        <div class="example">
+            <div class="example-tiles">
+                <div class="ex-tile correct">W</div><div class="ex-tile">E</div><div class="ex-tile">A</div><div class="ex-tile">R</div><div class="ex-tile">Y</div>
+            </div>
+            <p><strong>W</strong> is in the word and in the <strong>correct spot</strong>.</p>
+        </div>
+        <div class="example">
+            <div class="example-tiles">
+                <div class="ex-tile">P</div><div class="ex-tile present">I</div><div class="ex-tile">L</div><div class="ex-tile">L</div><div class="ex-tile">S</div>
+            </div>
+            <p><strong>I</strong> is in the word but in the <strong>wrong spot</strong>.</p>
+        </div>
+        <div class="example">
+            <div class="example-tiles">
+                <div class="ex-tile">V</div><div class="ex-tile">A</div><div class="ex-tile">G</div><div class="ex-tile absent">U</div><div class="ex-tile">E</div>
+            </div>
+            <p><strong>U</strong> is <strong>not in the word</strong> at all.</p>
+        </div>
+        <hr class="modal-divider" />
+        <p style="margin:0; font-size:13px; color:var(--muted);">Good luck!</p>
+    </div>
+</div>
+
 <!-- ── HOME ── -->
 <div class="screen screen-centered active" id="screen-home">
     <div class="card">
@@ -438,49 +469,6 @@
                style="text-transform:uppercase;letter-spacing:4px;font-family:'DM Mono',monospace;font-size:18px;" />
         <p class="error-msg" id="joinRoomError"></p>
         <button class="btn btn-green" onclick="joinRoom()">Join Room</button>
-    </div>
-</div>
-
-<!-- ── How to Play Modal ── -->
-<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <div class="modal">
-        <button class="modal-close" id="modalClose" aria-label="Close">&#x2715;</button>
-        <h2 id="modalTitle">HOW TO PLAY</h2>
-        <p>Guess the <strong>WORDFORGE</strong> in <strong>6 tries</strong>. Each guess must be a valid 5-letter word. Hit <strong>Enter</strong> to submit.</p>
-        <hr class="modal-divider" />
-        <p style="font-weight:600; margin-bottom:14px;">After each guess, the tile colours will change:</p>
-        <div class="example">
-            <div class="example-tiles">
-                <div class="ex-tile correct">W</div>
-                <div class="ex-tile">E</div>
-                <div class="ex-tile">A</div>
-                <div class="ex-tile">R</div>
-                <div class="ex-tile">Y</div>
-            </div>
-            <p><strong>W</strong> is in the word and in the <strong>correct spot</strong>.</p>
-        </div>
-        <div class="example">
-            <div class="example-tiles">
-                <div class="ex-tile">P</div>
-                <div class="ex-tile present">I</div>
-                <div class="ex-tile">L</div>
-                <div class="ex-tile">L</div>
-                <div class="ex-tile">S</div>
-            </div>
-            <p><strong>I</strong> is in the word but in the <strong>wrong spot</strong>.</p>
-        </div>
-        <div class="example">
-            <div class="example-tiles">
-                <div class="ex-tile">V</div>
-                <div class="ex-tile">A</div>
-                <div class="ex-tile">G</div>
-                <div class="ex-tile absent">U</div>
-                <div class="ex-tile">E</div>
-            </div>
-            <p><strong>U</strong> is <strong>not in the word</strong> at all.</p>
-        </div>
-        <hr class="modal-divider" />
-        <p style="margin:0; font-size:13px; color:var(--muted);">Press <strong>New Game</strong> for a new word any time. Good luck!</p>
     </div>
 </div>
 
@@ -1217,57 +1205,8 @@
     document.getElementById('chatInput').addEventListener('keydown', e => {
         if (e.key === 'Enter') { e.stopPropagation(); sendChat(); }
     });
-
-    // ── How to Play modal ──────────────────────────────────────────────
-    const overlay  = document.getElementById('modalOverlay');
-    const helpBtn  = document.getElementById('helpBtn');
-    const closeBtn = document.getElementById('modalClose');
-
-    const openModal  = () => overlay.classList.add('open');
-    const closeModal = () => overlay.classList.remove('open');
-
-    if (helpBtn) helpBtn.addEventListener('click', openModal);
-    if (closeBtn) closeBtn.addEventListener('click', closeModal);
-    if (overlay) {
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) closeModal();
-        });
-    }
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeModal();
-    });
-
 </script>
 
-<script>
-    // ── Hamburger menu ────────────────────────────────────────────────────────────
-    (function() {
-        const btn      = document.getElementById('hamburgerBtn');
-        const dropdown = document.getElementById('navDropdown');
-        if (!btn || !dropdown) return;
-
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const isOpen = !dropdown.classList.contains('open');
-            dropdown.classList.toggle('open', isOpen);
-            btn.classList.toggle('open', isOpen);
-        });
-
-        // Close when clicking a link inside dropdown
-        dropdown.addEventListener('click', () => {
-            dropdown.classList.remove('open');
-            btn.classList.remove('open');
-        });
-
-        // Close on outside click — use setTimeout to avoid same-tick close
-        document.addEventListener('click', (e) => {
-            if (!btn.contains(e.target) && !dropdown.contains(e.target)) {
-                dropdown.classList.remove('open');
-                btn.classList.remove('open');
-            }
-        });
-    })();
-</script>
-
+<script src="shared.js"></script>
 </body>
 </html>

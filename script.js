@@ -22,27 +22,7 @@ window.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', handleKeyPress);
     document.getElementById('resetBtn').addEventListener('click', resetGame);
 
-    // How to Play modal
-    const overlay  = document.getElementById('modalOverlay');
-    const helpBtn  = document.getElementById('helpBtn');
-    const closeBtn = document.getElementById('modalClose');
-
-    const openModal  = () => overlay.classList.add('open');
-    const closeModal = () => overlay.classList.remove('open');
-
-    helpBtn.addEventListener('click', openModal);
-    closeBtn.addEventListener('click', closeModal);
-    overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) closeModal();
-    });
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeModal();
-    });
-
-    if (!localStorage.getItem('wordleRulesSeen')) {
-        openModal();
-        localStorage.setItem('wordleRulesSeen', '1');
-    }
+    // Modal + hamburger handled by shared.js
 });
 
 function initializeGame() {
@@ -215,25 +195,38 @@ function buildShareGrid() {
     ).join('\n');
 }
 
-function showShareResult(won) {
-    const tries = won ? currentRow : 'X';
-    const grid  = buildShareGrid();
-
-    // Build a challenge link to this exact word so a friend can play it
-    const encoded  = encodeWordForShare(secretWord);
-    const baseUrl  = window.location.href.split('?')[0].replace(/index\.html$/, '');
+function buildShareText(won, showWords = false) {
+    const tries   = won ? currentRow : 'X';
+    const encoded = encodeWordForShare(secretWord);
+    const baseUrl = window.location.href.split('?')[0].replace(/index\.html$/, '');
     const challengeUrl = `${baseUrl}challenge.html?c=${encoded}`;
 
-    const shareText = [
-        ` WordForge Solo ${tries}/6`,
+    let grid;
+    if (showWords) {
+        // Emoji row + actual guess word side by side
+        grid = guessHistory.map(row => {
+            const emojis = row.map(r => r === 'correct' ? '🟩' : r === 'present' ? '🟨' : '⬛').join('');
+            // Get actual letters from tiles for that row
+            const rowIdx = guessHistory.indexOf(row);
+            const word   = Array.from({length: MAX_COLS}, (_, c) => tiles[rowIdx * MAX_COLS + c]?.textContent || '').join('');
+            return `${emojis}  ${word}`;
+        }).join('\n');
+    } else {
+        grid = buildShareGrid();
+    }
+
+    return [
+        `🟩 WordForge Solo ${tries}/6`,
         '',
         grid,
         '',
         'Think you can guess my word?',
         `Challenge me: ${challengeUrl}`
     ].join('\n');
+}
 
-    // Build / show the share button + container under the message
+function showShareResult(won) {
+    // Build / show share buttons under the message
     let container = document.getElementById('shareContainer');
     if (!container) {
         container = document.createElement('div');
@@ -245,23 +238,36 @@ function showShareResult(won) {
 
     container.innerHTML = '';
     container.style.display = 'flex';
+    container.style.gap = '8px';
+    container.style.flexWrap = 'wrap';
+    container.style.justifyContent = 'center';
 
+    // Share Result button (emoji only)
     const shareBtn = document.createElement('button');
     shareBtn.className = 'reset-btn';
-    shareBtn.style.background = '#c8b97a';
+    shareBtn.style.cssText = 'background:#c8b97a;color:#121213;font-family:"League Spartan",sans-serif;font-weight:700;font-size:13px;padding:10px 16px;border:none;border-radius:4px;cursor:pointer;';
     shareBtn.textContent = '📤 Share Result';
-    shareBtn.onclick = () => {
-        if (navigator.share) {
-            navigator.share({ title: 'WordForge Result', text: shareText }).catch(() => {});
-        } else {
-            navigator.clipboard.writeText(shareText).then(() => {
-                shareBtn.textContent = 'Copied!';
-                setTimeout(() => { shareBtn.textContent = '📤 Share Result'; }, 2000);
-            }).catch(() => showMessage('Copy failed — try manually', 'failure'));
-        }
-    };
+    shareBtn.onclick = () => doShare(buildShareText(won, false), shareBtn, '📤 Share Result');
+
+    // Share + Words button
+    const shareWordsBtn = document.createElement('button');
+    shareWordsBtn.style.cssText = 'background:transparent;color:#818384;font-family:"League Spartan",sans-serif;font-weight:700;font-size:13px;padding:10px 16px;border:1px solid #3a3a3c;border-radius:4px;cursor:pointer;';
+    shareWordsBtn.textContent = '📤 Share + Words';
+    shareWordsBtn.onclick = () => doShare(buildShareText(won, true), shareWordsBtn, '📤 Share + Words');
 
     container.appendChild(shareBtn);
+    container.appendChild(shareWordsBtn);
+}
+
+function doShare(text, btn, originalLabel) {
+    if (navigator.share) {
+        navigator.share({ title: 'WordForge Solo', text }).catch(() => {});
+    } else {
+        navigator.clipboard.writeText(text).then(() => {
+            btn.textContent = 'Copied! ✓';
+            setTimeout(() => { btn.textContent = originalLabel; }, 2000);
+        }).catch(() => showMessage('Copy failed — try manually', 'failure'));
+    }
 }
 
 function hideShareResult() {
