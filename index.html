@@ -24,46 +24,36 @@
         <span></span><span></span><span></span>
     </button>
     <div class="nav-dropdown" id="navDropdown">
-        <a href="daily.html" class="nav-link">📅 Daily</a>
-        <a href="duel.html" class="nav-link">⚔️ Duel</a>
+        <a href="daily.html"     class="nav-link">📅 Daily</a>
+        <a href="duel.html"      class="nav-link">⚔️ Duel</a>
         <a href="challenge.html" class="nav-link">🎯 Challenge</a>
-        <a href="party.html" class="nav-link">🎉 Party</a>
+        <a href="party.html"     class="nav-link">🎉 Party</a>
         <button class="nav-link" id="helpBtnMobile" onclick="document.getElementById('helpBtn').click();">❓ Help</button>
     </div>
 </header>
 
-<div class="container">
+<!-- Game board -->
+<div class="game-board" id="gameBoard"></div>
 
-    <!-- Game board -->
-    <div class="game-board" id="gameBoard"></div>
+<!-- Message -->
+<div class="message" id="message"></div>
 
-    <!-- Message -->
-    <div class="message" id="message"></div>
+<!-- Keyboard -->
+<div class="keyboard" id="keyboard"></div>
 
-    <!-- On-screen keyboard -->
-    <div id="keyboard"></div>
-
-    <!-- Buttons -->
-    <div class="buttons-container">
-        <button class="btn btn-new-game" id="resetBtn">New Game</button>
-    </div>
-
+<!-- New Game button -->
+<div class="buttons-container">
+    <button class="btn btn-new-game" id="resetBtn" style="max-width:200px;">New Game</button>
 </div>
 
-<!-- ── How to Play Modal ──────────────────────────────────────────────────── -->
+<!-- ── How to Play Modal ── -->
 <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal">
         <button class="modal-close" id="modalClose" aria-label="Close">&#x2715;</button>
-
         <h2 id="modalTitle">HOW TO PLAY</h2>
-
         <p>Guess the <strong>WORDFORGE</strong> in <strong>6 tries</strong>. Each guess must be a valid 5-letter word. Hit <strong>Enter</strong> to submit.</p>
-
         <hr class="modal-divider" />
-
-        <p style="font-weight:600; color:#333; margin-bottom:14px;">After each guess, the tile colours will change:</p>
-
-        <!-- Green example -->
+        <p style="font-weight:600; margin-bottom:14px;">After each guess, the tile colours will change:</p>
         <div class="example">
             <div class="example-tiles">
                 <div class="ex-tile correct">W</div>
@@ -74,8 +64,6 @@
             </div>
             <p><strong>W</strong> is in the word and in the <strong>correct spot</strong>.</p>
         </div>
-
-        <!-- Yellow example -->
         <div class="example">
             <div class="example-tiles">
                 <div class="ex-tile">P</div>
@@ -86,8 +74,6 @@
             </div>
             <p><strong>I</strong> is in the word but in the <strong>wrong spot</strong>.</p>
         </div>
-
-        <!-- Grey example -->
         <div class="example">
             <div class="example-tiles">
                 <div class="ex-tile">V</div>
@@ -98,9 +84,8 @@
             </div>
             <p><strong>U</strong> is <strong>not in the word</strong> at all.</p>
         </div>
-
         <hr class="modal-divider" />
-        <p style="margin:0; font-size:13px; color:#777;">A new word is available each time you press <strong>New Game</strong>. Good luck!</p>
+        <p style="margin:0; font-size:13px; color:var(--muted);">Press <strong>New Game</strong> for a new word any time. Good luck!</p>
     </div>
 </div>
 
@@ -121,13 +106,11 @@
             btn.classList.toggle('open', isOpen);
         });
 
-        // Close when clicking a link inside dropdown
         dropdown.addEventListener('click', () => {
             dropdown.classList.remove('open');
             btn.classList.remove('open');
         });
 
-        // Close on outside click — use setTimeout to avoid same-tick close
         document.addEventListener('click', (e) => {
             if (!btn.contains(e.target) && !dropdown.contains(e.target)) {
                 dropdown.classList.remove('open');
