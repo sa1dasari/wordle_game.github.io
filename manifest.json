@@ -1,0 +1,32 @@
+{
+    "name": "WordForge",
+    "short_name": "WordForge",
+    "description": "5 WordForge game modes — Daily, Duel, Challenge, Party & Solo",
+    "start_url": "/index.html",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#121213",
+    "theme_color": "#121213",
+    "categories": ["games", "word"],
+    "icons": [
+        { "src": "icons/icon_72.png",   "sizes": "72x72",   "type": "image/png", "purpose": "any maskable" },
+        { "src": "icons/icon_96.png",   "sizes": "96x96",   "type": "image/png", "purpose": "any maskable" },
+        { "src": "icons/icon_128.png",  "sizes": "128x128", "type": "image/png", "purpose": "any maskable" },
+        { "src": "icons/icon_192.png",  "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+        { "src": "icons/icon_512.png",  "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    ],
+    "shortcuts": [
+        {
+            "name": "Daily Word",
+            "short_name": "Daily",
+            "url": "/daily.html",
+            "icons": [{ "src": "icons/icon_96.png", "sizes": "96x96" }]
+        },
+        {
+            "name": "Duel Mode",
+            "short_name": "Duel",
+            "url": "/duel.html",
+            "icons": [{ "src": "icons/icon_96.png", "sizes": "96x96" }]
+        }
+    ]
+}
