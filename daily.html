@@ -193,6 +193,42 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
     let guessHistory  = [];
     let myUsername    = null; // logged-in user's username for leaderboard highlighting
 
+    // ── Active play time tracking ──────────────────────────────────
+    // Counts only time the user is actively on the page, not wall-clock
+    let activeSeconds = 0;
+    let activeStart   = null;
+
+    function startActiveClock() {
+        if (!activeStart) activeStart = Date.now();
+    }
+
+    function pauseActiveClock() {
+        if (activeStart) {
+            activeSeconds += (Date.now() - activeStart) / 1000;
+            activeStart = null;
+        }
+    }
+
+    function resetActiveClock() {
+        activeSeconds = 0;
+        activeStart   = null;
+    }
+
+    function getActiveSeconds() {
+        const current = activeStart ? (Date.now() - activeStart) / 1000 : 0;
+        return Math.round(activeSeconds + current);
+    }
+
+    // Pause when tab/app goes to background, resume when it comes back
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            pauseActiveClock();
+        } else {
+            const activeScreen = document.querySelector('.screen.active')?.id;
+            if (activeScreen === 'screen-game') startActiveClock();
+        }
+    });
+
     // Local date string YYYY-MM-DD — resets at local midnight
     function getLocalDateStr() {
         const d = new Date();
@@ -216,6 +252,11 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
+    }
+
+    function showLoadingScreen() {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('screen-loading').classList.add('active');
     }
 
     async function apiCall(path, options = {}) {
@@ -311,16 +352,6 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
         }
     });
 
-    function showLoadingScreen() {
-        // Show a neutral loading state while magic link token is being processed
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        // Reuse the login card area but show loading text
-        const loginScreen = document.getElementById('screen-login');
-        loginScreen.classList.add('active');
-        const card = loginScreen.querySelector('.card');
-        if (card) card.innerHTML = '<p style="text-align:center;color:var(--muted);font-family:monospace;font-size:13px;padding:20px 0;">Signing you in...</p>';
-    }
-
     async function afterLogin() {
         // Check if user has a profile/username
         try {
@@ -361,11 +392,13 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
             const status = await apiCall('/api/daily/status?date=' + getLocalDateStr());
 
             if (status.played) {
+                pauseActiveClock();
                 showResultScreen(status.result);
             } else {
                 // Resume in-progress session if any
                 guessHistory = status.guesses || [];
                 currentRow = guessHistory.length;
+                if (currentRow === 0) resetActiveClock();
                 startGame();
             }
         } catch (err) {
@@ -377,6 +410,7 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
         showScreen('screen-game');
         buildBoard();
         buildKeyboard();
+        startActiveClock();
 
         // Replay any existing guesses from this session
         guessHistory.forEach((g, rowIdx) => {
@@ -452,7 +486,7 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
         setKeyboardEnabled(false);
 
         try {
-            const data = await apiCall('/api/daily/guess', { method: 'POST', body: JSON.stringify({ guess, date: getLocalDateStr() }) });
+            const data = await apiCall('/api/daily/guess', { method: 'POST', body: JSON.stringify({ guess, date: getLocalDateStr(), activeSeconds: getActiveSeconds() }) });
 
             if (data.invalid) {
                 showToast('Not a valid word!', true);
@@ -473,7 +507,7 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
             if (data.gameOver) {
                 gameOver = true;
                 setKeyboardEnabled(false);
-                setTimeout(() => loadGameState(), 600); // reload to show result screen
+                setTimeout(() => loadGameState(), 600);
             } else {
                 setKeyboardEnabled(true);
                 tiles[currentRow]?.forEach(t => t.classList.add('active'));
@@ -788,7 +822,6 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
     checkAuth();
 </script>
 
-
 <style>
     .btn-show-guesses {
         background: transparent;
@@ -809,6 +842,9 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
         0%,100% { transform: translateX(0); } 20% { transform: translateX(-6px); }
         40% { transform: translateX(6px); }   60% { transform: translateX(-4px); }
         80% { transform: translateX(4px); }
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
     }
 </style>
 
