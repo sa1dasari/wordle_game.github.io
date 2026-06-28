@@ -17,10 +17,14 @@ const KB_ROWS = [
 
 // Initialize game
 window.addEventListener('DOMContentLoaded', () => {
-    initializeGame();
     buildKeyboard();
     document.addEventListener('keydown', handleKeyPress);
     document.getElementById('resetBtn').addEventListener('click', resetGame);
+
+    // Try to restore previous game, otherwise start fresh
+    if (!loadSoloState()) {
+        initializeGame();
+    }
 
     // Modal + hamburger handled by shared.js
 });
@@ -169,13 +173,18 @@ async function submitWord() {
     // Update keyboard colours after evaluation
     word.split('').forEach((letter, i) => updateKeyboard(letter, result[i]));
 
+    // Persist state so returning to the page resumes mid-game
+    saveSoloState();
+
     if (word === secretWord) {
         gameOver = true;
+        saveSoloState(); // save completed state so share button survives refresh
         const messages = ['Genius!', 'Magnificent!', 'Impressive!', 'Splendid!', 'Great!', 'Phew!'];
         showMessage(messages[currentRow - 1] || '🎉 You got it!', 'success');
         showShareResult(true);
     } else if (currentRow === MAX_ROWS) {
         gameOver = true;
+        saveSoloState(); // save completed state
         showMessage(`The word was: ${secretWord}`, 'failure');
         showShareResult(false);
     }
@@ -275,6 +284,69 @@ function hideShareResult() {
     if (container) container.style.display = 'none';
 }
 
+// ── Solo state persistence ────────────────────────────────────────────────────
+const SOLO_STATE_KEY = 'wordforge_solo_state';
+
+function saveSoloState() {
+    // Save current game progress to localStorage
+    const guesses = [];
+    for (let r = 0; r < currentRow; r++) {
+        const word = Array.from({length: MAX_COLS}, (_, c) => tiles[r * MAX_COLS + c]?.textContent || '').join('');
+        guesses.push({ word, result: guessHistory[r] });
+    }
+    localStorage.setItem(SOLO_STATE_KEY, JSON.stringify({
+        secretWord,
+        guesses,
+        gameOver,
+    }));
+}
+
+function clearSoloState() {
+    localStorage.removeItem(SOLO_STATE_KEY);
+}
+
+function loadSoloState() {
+    try {
+        const raw = localStorage.getItem(SOLO_STATE_KEY);
+        if (!raw) return false;
+        const state = JSON.parse(raw);
+        if (!state.secretWord || !state.guesses) return false;
+
+        // Restore game
+        secretWord   = state.secretWord;
+        gameOver     = state.gameOver || false;
+        guessHistory = [];
+
+        createGameBoard();
+        resetKeyboard();
+
+        state.guesses.forEach((g, rowIdx) => {
+            // Fill tiles
+            g.word.split('').forEach((letter, c) => {
+                tiles[rowIdx * MAX_COLS + c].textContent = letter;
+                tiles[rowIdx * MAX_COLS + c].classList.add(g.result[c]);
+            });
+            guessHistory.push(g.result);
+            // Update keyboard
+            g.word.split('').forEach((letter, i) => updateKeyboard(letter, g.result[i]));
+        });
+
+        currentRow = state.guesses.length;
+        currentCol = 0;
+
+        if (gameOver) {
+            const won = guessHistory.length > 0 &&
+                guessHistory[guessHistory.length-1].every(r => r === 'correct');
+            showShareResult(won);
+        }
+
+        return true;
+    } catch {
+        clearSoloState();
+        return false;
+    }
+}
+
 function getEnteredWord() {
     let word = '';
     for (let i = 0; i < MAX_COLS; i++) {
@@ -337,5 +409,6 @@ function resetGame() {
     document.getElementById('message').textContent = '';
     document.getElementById('message').className = 'message';
     hideShareResult();
+    clearSoloState();
     initializeGame();
 }
