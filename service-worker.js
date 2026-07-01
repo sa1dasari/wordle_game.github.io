@@ -45,6 +45,9 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
     const url = new URL(event.request.url);
 
+    // Never cache the service worker itself — must always be fresh
+    if (url.pathname.includes('service-worker.js')) return;
+
     // Always fetch from network for API calls and socket connections
     if (
         url.hostname.includes('railway.app') ||
@@ -57,12 +60,33 @@ self.addEventListener('fetch', event => {
         return; // let browser handle — no caching for external resources
     }
 
-    // Cache-first for local static assets
+    // Network-first for HTML files — always get fresh content
+    // Cache-first for everything else (JS, CSS, images)
+    const isHTML = url.pathname.endsWith('.html') || url.pathname === '/';
+
+    if (isHTML) {
+        event.respondWith(
+            fetch(event.request)
+                .then(response => {
+                    // Update cache with fresh HTML
+                    const clone = response.clone();
+                    caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+                    return response;
+                })
+                .catch(() => {
+                    // Offline fallback — serve from cache
+                    return caches.match(event.request)
+                        .then(cached => cached || caches.match('/index.html'));
+                })
+        );
+        return;
+    }
+
+    // Cache-first for JS, CSS, images — faster loads
     event.respondWith(
         caches.match(event.request).then(cached => {
             if (cached) return cached;
             return fetch(event.request).then(response => {
-                // Cache successful GET responses for local files
                 if (
                     response.ok &&
                     event.request.method === 'GET' &&
@@ -73,7 +97,6 @@ self.addEventListener('fetch', event => {
                 }
                 return response;
             }).catch(() => {
-                // Offline fallback — return index.html for navigation requests
                 if (event.request.mode === 'navigate') {
                     return caches.match('/index.html');
                 }
