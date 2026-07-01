@@ -1,5 +1,5 @@
 // WordForge Service Worker — caches app shell for offline support
-const CACHE_NAME = 'wordforge-v1';
+const CACHE_NAME = 'wordforge-v3';
 
 // Core files to cache on install
 const PRECACHE = [
@@ -14,8 +14,8 @@ const PRECACHE = [
     '/shared.js',
     '/words.js',
     '/manifest.json',
-    '/icons/icon_192.png',
-    '/icons/icon_512.png',
+    '/icons/icon-192.png',
+    '/icons/icon-512.png',
 ];
 
 // Install — precache app shell
