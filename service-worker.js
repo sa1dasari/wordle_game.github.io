@@ -1,5 +1,5 @@
 // WordForge Service Worker — caches app shell for offline support
-const CACHE_NAME = 'wordforge-v3';
+const CACHE_NAME = 'wordforge-v4';
 
 // Core files to cache on install
 const PRECACHE = [
