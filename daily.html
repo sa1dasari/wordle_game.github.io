@@ -784,7 +784,7 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
                 } else {
                     const winStreak  = entry.max_streak       ?? 0;
                     const playStreak = entry.max_play_streak  ?? 0;
-                    statText  = `🏆 ${winStreak} win · 📅 ${playStreak} play · ${entry.win_pct}%`;
+                    statText  = `🏆 ${winStreak} win · 📅 ${playStreak} play`;
                     rankLabel = idx + 1;
                 }
 
@@ -861,6 +861,10 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
 </script>
 
 <style>
+    /* Alltime leaderboard — allow stat to wrap on small screens */
+    .lb-stat { white-space: normal; text-align: right; line-height: 1.4; }
+    .lb-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
     .btn-show-guesses {
         background: transparent;
         border: 1px solid var(--border);
