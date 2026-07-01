@@ -194,12 +194,19 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
     let myUsername    = null; // logged-in user's username for leaderboard highlighting
 
     // ── Active play time tracking ──────────────────────────────────
-    // Counts only time the user is actively on the page, not wall-clock
-    let activeSeconds = 0;
-    let activeStart   = null;
+    // Only counts time when ALL of these are true:
+    //   1. Tab/app is visible (not backgrounded)
+    //   2. Game screen is active (not on leaderboard/result/login)
+    //   3. Player has been active within the last 30 seconds
+    let activeSeconds   = 0;
+    let activeStart     = null;
+    let idleTimer       = null;
+    const IDLE_TIMEOUT  = 30000; // pause after 30s of no interaction
 
     function startActiveClock() {
-        if (!activeStart) activeStart = Date.now();
+        if (!document.hidden && !activeStart) {
+            activeStart = Date.now();
+        }
     }
 
     function pauseActiveClock() {
@@ -212,6 +219,8 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
     function resetActiveClock() {
         activeSeconds = 0;
         activeStart   = null;
+        clearTimeout(idleTimer);
+        idleTimer = null;
     }
 
     function getActiveSeconds() {
@@ -219,15 +228,37 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
         return Math.round(activeSeconds + current);
     }
 
-    // Pause when tab/app goes to background, resume when it comes back
+    function isGameScreenActive() {
+        return document.querySelector('.screen.active')?.id === 'screen-game';
+    }
+
+    // Reset idle timer on any player interaction during the game
+    function onPlayerActivity() {
+        if (!isGameScreenActive() || document.hidden) return;
+        // Resume clock if it was paused due to idle
+        startActiveClock();
+        // Reset the idle countdown
+        clearTimeout(idleTimer);
+        idleTimer = setTimeout(() => {
+            // Player has been idle for 30s — pause the clock
+            pauseActiveClock();
+        }, IDLE_TIMEOUT);
+    }
+
+    // 1 — Pause/resume on tab/app visibility change
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
             pauseActiveClock();
-        } else {
-            const activeScreen = document.querySelector('.screen.active')?.id;
-            if (activeScreen === 'screen-game') startActiveClock();
+            clearTimeout(idleTimer);
+        } else if (isGameScreenActive()) {
+            // Only resume if player was recently active (idle timer still running)
+            if (idleTimer) startActiveClock();
         }
     });
+
+    // 2 — Track activity: key presses and tile/keyboard taps
+    document.addEventListener('keydown',    onPlayerActivity, { passive: true });
+    document.addEventListener('pointerdown', onPlayerActivity, { passive: true });
 
     // Local date string YYYY-MM-DD — resets at local midnight
     function getLocalDateStr() {
@@ -250,8 +281,16 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
     }
 
     function showScreen(id) {
+        // Pause clock when leaving game screen, resume when returning to it
+        const wasGame = document.querySelector('.screen.active')?.id === 'screen-game';
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
+        if (wasGame && id !== 'screen-game') {
+            pauseActiveClock();
+            clearTimeout(idleTimer);
+        } else if (!wasGame && id === 'screen-game') {
+            onPlayerActivity(); // restart clock + idle timer on return to game
+        }
     }
 
     function showLoadingScreen() {
@@ -723,9 +762,6 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
                 return;
             }
 
-            // Persistent rank-change arrows:
-            // prevKey = last known ranks (updated only when ranks actually change)
-            // arrowKey = arrows to display (persists until next real change)
             const today      = getLocalDateStr();
             const prevKey    = `lb_prev_${type}_${today}`;
             const arrowKey   = `lb_arrows_${type}_${today}`;
@@ -746,7 +782,9 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
                     statText  = timeLabel ? `${timeLabel} · ${guessLabel}` : guessLabel;
                     rankLabel = entry.rank ?? (idx + 1);
                 } else {
-                    statText  = `🔥 ${entry.max_streak} · ${entry.win_pct}% wins`;
+                    const winStreak  = entry.max_streak       ?? 0;
+                    const playStreak = entry.max_play_streak  ?? 0;
+                    statText  = `🏆 ${winStreak} win · 📅 ${playStreak} play · ${entry.win_pct}%`;
                     rankLabel = idx + 1;
                 }
 
