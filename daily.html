@@ -782,7 +782,7 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
                     statText  = timeLabel ? `${timeLabel} · ${guessLabel}` : guessLabel;
                     rankLabel = entry.rank ?? (idx + 1);
                 } else {
-                    statText  = `📅 Play Streak ${entry.max_play_streak ?? 0} · ${entry.win_pct}%`;
+                    statText  = `${entry.max_play_streak ?? 0}🔥 · ${entry.win_pct}%`;
                     rankLabel = idx + 1;
                 }
 
