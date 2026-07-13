@@ -544,19 +544,24 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
             isSubmitting = false;
 
             if (data.gameOver) {
+                // Keep isSubmitting = true and keyboard disabled so
+                // no further input is accepted during the 600ms transition
                 gameOver = true;
                 setKeyboardEnabled(false);
                 setTimeout(() => loadGameState(), 600);
             } else {
+                isSubmitting = false;
                 setKeyboardEnabled(true);
                 tiles[currentRow]?.forEach(t => t.classList.add('active'));
             }
         } catch (err) {
-            showToast(err.message, true);
             isSubmitting = false;
             setKeyboardEnabled(true);
             if (err.message.includes('already played')) {
+                // Silently redirect to result screen — no toast needed
                 loadGameState();
+            } else {
+                showToast(err.message, true);
             }
         }
     }
