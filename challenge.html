@@ -734,10 +734,35 @@
 
     // ── DICTIONARY VALIDATION ─────────────────────────────────────────────────
     async function isValidWord(word) {
+        // Quick local caching to avoid repeated network calls
+        const CACHE_KEY = 'wf_valid_words_v2';
+        let cache = {};
+        try { cache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}'); } catch(e) { cache = {}; }
+        const key = word.toLowerCase();
+        if (cache[key] != null) return Boolean(cache[key]);
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2500);
         try {
-            const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`);
-            return res.ok;
-        } catch { return true; }
+            const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${key}`, { signal: controller.signal });
+            clearTimeout(timeoutId);
+            if (res.ok) {
+                cache[key] = true;
+                try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch(e) {}
+                return true;
+            }
+            if (res.status === 404) {
+                cache[key] = false;
+                try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch(e) {}
+                return false;
+            }
+            return false;
+        } catch (err) {
+            clearTimeout(timeoutId);
+            // Network/CORS/timeout errors — treat as invalid so gibberish isn't accepted
+            console.warn('Dictionary API fetch failed for', key, err);
+            return false;
+        }
     }
 
     // ── PLAY: state ───────────────────────────────────────────────────────────

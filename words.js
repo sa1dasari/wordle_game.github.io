@@ -151,28 +151,28 @@ async function isValidWord(word) {
     // First, allow any word already in our answer list (instant, no network call)
     if (ANSWER_WORDS.includes(word.toUpperCase())) return true;
 
-    // Simple local cache to avoid repeated network calls for the same word
-    const CACHE_KEY = 'wf_valid_words_v1';
+    // Use a new cache version so old permissive entries are ignored after deploys
+    const CACHE_KEY = 'wf_valid_words_v2';
     let cache = {};
     try { cache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}'); } catch(e) { cache = {}; }
     const key = word.toLowerCase();
     if (cache[key] != null) return Boolean(cache[key]);
 
     // Helper that fetches with timeout and returns: true (valid), false (invalid), null (network/error)
-    async function tryFetch() {
+    async function tryFetch(timeoutMs = 2500) {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
         try {
             const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${key}`, { signal: controller.signal });
             clearTimeout(timeoutId);
             if (res.ok) {
                 cache[key] = true;
-                try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch {}
+                try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch(e) {}
                 return true;
             }
             if (res.status === 404) {
                 cache[key] = false;
-                try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch {}
+                try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch(e) {}
                 return false;
             }
             // Other HTTP errors (5xx etc) — treat as transient
@@ -183,11 +183,11 @@ async function isValidWord(word) {
         }
     }
 
-    // Try twice for transient failures
-    let result = await tryFetch();
+    // Quick attempt + one fast retry to avoid long waits
+    let result = await tryFetch(2500);
     if (result === null) {
-        await new Promise(r => setTimeout(r, 400));
-        result = await tryFetch();
+        await new Promise(r => setTimeout(r, 200));
+        result = await tryFetch(2500);
     }
 
     // If still null (network/CORS), reject the guess to avoid allowing nonsense words.
