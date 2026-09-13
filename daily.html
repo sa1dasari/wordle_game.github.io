@@ -301,10 +301,35 @@ const API_URL = 'https://web-production-a12a9.up.railway.app';
     async function apiCall(path, options = {}) {
         const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
         if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
-        const res = await fetch(`${API_URL}${path}`, { ...options, headers });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Request failed');
-        return data;
+
+        const url = `${API_URL}${path}`;
+        async function doFetch() {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 8000);
+            try {
+                const res = await fetch(url, { ...options, headers, signal: controller.signal });
+                clearTimeout(timeoutId);
+                // Try to parse JSON safely
+                let data = {};
+                try { data = await res.json(); } catch (e) { data = {}; }
+                if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+                return data;
+            } catch (err) {
+                clearTimeout(timeoutId);
+                throw err;
+            }
+        }
+
+        try {
+            return await doFetch();
+        } catch (err) {
+            // Retry once for transient network/timeouts
+            if (err.name === 'AbortError' || err.name === 'TypeError' || /Failed to fetch/i.test(err.message || '')) {
+                await new Promise(r => setTimeout(r, 400));
+                return await doFetch();
+            }
+            throw err;
+        }
     }
 
     // ── AUTH ───────────────────────────────────────────────────────

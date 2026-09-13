@@ -151,15 +151,50 @@ async function isValidWord(word) {
     // First, allow any word already in our answer list (instant, no network call)
     if (ANSWER_WORDS.includes(word.toUpperCase())) return true;
 
-    try {
-        const response = await fetch(
-            `https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`
-        );
-        // API returns 200 with definitions array if word exists, 404 if not
-        return response.ok;
-    } catch (err) {
-        // If the API is unreachable (offline / CORS), fail open so game still works
-        console.warn('Dictionary API unreachable, allowing guess:', err);
-        return true;
+    // Simple local cache to avoid repeated network calls for the same word
+    const CACHE_KEY = 'wf_valid_words_v1';
+    let cache = {};
+    try { cache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}'); } catch(e) { cache = {}; }
+    const key = word.toLowerCase();
+    if (cache[key] != null) return Boolean(cache[key]);
+
+    // Helper that fetches with timeout and returns: true (valid), false (invalid), null (network/error)
+    async function tryFetch() {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        try {
+            const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${key}`, { signal: controller.signal });
+            clearTimeout(timeoutId);
+            if (res.ok) {
+                cache[key] = true;
+                try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch {}
+                return true;
+            }
+            if (res.status === 404) {
+                cache[key] = false;
+                try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch {}
+                return false;
+            }
+            // Other HTTP errors (5xx etc) — treat as transient
+            return null;
+        } catch (err) {
+            clearTimeout(timeoutId);
+            return null; // network/CORS/timeout — signal to retry
+        }
     }
+
+    // Try twice for transient failures
+    let result = await tryFetch();
+    if (result === null) {
+        await new Promise(r => setTimeout(r, 400));
+        result = await tryFetch();
+    }
+
+    // If still null (network/CORS), reject the guess to avoid allowing nonsense words.
+    if (result === null) {
+        console.warn('Dictionary API unreachable after retries — rejecting guess');
+        return false;
+    }
+
+    return result;
 }
