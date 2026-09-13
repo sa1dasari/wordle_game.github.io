@@ -147,18 +147,64 @@ function getRandomWord() {
 //   const valid = await isValidWord(guess);
 //   if (!valid) { showError("Not a valid word!"); return; }
 //
+// Client-side valid-guess set loader (fetches Wordle allowed list from GitHub once)
+const VALID_LIST_URL = 'https://raw.githubusercontent.com/tabatkins/wordle-list/main/words';
+const VALID_LIST_CACHE_KEY = 'wf_valid_list_v1';
+let VALID_GUESSES_SET = null;
+
+async function ensureValidList(timeoutMs = 5000) {
+    if (VALID_GUESSES_SET) return VALID_GUESSES_SET;
+    // Try localStorage cached array first
+    try {
+        const stored = localStorage.getItem(VALID_LIST_CACHE_KEY);
+        if (stored) {
+            const arr = JSON.parse(stored);
+            VALID_GUESSES_SET = new Set(arr.map(w => w.toLowerCase()));
+            return VALID_GUESSES_SET;
+        }
+    } catch (e) { /* ignore parse errors */ }
+
+    // Fetch remote list (raw GitHub) with timeout
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+        const res = await fetch(VALID_LIST_URL, { signal: controller.signal });
+        clearTimeout(id);
+        if (!res.ok) throw new Error('Failed to fetch word list');
+        const txt = await res.text();
+        const arr = txt.split(/\r?\n/).filter(Boolean).map(w => w.toLowerCase());
+        VALID_GUESSES_SET = new Set(arr);
+        try { localStorage.setItem(VALID_LIST_CACHE_KEY, JSON.stringify(arr)); } catch (e) { /* ignore quota errors */ }
+        return VALID_GUESSES_SET;
+    } catch (err) {
+        clearTimeout(id);
+        console.warn('Failed to load VALID_GUESSES from remote:', err);
+        return null;
+    }
+}
+
 async function isValidWord(word) {
     // First, allow any word already in our answer list (instant, no network call)
     if (ANSWER_WORDS.includes(word.toUpperCase())) return true;
 
-    // Use a new cache version so old permissive entries are ignored after deploys
+    const key = word.toLowerCase();
+
+    // Check cached result map first
     const CACHE_KEY = 'wf_valid_words_v2';
     let cache = {};
     try { cache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}'); } catch(e) { cache = {}; }
-    const key = word.toLowerCase();
     if (cache[key] != null) return Boolean(cache[key]);
 
-    // Helper that fetches with timeout and returns: true (valid), false (invalid), null (network/error)
+    // Prefer local valid-list if available (fast, offline-capable)
+    const set = await ensureValidList(3000);
+    if (set) {
+        const ok = set.has(key);
+        cache[key] = ok;
+        try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch (e) {}
+        return ok;
+    }
+
+    // Fall back to dictionary API (with timeouts and retry)
     async function tryFetch(timeoutMs = 2500) {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -175,24 +221,24 @@ async function isValidWord(word) {
                 try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch(e) {}
                 return false;
             }
-            // Other HTTP errors (5xx etc) — treat as transient
             return null;
         } catch (err) {
             clearTimeout(timeoutId);
-            return null; // network/CORS/timeout — signal to retry
+            return null;
         }
     }
 
-    // Quick attempt + one fast retry to avoid long waits
     let result = await tryFetch(2500);
     if (result === null) {
         await new Promise(r => setTimeout(r, 200));
         result = await tryFetch(2500);
     }
 
-    // If still null (network/CORS), reject the guess to avoid allowing nonsense words.
     if (result === null) {
         console.warn('Dictionary API unreachable after retries — rejecting guess');
+        // Default to rejecting when neither local list nor API produced a result
+        cache[key] = false;
+        try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch(e) {}
         return false;
     }
 

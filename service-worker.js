@@ -20,11 +20,17 @@ const PRECACHE = [
 
 // Install — precache app shell
 self.addEventListener('install', event => {
-    event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => cache.addAll(PRECACHE))
-            .then(() => self.skipWaiting())
-    );
+    // Handle failures during precache so the service worker doesn't fail install
+    event.waitUntil((async () => {
+        try {
+            const cache = await caches.open(CACHE_NAME);
+            await cache.addAll(PRECACHE);
+        } catch (err) {
+            // Log and continue — missing network resources shouldn't block SW activation
+            console.warn('Service Worker precache failed:', err);
+        }
+        await self.skipWaiting();
+    })());
 });
 
 // Activate — clean up old caches
